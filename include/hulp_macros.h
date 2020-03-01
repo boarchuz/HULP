@@ -1,32 +1,100 @@
-#ifndef HULP_MACROS_H_
-#define HULP_MACROS_H_
+#ifndef HULP_MACROS_H
+#define HULP_MACROS_H
+
+#include "driver/gpio.h"
+#include "driver/rtc_io.h"
+#include "soc/rtc_cntl_reg.h"
+#include "soc/rtc_io_reg.h"
+#include "soc/sens_reg.h"
+#include "soc/rtc_periph.h"
+#include "soc/rtc_i2c_reg.h"
 
 #include "hulp.h"
-#include "soc/sens_reg.h"
+
 
 #define RTC_WORD_OFFSET(x) ((uint32_t*)&(x) - RTC_SLOW_MEM)
-#define HAS_DEFAULT_PULLUP(x) ((x == GPIO_NUM_0) || (x == GPIO_NUM_14) || (x == GPIO_NUM_15))
-#define HAS_DEFAULT_PULLDOWN(x) ((x == GPIO_NUM_2) || (x == GPIO_NUM_4) || (x == GPIO_NUM_12) || (x == GPIO_NUM_13))
+#define RTCIO_HAS_DEFAULT_PULLUP(x) ((x == GPIO_NUM_0) || (x == GPIO_NUM_14) || (x == GPIO_NUM_15))
+#define RTCIO_HAS_DEFAULT_PULLDOWN(x) ((x == GPIO_NUM_2) || (x == GPIO_NUM_4) || (x == GPIO_NUM_12) || (x == GPIO_NUM_13))
 
 
-
+/**
+ * Move the offset (in words) of a ulp_var_t or similar into reg_dest.
+ *  You may then use it with regular I_LD and I_ST instructions, for example.
+ *  It is strongly suggested to use I_GET and I_PUT methods provided by HULP instead.
+ * 
+ *  reg_dest: General purpise register to hold offset value (R0-R3).
+ *  var: A variable of type ulp_var_t or similar.
+ * 
+ *  eg.
+ *      I_MOVO(R3, ulp_my_variable),    // R3 = word offset of ulp_my_variable
+ *      I_LD(R0, R3, 0),                // Load the value at the address in R3 into R0
+ *      I_ADDI(R0, R0, 1),
+ *      I_ST(R0, R3, 0),                // Store the value of R0 into the address in R3
+ */
 #define I_MOVO(reg_dest, var) \
     I_MOVI(reg_dest, (uint16_t)(RTC_WORD_OFFSET(var)))
 
+/**
+ * Load the value of a ulp_var_t into a general purpose register.
+ * 
+ *  reg_dest: General purpise register to load value into (R0-R3).
+ *  reg_zero: General purpise register containing 0. May be the same as reg_dest.
+ *  var: A variable of type ulp_var_t or similar.
+ * 
+ *  eg.
+ *      I_MOVI(R3, 0),                  // A register must have known value 0 to use I_GET/I_PUT.
+ *      I_GET(R0, R3, ulp_my_variable), // Get ulp_my_variable's value into R0.
+ *      I_ADDI(R0, R0, 1),              // R0 = R0 + 1
+ *      I_PUT(R0, R3, ulp_my_variable), // Put the value of R0 into ulp_my_variable.
+ */
 #define I_GET(reg_dest, reg_zero, var) \
     I_GETO(reg_dest, reg_zero, 0, var)
 
+/**
+ * A more flexible variant of I_GET that allows specifying the value (val_offset) of the offset register (reg_offset).
+ *  Note: undefined behaviour may occur if val_offset > offset of var. This is not a concern if your program is at default address 0.
+ * 
+ *  reg_dest: General purpise register to load value into (R0-R3).
+ *  reg_offset: General purpose register containing a known value. May be the same as reg_src.
+ *  val_offset: The value of reg_offset.
+ *  var: A 4-byte, word-aligned variable in RTC_SLOW_MEM. Use HULP's ulp_var_t family for convenience.
+ * 
+ */
 #define I_GETO(reg_dest, reg_offset, val_offset, var) \
     I_LD(reg_dest, reg_offset, (uint16_t)(RTC_WORD_OFFSET(var) - (val_offset)))
 
-#define I_PUT(reg_dest, reg_zero, var) \
-    I_PUTO(reg_dest, reg_zero, 0, var)
-
-#define I_PUTO(reg_dest, reg_offset, val_offset, var) \
-    I_ST(reg_dest, reg_offset, (uint16_t)(RTC_WORD_OFFSET(var) - (val_offset)))
+/**
+ * Store the value of a general purpose register into ulp_var_t.
+ * 
+ *  reg_src: General purpise register containing the value to be stored (R0-R3)
+ *  reg_zero: General purpise register containing 0. May be the same as reg_src (if storing 0).
+ *  var: a ulp_var_t or similar.
+ * 
+ *  eg.
+ *      I_MOVI(R3, 0),                          // A register must have known value 0 to use I_GET/I_PUT.
+ *      I_MOVI(R0, 123),
+ *      I_PUT(R0, R3, ulp_my_variable),         // Put R0's value in ulp_my_variable.
+ *      I_MOVI(R1, 1),
+ *      I_PUT(R1, R3, ulp_another_variable),    // Put R1's value in ulp_another_variable.
+ */
+#define I_PUT(reg_src, reg_zero, var) \
+    I_PUTO(reg_src, reg_zero, 0, var)
 
 /**
- * Request and wait for the RTC ticks register to update.
+ * A more flexible variant of I_PUT that allows specifying the value (val_offset) of the offset register (reg_offset).
+ *  Note: undefined behaviour may occur if val_offset > offset of var. This is not a concern if your program is at default address 0.
+ * 
+ *  reg_src: General purpose register containing the value to be stored (R0-R3)
+ *  reg_offset: General purpose register containing a known value. May be the same as reg_src.
+ *  val_offset: The value of reg_offset.
+ *  var: A 4-byte, word-aligned variable in RTC_SLOW_MEM. Use HULP's ulp_var_t family for convenience.
+ * 
+ */
+#define I_PUTO(reg_src, reg_offset, val_offset, var) \
+    I_ST(reg_src, reg_offset, (uint16_t)(RTC_WORD_OFFSET(var) - (val_offset)))
+
+/**
+ * Request and block until the RTC ticks register is updated.
  */
 #define M_UPDATE_TICKS() \
     I_FLAG_UPDATE_TICKS(), \
@@ -41,66 +109,174 @@
     M_BX(label_goto), \
     M_LABEL(label_return_point)
 
-
+/**
+ * Init GPIO as RTCIO
+ */
 #define M_GPIO_INIT(gpio_num) \
     I_WR_REG_BIT(rtc_gpio_desc[gpio_num].reg, (uint8_t)log2(rtc_gpio_desc[gpio_num].mux), 1), \
     I_WR_REG(rtc_gpio_desc[gpio_num].reg, rtc_gpio_desc[gpio_num].func, rtc_gpio_desc[gpio_num].func + 1, 0)
 
+/**
+ * Init RTCIO
+ */
 #define M_RTCIO_INIT(rtcio_num) \
     M_GPIO_INIT(rtc_to_gpio[(rtcio_num)])
 
+/**
+ * Read GPIO analog value into reg_dest
+ * This converts the GPIO_NUM into an ADC_UNIT and ADC_CHANNEL for ULP instruction I_ADC
+ */
 #define I_ANALOG_READ(reg_dest, pin) \
     I_ADC(reg_dest, (uint32_t)(hulp_adc_get_unit(pin) - 1), (uint32_t)(hulp_adc_get_channel_num(pin)))
 
+/**
+ * Read GPIO input value into R0 lsb
+ * ie. R0 == 0 (low) or R0 == 1 (high)
+ */
 #define I_GPIO_READ(gpio_num) \
     I_RTCIO_READ(rtc_gpio_desc[gpio_num].rtc_num)
 
+/**
+ * Read RTCIO input value into R0 lsb
+ * ie. R0 == 0 (low) or R0 == 1 (high)
+ */
 #define I_RTCIO_READ(rtcio_num) \
     I_RTCIOS_READ(rtcio_num, 1)
 
+/**
+ * Set GPIO output level.
+ */
 #define I_GPIO_SET(gpio_num, level) \
     I_RTCIO_SET(rtc_gpio_desc[(gpio_num_t)gpio_num].rtc_num, level)
 
+/**
+ * Set RTCIO output level.
+ */
 #define I_RTCIO_SET(rtcio_num, level) \
     I_WR_REG_BIT( ( (level) ? RTC_GPIO_OUT_W1TS_REG : RTC_GPIO_OUT_W1TC_REG ), (uint8_t)( (level) ? (RTC_GPIO_OUT_DATA_W1TS_S + (rtcio_num)) : (RTC_GPIO_OUT_DATA_W1TC_S + (rtcio_num)) ), 1)
     // I_WR_REG_BIT( RTC_GPIO_OUT_REG, (uint8_t)( RTC_GPIO_OUT_DATA_S + (rtcio_num)), (level))
 
+/**
+ * Enable GPIO output.
+ */
 #define I_GPIO_OUTPUT_EN(gpio_num) \
     I_RTCIO_OUTPUT_EN(rtc_gpio_desc[gpio_num].rtc_num)
 
+/**
+ * Enable RTCIO output.
+ */
 #define I_RTCIO_OUTPUT_EN(rtcio_num) \
     I_WR_REG_BIT(RTC_GPIO_ENABLE_W1TS_REG, (uint8_t)(RTC_GPIO_ENABLE_W1TS_S + rtcio_num), 1)
 
+/**
+ * Disable GPIO output.
+ */
 #define I_GPIO_OUTPUT_DIS(gpio_num) \
     I_RTCIO_OUTPUT_DIS(rtc_gpio_desc[gpio_num].rtc_num)
 
+/**
+ * Disable RTCIO output.
+ */
 #define I_RTCIO_OUTPUT_DIS(rtcio_num) \
     I_WR_REG_BIT(RTC_GPIO_ENABLE_W1TC_REG, (uint8_t)(RTC_GPIO_ENABLE_W1TC_S + rtcio_num), 1)
 
+/**
+ * Set GPIO internal pullup.
+ */
 #define I_GPIO_PULLUP(gpio_num, enable) \
     I_WR_REG_BIT(rtc_gpio_desc[(gpio_num)].reg, (uint8_t)log2(rtc_gpio_desc[(gpio_num)].pullup), ( (enable) ? 1 : 0) )
 
+/**
+ * Set RTCIO internal pullup.
+ */
 #define I_RTCIO_PULLUP(rtcio_num, enable) \
     I_GPIO_PULLUP(rtc_to_gpio[(rtcio_num)],(enable))
 
+/**
+ * Set GPIO internal pulldown.
+ */
 #define I_GPIO_PULLDOWN(gpio_num, enable) \
     I_WR_REG_BIT(rtc_gpio_desc[(gpio_num)].reg, (uint8_t)log2(rtc_gpio_desc[(gpio_num)].pulldown), ( (enable) ? 1 : 0) )
 
+/**
+ * Set RTCIO internal pulldown.
+ */
 #define I_RTCIO_PULLDOWN(rtcio_num, enable) \
     I_GPIO_PULLDOWN(rtc_to_gpio[(rtcio_num)],(enable))
 
+/**
+ * Toggle GPIO output value.
+ * This is a simple implementation and should not be used if timing requirements are strict.
+ */
 #define M_GPIO_TOGGLE(gpio_num) \
     M_RTCIO_TOGGLE(rtc_gpio_desc[gpio_num].rtc_num)
 
+/**
+ * Toggle RTCIO output value.
+ * This is a simple implementation and should not be used if timing requirements are strict.
+ */
 #define M_RTCIO_TOGGLE(rtcio_num) \
     I_RD_REG_BIT(RTC_GPIO_OUT_REG, (uint8_t)(RTC_GPIO_OUT_DATA_S + (rtcio_num))), \
     I_RTCIO_SET((rtcio_num), 0), \
     I_BGE(2,1), \
     I_RTCIO_SET((rtcio_num), 1)
 
+/**
+ * Read RTCIO input values into R0.
+ * If low_rtcio <= 15, up to 16 bits may be returned [RTCIO_15:RTCIO_0] from the lower RTCIO input register
+ * If low_rtcio > 15, up to 2 bits may be returned [RTCIO_17:RTCIO_16] from the upper RTCIO input register
+ */
 #define I_RTCIOS_READ(low_rtcio, num) \
     I_RD_REG(RTC_GPIO_IN_REG, (uint8_t)(RTC_GPIO_IN_NEXT_S + (low_rtcio)), \
         (uint8_t)(RTC_GPIO_IN_NEXT_S + (( ((low_rtcio) + (num) - 1) < 17) ? ((low_rtcio) + (num) - 1) : (17 - low_rtcio))))
+
+/**
+ * Latch GPIO config. Use before returning to deep sleep to maintain state.
+ */
+#define I_GPIO_HOLD(gpio_num) \
+    I_WR_REG_BIT(rtc_gpio_desc[(gpio_num)].reg, (uint8_t)log2(rtc_gpio_desc[(gpio_num)].hold), 1)
+
+/**
+ * Latch RTCIO config. Use before returning to deep sleep to maintain state.
+ */
+#define I_RTCIO_HOLD(rtcio_num, enable) \
+    I_GPIO_HOLD(rtc_to_gpio[(rtcio_num)])
+
+/**
+ * Unlatch GPIO config
+ */
+#define I_GPIO_UNHOLD(gpio_num) \
+    I_WR_REG_BIT(rtc_gpio_desc[(gpio_num)].reg, (uint8_t)log2(rtc_gpio_desc[(gpio_num)].hold), 0)
+
+/**
+ * Unlatch RTCIO config
+ */
+#define I_RTCIO_UNHOLD(rtcio_num, enable) \
+    I_GPIO_UNHOLD(rtc_to_gpio[(rtcio_num)])
+
+/**
+ * Set GPIO output strength. Ensure pin is output capable!
+ */
+#define I_GPIO_SET_DRIVE_CAP(gpio_num, drive_cap) \
+    I_WR_REG(rtc_gpio_desc[(gpio_num)].reg, rtc_gpio_desc[(gpio_num)].drv_s, rtc_gpio_desc[(gpio_num)].drv_s + 1, (uint8_t)(drive_cap))
+
+/**
+ * Set RTC peripherals automatic power down
+ */
+#define I_PWR_PERI_ENABLE_PD(enable) \
+    I_WR_REG_BIT(RTC_CNTL_PWC_REG, RTC_CNTL_PD_EN_S, (enable) ? 1 : 0)
+
+/**
+ * Set RTC peripherals force powered down
+ */
+#define I_PWR_PERI_FORCE_PD(enable) \
+    I_WR_REG_BIT(RTC_CNTL_PWC_REG, RTC_CNTL_PWC_FORCE_PD_S, (enable) ? 1 : 0)
+
+/**
+ * Set RTC peripherals force powered up
+ */
+#define I_PWR_PERI_FORCE_PU(enable) \
+    I_WR_REG_BIT(RTC_CNTL_PWC_REG, RTC_CNTL_PWC_FORCE_PU_S, (enable) ? 1 : 0)
 
 /**
  * Read a bit from peripheral register into R0
@@ -133,16 +309,22 @@
 #define I_ADC_POWER_OFF() I_WR_REG(SENS_SAR_MEAS_WAIT2_REG, SENS_FORCE_XPD_SAR_S, SENS_FORCE_XPD_SAR_S + 1, SENS_FORCE_XPD_SAR_PD)
 
 /**
- * Convert a time (in milliseconds) to an optimally-shifted 16-bit RTC tick count.
- * Equivalent to hulp_ticks()
+ * Check if RTC controller is ready to wake the SoC
  */
-#define I_HULP_TICKS(reg_dest, time_ms) \
-    I_MOVI(reg_dest, hulp_ticks(time_ms))
+#define I_GET_WAKE_READY() I_RD_REG_BIT(RTC_CNTL_LOW_POWER_ST_REG, RTC_CNTL_RDY_FOR_WAKEUP_S)
+
+/**
+ * I_WAKE when the SoC is ready, waiting if necessary
+ */
+#define M_WAKE_WHEN_READY() \
+    I_GET_WAKE_READY() \
+    I_BL(-1, 1), \
+    I_WAKE()
 
 /**
  * Get 16 bits of RTC ticks register into R0, range optimised for the provided time (in milliseconds).
  */
-#define I_RD_TICKS(timebase_ms) I_RD_TICKS_REG(hulp_tick_shift(timebase_ms))
+#define I_RD_TICKS(timebase_ms) I_RD_TICKS_REG(hulp_ms_to_ulp_tick_shift(timebase_ms))
 
 /**
  * Read up to 16 bits of the 48-bit RTC tick registers, from low_bit.
@@ -168,7 +350,7 @@
     I_ST(R0,R2,timestamp_offset)
 
 #define M_IF_MS_ELAPSED(id_label, interval_ms, else_goto_label) \
-    M_IF_TICKS_ELAPSED(id_label, hulp_ticks((interval_ms)), hulp_tick_shift((interval_ms)), else_goto_label)
+    M_IF_TICKS_ELAPSED(id_label, hulp_ms_to_ulp_ticks((interval_ms)), hulp_ms_to_ulp_tick_shift((interval_ms)), else_goto_label)
 
 #define M_IF_TICKS_ELAPSED(id_label, interval_ticks, ticks_reg_low_bit, else_goto_label) \
     M_IF_TICKS_ELAPSED_(id_label, interval_ticks, ticks_reg_low_bit, else_goto_label, R1, R2)
@@ -187,7 +369,7 @@
         I_ST(reg_scr2,reg_scr1,7)
 
 #define M_IF_MS_WAITING(id_label, interval_ms, timebase_ms, else_goto_label) \
-    M_IF_TICKS_ELAPSED(id_label, hulp_ticks((interval_ms)), hulp_tick_shift((interval_ms)), else_goto_label)
+    M_IF_TICKS_ELAPSED(id_label, hulp_ms_to_ulp_ticks((interval_ms)), hulp_ms_to_ulp_tick_shift((interval_ms)), else_goto_label)
 
 #define M_IF_TICKS_WAITING(id_label, interval_ticks, ticks_reg_low_bit, else_goto_label) \
     M_IF_TICKS_ELAPSED_(id_label, interval_ticks, ticks_reg_low_bit, else_goto_label, R1, R2)
@@ -207,7 +389,7 @@
 
 /* A minimal variant (3 insn) offering more control, requiring a reg (R1-R3) preloaded with the previous ticks. You need to handle get and save current ticks if == true */
 #define M_IF_REG_MS_ELAPSED(reg_ticks_previous, interval_ms, timebase_ms, else_goto_label)  \
-        M_IF_REG_TICKS_ELAPSED(reg_ticks_previous, hulp_ticks((interval_ms)), hulp_tick_shift((timebase_ms)), else_goto_label)
+        M_IF_REG_TICKS_ELAPSED(reg_ticks_previous, hulp_ms_to_ulp_ticks((interval_ms)), hulp_ms_to_ulp_tick_shift((timebase_ms)), else_goto_label)
 
 #define M_IF_REG_TICKS_ELAPSED(reg_previous_ticks, interval_ticks, ticks_reg_low_bit, else_goto_label) \
     I_RD_TICKS_REG(ticks_reg_low_bit), \
@@ -215,7 +397,7 @@
     M_BL(else_goto_label, (interval_ticks))
 
 #define M_IF_REG_MS_WAITING(reg_ticks_previous, interval_ms, timebase_ms, else_goto_label)  \
-    M_IF_REG_TICKS_WAITING_(reg_ticks_previous, hulp_ticks((interval_ms)), hulp_tick_shift((timebase_ms)), else_goto_label)
+    M_IF_REG_TICKS_WAITING_(reg_ticks_previous, hulp_ms_to_ulp_ticks((interval_ms)), hulp_ms_to_ulp_tick_shift((timebase_ms)), else_goto_label)
 
 #define M_IF_REG_TICKS_WAITING_(reg_previous_ticks, interval_ticks, ticks_reg_low_bit, else_goto_label) \
     I_RD_TICKS_REG(ticks_reg_low_bit), \
@@ -225,19 +407,20 @@
 #define M_CHECK_MS_ELAPSED(time_ms,reg_previous,else_go_to) \
     I_RD_TICKS((time_ms)), \
     I_SUBR(R0,R0,reg_previous), \
-    M_BL(else_go_to,hulp_ticks((time_ms)))
+    M_BL(else_go_to, hulp_ms_to_ulp_ticks((time_ms)))
 
 /**
  * Set the entry point (in words) next time the ULP runs.
  */
-#define I_SET_ENTRY(word_entry) \
-    I_WR_REG(SENS_SAR_START_FORCE_REG, SENS_PC_INIT_S, SENS_PC_INIT_S + 10, (word_entry))
+#define M_SET_ENTRY(word_entry) \
+    I_WR_REG(SENS_SAR_START_FORCE_REG, SENS_PC_INIT_S + 8, SENS_PC_INIT_S + 10, (uint8_t)(((word_entry) >> 8) & 0x7)), \
+    I_WR_REG(SENS_SAR_START_FORCE_REG, SENS_PC_INIT_S + 0, SENS_PC_INIT_S +  7, (uint8_t)(word_entry) & 0xFF)
 
 /**
  * Set the entry point to the given label. Next time the ULP runs, it will begin from that point.
  */
-#define I_SET_ENTRY_LBL(label_entry, ulp_program_ptr) \
-    I_SET_ENTRY(hulp_label(label_entry, ulp_program_ptr))
+#define M_SET_ENTRY_LBL(label_entry, ulp_program_ptr) \
+    M_SET_ENTRY(hulp_get_label_pc(label_entry, ulp_program_ptr))
 
 
-#endif
+#endif // HULP_MACROS_H

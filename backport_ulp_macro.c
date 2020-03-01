@@ -1,3 +1,4 @@
+
 // Copyright 2010-2016 Espressif Systems (Shanghai) PTE LTD
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//This file is taken from IDF 4.x. There are additional macros defined and able to be processed. These are useful and many HULP macros depend on them.
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,20 +22,17 @@
 #include "esp_attr.h"
 #include "esp_err.h"
 #include "esp_log.h"
-#include "esp32/ulp.h"
+
+#include "hulp_ulp.h"
 // #include "ulp_private.h"
-#ifndef CONFIG_ESP32_ULP_COPROC_RESERVE_MEM
-    #define CONFIG_ESP32_ULP_COPROC_RESERVE_MEM CONFIG_ULP_COPROC_RESERVE_MEM
-#endif
-#ifndef ULP_RESERVE_MEM
-    #define ULP_RESERVE_MEM CONFIG_ESP32_ULP_COPROC_RESERVE_MEM
-#endif
 
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
 #include "soc/sens_reg.h"
 
 #include "sdkconfig.h"
+
+#ifdef CONFIG_HULP_BACKPORT_MACROS
 
 static const char* TAG = "ulp";
 
@@ -318,12 +318,13 @@ esp_err_t ulp_process_macros_and_load(uint32_t load_addr, const ulp_insn_t* prog
 
 esp_err_t ulp_process_macros_in_place(const ulp_insn_t* program, size_t* psize)
 {
+    uint32_t* program_addr = (uint32_t*)program;
     size_t macro_count = count_ulp_macros(program, *psize);
     size_t real_program_size = *psize - macro_count;
     const size_t ulp_mem_end = 0x1000 / sizeof(ulp_insn_t);
-    // const uint32_t* program_addr = program;
-    uint32_t load_addr = program - (ulp_insn_t*)RTC_SLOW_MEM;
-    if (program < RTC_SLOW_MEM || load_addr >= ulp_mem_end) {
+    // const uint32_t* program_addr = program;v
+    uint32_t load_addr = program_addr - RTC_SLOW_MEM;
+    if (program_addr < RTC_SLOW_MEM || load_addr >= ulp_mem_end) {
         ESP_LOGW(TAG, "program in invalid location in memory, check attributes");
         return ESP_ERR_ULP_INVALID_LOAD_ADDR;
     }
@@ -339,3 +340,5 @@ esp_err_t ulp_process_macros_in_place(const ulp_insn_t* program, size_t* psize)
 
     return process_relocs(macro_count, load_addr, program, psize);
 }
+
+#endif // CONFIG_HULP_BACKPORT_MACROS

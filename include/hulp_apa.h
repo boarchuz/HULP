@@ -1,11 +1,14 @@
-#ifndef HULP_APA_H_
-#define HULP_APA_H_
+#ifndef HULP_APA_H
+#define HULP_APA_H
 
 /**
  * Basic APA-style RGB LED driver.
  * Only one LED is supported.
  * Useful for status indication, for example.
  */
+
+#include "driver/gpio.h"
+#include "driver/rtc_io.h"
 
 #include "hulp.h"
 
@@ -44,4 +47,4 @@
         I_GPIO_SET(data_gpio, 0), \
         I_BXR(reg_return)
 
-#endif
+#endif // HULP_APA_H

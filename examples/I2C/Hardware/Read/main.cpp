@@ -47,7 +47,8 @@ void startulp()
     hulp_configure_i2c_pins(SCL_PIN, SDA_PIN);
     hulp_configure_i2c_controller();
     
-    hulp_start(program, sizeof(program), 1ULL * 1000 * 1000);
+    hulp_ulp_load(program, sizeof(program), 1ULL * 1000 * 1000);
+    hulp_ulp_run();
 }
 
 extern "C" void app_main()

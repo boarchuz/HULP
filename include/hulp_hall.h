@@ -1,5 +1,7 @@
-#ifndef HULP_HALL_H_
-#define HULP_HALL_H_
+#ifndef HULP_HALL_H
+#define HULP_HALL_H
+
+#include "soc/rtc_io_reg.h"
 
 #include "hulp.h"
 
@@ -16,4 +18,4 @@
     I_WR_REG_BIT(RTC_IO_HALL_SENS_REG, RTC_IO_HALL_PHASE_S, 1)
 
 
-#endif
+#endif // HULP_HALL_H

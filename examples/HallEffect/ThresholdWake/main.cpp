@@ -85,7 +85,8 @@ void startulp()
 
     hulp_configure_hall_effect_sensor();
 
-    hulp_start(program, sizeof(program), 1ULL * 50 * 1000);
+    hulp_ulp_load(program, sizeof(program), 1ULL * 50 * 1000);
+    hulp_ulp_run();
 }
 
 extern "C" void app_main()

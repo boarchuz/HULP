@@ -1,0 +1,20 @@
+#ifndef HULP_ULP_H
+#define HULP_ULP_H
+
+#include "sdkconfig.h"
+
+#ifdef CONFIG_ESP32_ULP_COPROC_RESERVE_MEM
+#define ULP_RESERVE_MEM CONFIG_ESP32_ULP_COPROC_RESERVE_MEM
+#elif defined(CONFIG_ESP32S2_ULP_COPROC_RESERVE_MEM)
+#define ULP_RESERVE_MEM CONFIG_ESP32S2_ULP_COPROC_RESERVE_MEM
+#elif defined(CONFIG_ULP_COPROC_RESERVE_MEM)
+#define ULP_RESERVE_MEM CONFIG_ULP_COPROC_RESERVE_MEM
+#endif
+
+#ifdef CONFIG_HULP_BACKPORT_MACROS
+    #include "backport_ulp.h"
+#else
+    #include "esp32/ulp.h"
+#endif
+
+#endif // HULP_ULP_H

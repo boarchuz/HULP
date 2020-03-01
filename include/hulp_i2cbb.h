@@ -1,8 +1,11 @@
-#ifndef HULP_I2CBB_H_
-#define HULP_I2CBB_H_
+#ifndef HULP_I2CBB_H
+#define HULP_I2CBB_H
 
 //I2C bitbanger. Read (8/16 bit), write, multiple slaves, lightweight (~76 instr), basic error handling.
 //Timing is fixed (Frequency: ~150kHz)
+#include "driver/gpio.h"
+#include "driver/rtc_io.h"
+#include "soc/sens_reg.h"
 
 #include "hulp.h"
 
@@ -267,4 +270,4 @@
 			I_GPIO_OUTPUT_DIS(scl_gpio), \
 			I_BGE(-11,0)
 
-#endif
+#endif // HULP_I2CBB_H

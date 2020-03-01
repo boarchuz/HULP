@@ -1,13 +1,14 @@
-#ifndef HULP_TYPES_H_
-#define HULP_TYPES_H_
+#ifndef HULP_TYPES_H
+#define HULP_TYPES_H
 
 #include "hulp.h"
+
 #include "soc/rtc.h"
 extern "C" {
     #include "esp_clk.h"
 }
 
-#define ADDR_IN_RTC_SLOW_MEM(addr) ((uint8_t*)(addr) - (uint8_t*)RTC_SLOW_MEM < 0x2000)
+#define ADDR_IN_RTC_SLOW_MEM(addr) (((uint32_t)(addr) - (uint32_t)(RTC_SLOW_MEM)) < 0x1000)
 
 struct rtcslow32_t {
     rtcslow32_t() {
@@ -38,15 +39,19 @@ struct ulp_var_t : rtcslow32_t {
     {
         ulpf.data.val = v;
     }
-    uint16_t get()
+    uint16_t get() const
     {
         return ulpf.data.val;
     }
-    operator uint16_t*()
+    uint16_t pc()
+    {
+        return ulpf.pc;
+    }
+    operator uint16_t*() const
     {
         return (uint16_t*)&ulpf.data;
     }
-    operator uint16_t()
+    operator uint16_t() const
     {
         return ulpf.data.val;
     }
@@ -77,7 +82,7 @@ struct ulp_var_t : rtcslow32_t {
         --*this;
         return temp;
     }
-    bool updated()
+    bool updated() const
     {
         return (ulpf.st != 0);
     }
@@ -85,8 +90,14 @@ struct ulp_var_t : rtcslow32_t {
     {
         ulpf.st = 0;
     }
-    uint8_t operator [](uint8_t i) const    {return ulpf.data.bytes[(uint8_t)i];}
-    uint8_t & operator [](uint8_t i) {return ulpf.data.bytes[(uint8_t)i];}
+    uint8_t operator[](uint8_t i) const
+    {
+        return ulpf.data.bytes[(uint8_t)i];
+    }
+    uint8_t& operator[](uint8_t i)
+    {
+        return ulpf.data.bytes[(uint8_t)i];
+    }
 };
 
 template<uint8_t SZ>
@@ -200,4 +211,4 @@ struct ulp_timestamp_t {
 		// printf("ADC age: %"PRIu64"ms, PG time: %"PRIu64"ms\n", rtc_time_slowclk_to_us(timeNow - adcTimestamp, esp_clk_slowclk_cal_get()) / 1000, (ulp_data_read(DUM_BQ_PG_VALID) ? (rtc_time_slowclk_to_us(timeNow - pgTimestamp, esp_clk_slowclk_cal_get()) / 1000) : 0));
 };
 
-#endif
+#endif // HULP_TYPES_H

@@ -85,7 +85,8 @@ void startulp()
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-    hulp_start(program, sizeof(program), 1ULL * 1000 * 1000);
+    hulp_ulp_load(program, sizeof(program), 1ULL * 1000 * 1000);
+    hulp_ulp_run();
 }
 
 extern "C" void app_main()

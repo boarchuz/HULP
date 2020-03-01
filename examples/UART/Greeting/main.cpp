@@ -58,7 +58,8 @@ void startulp()
     hulp_configure_pin(PIN_ULP_TX, RTC_GPIO_MODE_DISABLED, true);
     hulp_configure_pin(PIN_ULP_RX, RTC_GPIO_MODE_INPUT_ONLY, true);
 
-    hulp_start(program, sizeof(program), 10ULL * 1000 * 1000);
+    hulp_ulp_load(program, sizeof(program), 10ULL * 1000 * 1000);
+    hulp_ulp_run();
 }
 
 extern "C" void app_main()

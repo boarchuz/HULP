@@ -1,13 +1,16 @@
-#ifndef HULP_TOUCH_H_
-#define HULP_TOUCH_H_
+#ifndef HULP_TOUCH_H
+#define HULP_TOUCH_H
 
-#include "hulp.h"
+#include "driver/gpio.h"
+#include "driver/touch_pad.h"
 #include "soc/touch_channel.h"
 #include "soc/sens_reg.h"
 
+#include "hulp.h"
+
 #define SWAPPED_TOUCH_INDEX(x) ((x) == (uint8_t)TOUCH_PAD_NUM9 ? (uint8_t)TOUCH_PAD_NUM8 : ((x) == (uint8_t)TOUCH_PAD_NUM8 ? (uint8_t)TOUCH_PAD_NUM9 : (x)))
 
-#define TOUCH_PAD_NO_CHANNEL TOUCH_PAD_GPIO0_CHANNEL
+#define TOUCH_PAD_NO_CHANNEL TOUCH_PAD_MAX
 
 const touch_pad_t gpio_to_touch_num[] = {
     TOUCH_PAD_GPIO0_CHANNEL, TOUCH_PAD_NO_CHANNEL, TOUCH_PAD_GPIO2_CHANNEL, TOUCH_PAD_NO_CHANNEL, TOUCH_PAD_GPIO4_CHANNEL, TOUCH_PAD_NO_CHANNEL, TOUCH_PAD_NO_CHANNEL, TOUCH_PAD_NO_CHANNEL, TOUCH_PAD_NO_CHANNEL, TOUCH_PAD_NO_CHANNEL,
@@ -38,8 +41,6 @@ const touch_pad_t gpio_to_touch_num[] = {
 #define M_TOUCH_BEGIN() \
     I_WR_REG_BIT(SENS_SAR_TOUCH_CTRL2_REG, SENS_TOUCH_START_EN_S, 0), \
     I_WR_REG_BIT(SENS_SAR_TOUCH_CTRL2_REG, SENS_TOUCH_START_EN_S, 1)
-
-
 
 //Junk:
 #define I_TOUCH_EN(gpio_num, enable) \
@@ -72,4 +73,10 @@ const touch_pad_t gpio_to_touch_num[] = {
 #define M_TOUCH_SW_READ_GPIO_BEGIN_V(gpio_num) \
     M_TOUCH_SW_READ_PAD_BEGIN_V((uint8_t)gpio_to_touch_num[(gpio_num)])
 
-#endif
+
+/**
+ * Prepare a touch pad for ULP control.
+ */
+esp_err_t hulp_configure_touch(gpio_num_t touch_gpio);
+
+#endif // HULP_TOUCH_H

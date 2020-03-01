@@ -1,15 +1,18 @@
 
-#ifndef HULP_UART_H_
-#define HULP_UART_H_
+#ifndef HULP_UART_H
+#define HULP_UART_H
 
-#include "hulp.h"
+#include "driver/gpio.h"
+#include "driver/rtc_io.h"
 #include "soc/rtc.h"
 
-#ifndef HULP_RTC_FAST_CLK_HZ
-    //Accurate:
+#include "hulp.h"
+
+
+#ifdef CONFIG_HULP_USE_APPROX_FAST_CLK
+    #define HULP_RTC_FAST_CLK_HZ RTC_FAST_CLK_FREQ_APPROX
+#else
     #define HULP_RTC_FAST_CLK_HZ (1000000ULL * (1 << RTC_CLK_CAL_FRACT) * 256 / rtc_clk_cal(RTC_CAL_8MD256, 100))
-    //Approx:
-    // #define HULP_RTC_FAST_CLK_HZ RTC_FAST_CLK_FREQ_APPROX
 #endif
 
 /*
@@ -103,4 +106,61 @@ Branch to label_entry
         I_BXR(reg_return),\
         I_HALT()
 
-#endif
+/**
+ * This will convert the value in R0 into an ASCII string. Very useful for debugging in combination with UART TX.
+ *  **Note: Destructive!!! R0 will hold 0 on return.
+ * 
+ *  As R1, R2, and R3 are also used in the subroutine, you should store the value beforehand and retrieve afterwards if still required.
+ *  The string is always 5 digits, padded with leading zeros where necessary (ie. "00000", "00001", ... "65535").
+ *  A ulp_string_t initialised with a size of 6 is required for the destination buffer. eg. RTC_DATA_ATTR ulp_string_t<6> ulp_printf_buffer;
+ * 
+ *  A newline character will be appended automatically. The ULP may therefore pass the buffer directly to UART TX to print one value per line.
+ *  Use the customisable variant to override this behaviour.
+ *  
+ *  Prepare R1 with the offset of the ulp_string_t buffer. eg. I_MOVO(R1, ulp_printf_buffer)
+ *  Prepare R3 with the return address. eg. MOVL(R3, LABEL_SOME_PRINTF_RETURN_POINT)
+ *  Branch to the entry of the subroutine.
+ */
+#define M_INCLUDE_PRINTF_U(label_entry) \
+    M_INCLUDE_PRINTF_U_(label_entry, R1, R2, R3, 1, '\n')
+
+/**
+ * Given that ulp_string_t rounds up odd initialisation sizes, a length of 5 for our 5-digit value produces a string with max length of 6 (one unused char).
+ * May as well take advantage of it (eg. using '\n' allows outputting the buffer directly to UART TX with a linebreak between values, zero overhead).
+ * If desired, use_final_char == 1 and specify final_char. To output the 5 digit ASCII only, use_final_char == 0.
+ */
+#define M_INCLUDE_PRINTF_U_(label_entry, reg_string_ptr, reg_scr, reg_return, use_final_char, final_char) \
+    M_LABEL(label_entry), \
+        I_MOVI(R2, '0' << 8 | '0'),  /* Reset counters for digits (10^4) (lower bits) and (10^3) (upper bits) with ASCII zero '0' */ \
+        I_BL(4, 10000),              /* Loop incrementing (10^4) counter: '0' + 1 = '1' + 1 = '2' + 1 = '3' etc */ \
+        I_ADDI(R2, R2, 1),  \
+        I_SUBI(R0, R0, 10000),  \
+        I_BGE(-3, 0),   \
+        I_BL(4, 1000),              /* Loop incrementing (10^3) counter */ \
+        I_ADDI(R2, R2, 1 << 8), \
+        I_SUBI(R0, R0, 1000),   \
+        I_BGE(-3, 0),   \
+        I_ST(R2, R1, 1),            /* Store ASCII counters for digits (10^4) and (10^3) at offset metadata+1 */ \
+        I_MOVI(R2, '0' << 8 | '0'), /* Do it all over again for (10^2) and (10^1), at metadata+2 */ \
+        I_BL(4, 100),   \
+        I_ADDI(R2, R2, 1),  \
+        I_SUBI(R0, R0, 100),    \
+        I_BGE(-3, 0),   \
+        I_BL(4, 10),    \
+        I_ADDI(R2, R2, 1 << 8), \
+        I_SUBI(R0, R0, 10), \
+        I_BGE(-3, 0),   \
+        I_ST(R2, R1, 2),    \
+        I_MOVI(R2, ((use_final_char) ? (uint8_t)(final_char) : 0) << 8 | '0'),    /* Lastly the units (10^0) at metadata+3 */    \
+        I_BL(4, 1), \
+        I_ADDI(R2, R2, 1),  \
+        I_SUBI(R0, R0, 1),  \
+        I_BGE(-3, 0),   \
+        I_ST(R2, R1, 3),    \
+        I_LD(R2, R1, 0),    /* Load the metadata (ie. offset+0) and set length=5*/    \
+        I_ANDI(R2, R2, 0xFF << 8),  \
+        I_ORI(R2, R2, 5 + ((use_final_char) ? 1 : 0)),   \
+        I_ST(R2, R1, 0),    \
+        I_BXR(R3)
+
+#endif // HULP_UART_H

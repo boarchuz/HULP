@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//This file is taken from IDF 4.x. There are additional macros defined and able to be processed. These are useful and many HULP macros depend on them internally.
+
+#ifdef CONFIG_HULP_BACKPORT_MACROS
+
 #pragma once
 #include <stdint.h>
 #include <stddef.h>
@@ -1135,3 +1139,5 @@ esp_err_t ulp_set_wakeup_period(size_t period_index, uint32_t period_us);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // CONFIG_HULP_BACKPORT_MACROS

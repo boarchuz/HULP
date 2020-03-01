@@ -1,0 +1,16 @@
+menu "HULP"
+
+    config HULP_BACKPORT_MACROS
+        bool "Extend Macro Support For Pre-4.0"
+        default y if (ESP_IDF_VERSION_MAJOR >= 4)
+        default n if (ESP_IDF_VERSION_MAJOR < 4)
+        help
+            Patch in extended macro processing for ESP IDF versions prior to v4.x.
+
+    config HULP_USE_APPROX_FAST_CLK
+        bool "Use Approximate Fast Clock Frequency"
+        default n
+        help
+            In calculating some timings, use hardcoded approximate fast clock frequency instead of querying accurate frequency at runtime.
+
+endmenu

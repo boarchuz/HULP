@@ -5,12 +5,27 @@ This is a collection of macros and functions to help get the most out of the Ult
 ## Features
 
 * Methods to easily share data between the ULP and SoC.
+* Powerful ULP debugging functionality.
 * Macros for easy GPIO interaction, including reading input level, setting output level, setting pullup/pulldown, toggling, etc.
 * Wrappers for many timing functions, handling all conversions between milliseconds and ticks, allowing easy and intuitive non-blocking multi-tasking.
 * Single APA RGB LED driver for status indication.
 * Efficient I2C bitbanging driver with error callbacks, capable of 16-bit reads, supporting multiple devices. All in just 76 instructions.
 * Macros to easily control touch pads, hall effect sensor, temperature sensor, etc.
-* UART driver, with TX and RX. Why though...?
+* UART driver, with TX and RX.
+
+## Debugging
+
+* Breakpoint-style debugging aided by the SoC.
+* One simple macro to add a breakpoint anywhere in the ULP program array.
+* Use an optional callback to receive information about the breakpoint: register values (excluding one scratch), program counter, even the line number in your file.
+* Alter register values in the breakpoint, disable or enable breakpoints, change the current program counter, etc. Continue the ULP when ready.
+* Only a few lines needed to set up a minimal debugging configuration that will output key information at each breakpoint before automatically continuing.
+
+
+## Deep Sleep Debugging
+
+* A printf-style function allows the ULP to format the value of R0 to its 5-digit ASCII representation.
+* Combined with HULP's UART TX functionality, the ULP can output vital debugging information completely independent of the SoC, even in deep sleep.
 
 ### Preview
 

@@ -55,7 +55,8 @@ void startulp()
 
     hulp_peripherals_on();
 
-    hulp_start(program, sizeof(program), 1ULL * 10 * 1000);
+    hulp_ulp_load(program, sizeof(program), 1ULL * 10 * 1000);
+    hulp_ulp_run();
 }
 
 extern "C" void app_main()
