@@ -1,0 +1,21 @@
+#ifndef HULP_HALL_H
+#define HULP_HALL_H
+
+#include "soc/rtc_io_reg.h"
+
+#include "hulp.h"
+
+#define I_HALL_CONNECT() \
+    I_WR_REG_BIT(RTC_IO_HALL_SENS_REG, RTC_IO_XPD_HALL_S, 1)
+
+#define I_HALL_DISCONNECT() \
+    I_WR_REG_BIT(RTC_IO_HALL_SENS_REG, RTC_IO_XPD_HALL_S, 0)
+
+#define I_HALL_POLARITY_FORWARD() \
+    I_WR_REG_BIT(RTC_IO_HALL_SENS_REG, RTC_IO_HALL_PHASE_S, 0)
+
+#define I_HALL_POLARITY_REVERSE() \
+    I_WR_REG_BIT(RTC_IO_HALL_SENS_REG, RTC_IO_HALL_PHASE_S, 1)
+
+
+#endif // HULP_HALL_H

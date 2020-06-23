@@ -1,0 +1,9 @@
+menu "HULP"
+
+    config HULP_USE_APPROX_FAST_CLK
+        bool "Use Approximate Fast Clock Frequency"
+        default n
+        help
+            In calculating some timings, use hardcoded approximate fast clock frequency instead of querying accurate frequency at runtime.
+
+endmenu
