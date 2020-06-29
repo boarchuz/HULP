@@ -3,32 +3,27 @@
 
 #include "hulp.h"
 
+#include <stdint.h>
+
 #include "soc/rtc.h"
 #include "esp32/clk.h"
-#include "soc/soc_memory_layout.h"
 
-struct ulp_var_t {
-    ulp_var_t() {
-        assert(esp_ptr_in_rtc_slow(this) && "var not in RTC_SLOW_MEM, check attributes");
-    }
-    void put(uint16_t v)
-    {
-        val = v;
-    }
-    uint16_t get() const
-    {
-        return val;
-    }
-    union {
-        struct {
-            uint32_t val : 16;
-            uint32_t reg_off : 2;
-            uint32_t st : 3;
-            uint32_t pc : 11;
-        };
-        ulp_insn_t insn;
+union ulp_var_t {
+    struct {
+        uint32_t data : 16;
+        uint32_t reg_off : 2;
+        uint32_t st : 3;
+        uint32_t pc : 11;
     };
+    struct {
+        uint16_t val;
+        uint16_t meta;
+    };
+    ulp_insn_t insn;
+    uint32_t word;
 };
+
+_Static_assert(sizeof(ulp_var_t) == 4, "ulp_var_t size should be 4 bytes");
 
 template<uint8_t SZ>
 struct ulp_string_t {
@@ -122,7 +117,7 @@ struct ulp_string_t {
 struct ulp_timestamp_t {
 		uint64_t ticks()
 		{
-			return ((uint64_t)bits.upper.get() << 32) | ((uint32_t)bits.middle.get() << 16) | bits.lower.get();
+			return ((uint64_t)bits.upper.val << 32) | ((uint32_t)bits.middle.val << 16) | bits.lower.val;
 		}
         uint64_t us()
         {

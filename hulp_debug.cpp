@@ -127,7 +127,7 @@ esp_err_t hulp_debug_bp_alter_reg(hulp_debug_bp_cb_data_t* bp_data, uint8_t reg,
     uint8_t arr_ind = reg;
     if(reg > scr_reg) --arr_ind;
 
-    bp_data->meta.handle->data->reg[arr_ind].put(val);
+    bp_data->meta.handle->data->reg[arr_ind].val = val;
     return ESP_OK;
 }
 

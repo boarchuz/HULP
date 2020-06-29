@@ -8,11 +8,17 @@
 #include "soc/sens_reg.h"
 #include "soc/rtc_periph.h"
 #include "soc/rtc_i2c_reg.h"
+#include "soc/soc_memory_layout.h"
+#include "esp_assert.h"
 
 #include "hulp.h"
 
+#define RTC_WORD_OFFSET(x) ({ \
+            TRY_STATIC_ASSERT((uint32_t)(&(x)) % sizeof(uint32_t) == 0, (Not aligned)); \
+            TRY_STATIC_ASSERT(esp_ptr_in_rtc_slow(&(x)), (Not in RTC Slow Mem)); \
+            ((uint16_t)((uint32_t*)(&(x)) - RTC_SLOW_MEM)); \
+        })
 
-#define RTC_WORD_OFFSET(x) ((uint16_t)((uint32_t*)&(x) - RTC_SLOW_MEM))
 #define RTCIO_HAS_DEFAULT_PULLUP(x) ((x == GPIO_NUM_0) || (x == GPIO_NUM_14) || (x == GPIO_NUM_15))
 #define RTCIO_HAS_DEFAULT_PULLDOWN(x) ((x == GPIO_NUM_2) || (x == GPIO_NUM_4) || (x == GPIO_NUM_12) || (x == GPIO_NUM_13))
 

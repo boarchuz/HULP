@@ -100,7 +100,7 @@ extern "C" void app_main()
         adc1_config_width( ADC_WIDTH_BIT_12);
         int baseline = hall_sensor_read();
         printf("Baseline: %d\n", baseline);
-        ulp_adcbaseline.put(baseline);
+        ulp_adcbaseline.val = baseline;
         
         init_ulp();
 
