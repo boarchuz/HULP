@@ -1,6 +1,4 @@
-# Edit following two lines to set component requirements (see docs)
-
-set(COMPONENT_SRCS "hulp.cpp" "hulp_touch.cpp" "hulp_debug.cpp")
+set(COMPONENT_SRCS "src/hulp.cpp" "src/hulp_touch.cpp" "src/hulp_debug.cpp")
 set(COMPONENT_REQUIRES ulp)
 
 set(COMPONENT_PRIV_REQUIRES "soc")
