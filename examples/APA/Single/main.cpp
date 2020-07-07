@@ -57,8 +57,8 @@ void init_ulp()
         M_INCLUDE_APA1(LBL_APA_ENTRY, SCL_PIN, SDA_PIN),
     };
 
-    hulp_configure_pin(SCL_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_PULLUP_ONLY, 1);
-    hulp_configure_pin(SDA_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_PULLUP_ONLY, 1);
+    hulp_configure_pin(SCL_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0);
+    hulp_configure_pin(SDA_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0);
 
     hulp_peripherals_on();
 
