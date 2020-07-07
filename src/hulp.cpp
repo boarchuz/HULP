@@ -376,28 +376,28 @@ esp_err_t hulp_configure_pin_int(gpio_num_t gpio_num, gpio_int_type_t intr_type)
     return ESP_OK;
 }
 
-hulp_ulp_state_t hulp_get_state()
+ulp_state_t hulp_get_state()
 {
     uint32_t ulp_state_bits = REG_READ(RTC_CNTL_LOW_POWER_ST_REG) & (0xF << 13);
 
     switch(ulp_state_bits)
     {
         case 0:
-            return HULP_IDLE;
+            return ULP_STATE_IDLE;
         case BIT(13) |  BIT(14):
-            return HULP_RUNNING;
+            return ULP_STATE_RUNNING;
         case BIT(13) |  BIT(14) |             BIT(16):
-            return HULP_HALTED;
+            return ULP_STATE_HALTED;
         case                        BIT(15) | BIT(16):
-            return HULP_SLEEPING;
+            return ULP_STATE_SLEEPING;
         case            BIT(14) |             BIT(16):
         case            BIT(14) |   BIT(15) | BIT(16):
         case BIT(13) |  BIT(14) |   BIT(15) | BIT(16): //if sleep time ~0
-            return HULP_WAKING;
+            return ULP_STATE_WAKING;
         case                                  BIT(16):
-            return HULP_DONE;
+            return ULP_STATE_DONE;
         default:
             ESP_LOGW(TAG, "unknown state: %u", ulp_state_bits);
-            return HULP_UNKNOWN;
+            return ULP_STATE_UNKNOWN;
     }
 }

@@ -15,14 +15,14 @@
 
 #include "sdkconfig.h"
 
-enum hulp_ulp_state_t {
-    HULP_IDLE,      //Default state.
-    HULP_WAKING,    //Sleep timer expired. Starting ULP.
-    HULP_RUNNING,   //ULP is running.
-    HULP_HALTED,    //ULP just halted. Starting sleep timer.
-    HULP_SLEEPING,  //ULP is sleeping. Sleep timer is running.
-    HULP_DONE,      //ULP has finished and sleep timer is not running. (Only with hulp_ulp_run_once.)
-    HULP_UNKNOWN,   //Unable to determine.
+enum ulp_state_t {
+    ULP_STATE_IDLE,      //Default state.
+    ULP_STATE_WAKING,    //Sleep timer expired. Starting ULP.
+    ULP_STATE_RUNNING,   //ULP is running.
+    ULP_STATE_HALTED,    //ULP just halted. Starting sleep timer.
+    ULP_STATE_SLEEPING,  //ULP is sleeping. Sleep timer is running.
+    ULP_STATE_DONE,      //ULP has finished and sleep timer is not running.
+    ULP_STATE_UNKNOWN,   //Unable to determine.
 };
 
 /**
@@ -175,7 +175,7 @@ bool hulp_is_ulp_wakeup();
  * Get the current ULP state.
  * Note: when using hulp_ulp_run_once, only IDLE or DONE may be returned
  */
-hulp_ulp_state_t hulp_get_state();
+ulp_state_t hulp_get_state();
 
 /**
  * Register an ISR for ULP interrupts.
