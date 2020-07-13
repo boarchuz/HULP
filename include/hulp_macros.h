@@ -14,9 +14,10 @@
 #include "hulp.h"
 
 #define RTC_WORD_OFFSET(x) ({ \
-            TRY_STATIC_ASSERT((uint32_t)(&(x)) % sizeof(uint32_t) == 0, (Not aligned)); \
-            TRY_STATIC_ASSERT(esp_ptr_in_rtc_slow(&(x)), (Not in RTC Slow Mem)); \
-            ((uint16_t)((uint32_t*)(&(x)) - RTC_SLOW_MEM)); \
+            uint32_t* ptr_ = (uint32_t*)(&(x)); \
+            TRY_STATIC_ASSERT((uint32_t)(ptr_) % sizeof(uint32_t) == 0, (Not aligned)); \
+            TRY_STATIC_ASSERT(esp_ptr_in_rtc_slow(ptr_), (Not in RTC Slow Mem)); \
+            ((uint16_t)(ptr_ - RTC_SLOW_MEM)); \
         })
 
 #define RTCIO_HAS_DEFAULT_PULLUP(x) ((x == GPIO_NUM_0) || (x == GPIO_NUM_14) || (x == GPIO_NUM_15))
@@ -389,7 +390,7 @@
  * I_WAKE when the SoC is ready, waiting if necessary
  */
 #define M_WAKE_WHEN_READY() \
-    I_GET_WAKE_READY() \
+    I_GET_WAKE_READY(), \
     I_BL(-1, 1), \
     I_WAKE()
 
