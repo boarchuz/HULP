@@ -520,6 +520,63 @@
  */
 #define I_GPIO_INT_SET_TYPE(gpio_num, intr_type) I_RTCIO_INT_SET_TYPE(hulp_gtr(gpio_num), intr_type)
 
+#define I_SET_EXT0_RTCIO(rtcio_num) I_WR_REG(RTC_IO_EXT_WAKEUP0_REG, RTC_IO_EXT_WAKEUP0_SEL_S, RTC_IO_EXT_WAKEUP0_SEL_S, (rtcio_num))
+
+/**
+ * Set EXT0 wakeup GPIO
+ */
+#define I_SET_EXT0_GPIO(gpio_num) I_SET_EXT0_RTCIO(hulp_gtr(gpio_num))
+
+/**
+ * Set EXT0 wakeup level (0 or 1)
+ */
+#define I_SET_EXT0_LEVEL(level) I_WR_REG(RTC_CNTL_EXT_WAKEUP_CONF_REG, RTC_CNTL_EXT_WAKEUP0_LV_S, RTC_CNTL_EXT_WAKEUP0_LV_S, (level) ? 1 : 0)
+
+#define I_CLR_EXT1_INT() I_WR_REG(RTC_CNTL_EXT_WAKEUP1_REG, RTC_CNTL_EXT_WAKEUP1_STATUS_CLR_S, RTC_CNTL_EXT_WAKEUP1_STATUS_CLR_S, 1)
+
+#define I_RD_EXT1_RTCIO_INT(low_rtcio, num) I_RD_REG(RTC_CNTL_EXT_WAKEUP1_STATUS_REG, (uint8_t)(RTC_CNTL_EXT_WAKEUP1_STATUS_S + (low_rtcio)), \
+        (uint8_t)(RTC_CNTL_EXT_WAKEUP1_STATUS_S + (( ((low_rtcio) + (num) - 1) < 17) ? ((low_rtcio) + (num) - 1) : (17 - low_rtcio))))
+
+#define I_RD_EXT1_GPIO_INT(gpio_num) I_RD_EXT1_RTCIO_INT(hulp_gtr(gpio_num), 1)
+
+#define I_EXT1_RTCIO_EN(rtcio_num) I_WR_REG(RTC_CNTL_EXT_WAKEUP1_REG, (uint8_t)(RTC_CNTL_EXT_WAKEUP1_SEL_S + (rtcio_num)), (uint8_t)(RTC_CNTL_EXT_WAKEUP1_SEL_S + (rtcio_num)), 1)
+#define I_EXT1_RTCIO_DIS(rtcio_num) I_WR_REG(RTC_CNTL_EXT_WAKEUP1_REG, (uint8_t)(RTC_CNTL_EXT_WAKEUP1_SEL_S + (rtcio_num)), (uint8_t)(RTC_CNTL_EXT_WAKEUP1_SEL_S + (rtcio_num)), 0)
+
+/**
+ * Add GPIO to EXT1 wakeup group
+ */
+#define I_EXT1_GPIO_EN(gpio_num) I_EXT1_RTCIO_EN(hulp_gtr(gpio_num))
+
+/**
+ * Remove GPIO from EXT1 wakeup group
+ */
+#define I_EXT1_GPIO_DIS(gpio_num) I_EXT1_RTCIO_DIS(hulp_gtr(gpio_num))
+
+/**
+ * Set EXT1 wakeup trigger level (ESP_EXT1_WAKEUP_ALL_LOW or ESP_EXT1_WAKEUP_ANY_HIGH)
+ */
+#define I_SET_EXT1_LEVEL(level) I_WR_REG(RTC_CNTL_EXT_WAKEUP_CONF_REG, RTC_CNTL_EXT_WAKEUP1_LV_S, RTC_CNTL_EXT_WAKEUP1_LV_S, (level) ? 1 : 0)
+
+/**
+ * Enable EXT0 wakeup
+ */
+#define I_EXT0_EN() I_WR_REG_BIT(RTC_CNTL_WAKEUP_STATE_REG, RTC_CNTL_WAKEUP_ENA_S + 0, 1)
+
+/**
+ * Disable EXT0 wakeup
+ */
+#define I_EXT0_DIS() I_WR_REG_BIT(RTC_CNTL_WAKEUP_STATE_REG, RTC_CNTL_WAKEUP_ENA_S + 0, 0)
+
+/**
+ * Enable EXT1 wakeup
+ */
+#define I_EXT1_EN() I_WR_REG_BIT(RTC_CNTL_WAKEUP_STATE_REG, RTC_CNTL_WAKEUP_ENA_S + 1, 1)
+
+/**
+ * Disable EXT1 wakeup
+ */
+#define I_EXT1_DIS() I_WR_REG_BIT(RTC_CNTL_WAKEUP_STATE_REG, RTC_CNTL_WAKEUP_ENA_S + 1, 0)
+
 
 #define MIN_ULP_SLEEP_US (rtc_time_slowclk_to_us(ULP_FSM_PREPARE_SLEEP_CYCLES + ULP_FSM_WAKEUP_SLEEP_CYCLES + REG_GET_FIELD(RTC_CNTL_TIMER2_REG, RTC_CNTL_ULPCP_TOUCH_START_WAIT), esp_clk_slowclk_cal_get()))
 
@@ -536,7 +593,7 @@
  * Set the ULP wakeup period in microseconds (equivalent to ulp_set_wakeup_period).
  */
 #define M_SET_WAKEUP_PERIOD(index, period_us)   \
-    M_SET_WAKEUP_PERIOD_REG((index), (period_us) > MIN_ULP_SLEEP_US ? (period_us) - MIN_ULP_SLEEP_US : 0)
+    M_SET_WAKEUP_PERIOD_REG((index), (period_us) > (MIN_ULP_SLEEP_US) ? ((period_us) - MIN_ULP_SLEEP_US) : 0)
 
 
 
