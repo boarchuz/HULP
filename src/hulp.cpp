@@ -401,3 +401,21 @@ ulp_state_t hulp_get_state()
             return ULP_STATE_UNKNOWN;
     }
 }
+
+uint32_t hulp_get_fast_clk_freq(uint32_t slow_clk_cycles)
+{
+#ifdef CONFIG_HULP_USE_APPROX_FAST_CLK
+    return (uint32_t)RTC_FAST_CLK_FREQ_APPROX;
+#else
+    const bool clk_8m_enabled = rtc_clk_8m_enabled();
+    const bool clk_8md256_enabled = rtc_clk_8md256_enabled();
+    if (!clk_8m_enabled || !clk_8md256_enabled) {
+        rtc_clk_8m_enable(true, true);
+    }
+    uint32_t ret = (uint32_t)(1000000ULL * (1 << RTC_CLK_CAL_FRACT) * 256 / rtc_clk_cal(RTC_CAL_8MD256, slow_clk_cycles));
+    if (!clk_8m_enabled || !clk_8md256_enabled) {
+        rtc_clk_8m_enable(clk_8m_enabled, clk_8md256_enabled);
+    }
+    return ret;
+#endif
+}

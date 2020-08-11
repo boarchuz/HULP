@@ -10,13 +10,6 @@
 
 #include "sdkconfig.h"
 
-
-#ifdef CONFIG_HULP_USE_APPROX_FAST_CLK
-    #define HULP_RTC_FAST_CLK_HZ RTC_FAST_CLK_FREQ_APPROX
-#else
-    #define HULP_RTC_FAST_CLK_HZ (1000000ULL * (1 << RTC_CLK_CAL_FRACT) * 256 / rtc_clk_cal(RTC_CAL_8MD256, 100))
-#endif
-
 /*
 Prep:
 Set R1 = offset of ULP string eg. I_MOVO(R1, ulp_receive_buffer)
@@ -38,8 +31,8 @@ Branch to label_entry         eg. M_BX(LABEL_UART_RX)
         I_GPIO_READ(rx_gpio),                           /*Wait here until pin goes low (start bit)*/                                \
         I_BGE(-1,1),                                                                                                                \
         I_STAGE_RST(),                                                                                                              \
-        I_DELAY((uint16_t)(0.5f / (baud_rate) * HULP_RTC_FAST_CLK_HZ + 34 - 36)),                                                   \
-        I_DELAY((uint16_t)(1.0f / (baud_rate) * HULP_RTC_FAST_CLK_HZ - 34)),                                                        \
+        I_DELAY((uint16_t)(0.5f / (baud_rate) * hulp_get_fast_clk_freq() + 34 - 36)),                                                   \
+        I_DELAY((uint16_t)(1.0f / (baud_rate) * hulp_get_fast_clk_freq() - 34)),                                                        \
         I_GPIO_READ(rx_gpio),                           /*Read the new bit, make room for it in another reg, and OR it in*/         \
         I_RSHI(reg_return,reg_return,1),                                                                                            \
         I_LSHI(R0,R0,15),                                                                                                           \
@@ -86,22 +79,22 @@ Branch to label_entry
         I_MOVR(R0,reg_return),\
         I_BGE(19, 65535),\
         I_GPIO_OUTPUT_EN((tx_gpio)),\
-        I_DELAY((uint16_t)(1.0f / (baud_rate) * HULP_RTC_FAST_CLK_HZ - 30)),\
+        I_DELAY((uint16_t)(1.0f / (baud_rate) * hulp_get_fast_clk_freq() - 30)),\
         I_ANDI(R0,reg_scr,1),\
         I_BL(12, 1),\
         I_GPIO_OUTPUT_DIS((tx_gpio)),\
-        I_DELAY((uint16_t)(1.0f / (baud_rate) * HULP_RTC_FAST_CLK_HZ - 38)),\
+        I_DELAY((uint16_t)(1.0f / (baud_rate) * hulp_get_fast_clk_freq() - 38)),\
         I_RSHI(reg_scr,reg_scr,1),\
         I_STAGE_INC(1),\
         I_JUMPS(-6, 8, JUMPS_LT),\
         I_JUMPS(2, 9, JUMPS_LT),\
         I_JUMPS(-8, 16, JUMPS_LT),\
         I_GPIO_OUTPUT_DIS((tx_gpio)),\
-        I_DELAY((uint16_t)(1.0f / (baud_rate) * HULP_RTC_FAST_CLK_HZ)),\
+        I_DELAY((uint16_t)(1.0f / (baud_rate) * hulp_get_fast_clk_freq())),\
         I_JUMPS(-16, 9, JUMPS_LT),\
         I_BGE(-20, 0),\
         I_GPIO_OUTPUT_EN((tx_gpio)),\
-        I_DELAY((uint16_t)(1.0f / (baud_rate) * HULP_RTC_FAST_CLK_HZ - 38 - 4)),\
+        I_DELAY((uint16_t)(1.0f / (baud_rate) * hulp_get_fast_clk_freq() - 38 - 4)),\
         I_BGE(-11, 0),\
         M_MOVL(reg_return,label_entry),\
         I_LD(reg_return,reg_return,31),\
