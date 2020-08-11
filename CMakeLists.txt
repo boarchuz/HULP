@@ -1,4 +1,4 @@
-set(COMPONENT_SRCS "src/hulp.cpp" "src/hulp_touch.cpp" "src/hulp_debug.cpp")
+set(COMPONENT_SRCS "src/hulp.cpp" "src/hulp_touch.cpp" "src/hulp_debug.cpp" "src/hulp_pwm.cpp")
 set(COMPONENT_REQUIRES ulp)
 
 set(COMPONENT_PRIV_REQUIRES "soc")
