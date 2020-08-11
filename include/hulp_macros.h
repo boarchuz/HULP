@@ -595,6 +595,64 @@
 #define M_SET_WAKEUP_PERIOD(index, period_us)   \
     M_SET_WAKEUP_PERIOD_REG((index), (period_us) > (MIN_ULP_SLEEP_US) ? ((period_us) - MIN_ULP_SLEEP_US) : 0)
 
+/**
+ * Increment the value in a register
+ */
+#define M_REG_INC(reg, shift) \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 0)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 0), 0b1), \
+    I_BL(23, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 1)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 1), 0b10), \
+    I_BL(20, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 2)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 2), 0b100), \
+    I_BL(17, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 3)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 3), 0b1000), \
+    I_BL(14, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 4)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 4), 0b10000), \
+    I_BL(11, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 5)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 5), 0b100000), \
+    I_BL(8, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 6)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 6), 0b1000000), \
+    I_BL(5, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 7)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 7), 0b10000000), \
+    I_BL(2, 1), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 7), 0)
 
+/**
+ * Decrement the value in a register
+ */
+#define M_REG_DEC(reg, shift) \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 0)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 0), 0b0), \
+    I_BGE(23, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 1)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 1), 0b01), \
+    I_BGE(20, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 2)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 2), 0b011), \
+    I_BGE(17, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 3)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 3), 0b0111), \
+    I_BGE(14, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 4)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 4), 0b01111), \
+    I_BGE(11, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 5)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 5), 0b011111), \
+    I_BGE(8, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 6)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 6), 0b0111111), \
+    I_BGE(5, 1), \
+    I_RD_REG_BIT(reg, (uint8_t)((shift) + 7)), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 7), 0b01111111), \
+    I_BGE(2, 1), \
+    I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 7), 0b011111111)
 
 #endif // HULP_MACROS_H
