@@ -53,7 +53,7 @@ void ulp_isr(void *task_handle_ptr)
 void init_ulp()
 {
     // Configure pin
-    ESP_ERROR_CHECK(hulp_configure_pin(PIN_HX711_SDA,  RTC_GPIO_MODE_INPUT_ONLY,  GPIO_FLOATING));
+    ESP_ERROR_CHECK(hulp_configure_pin(PIN_HX711_SDA,  RTC_GPIO_MODE_INPUT_ONLY, GPIO_FLOATING));
     ESP_ERROR_CHECK(hulp_configure_pin(PIN_HX711_SCL, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING));
     // For the calibration phase, the ULP will send interrupts when data is ready. Prepare ISR here.
     TaskHandle_t main_handle =  xTaskGetCurrentTaskHandle();
@@ -82,7 +82,7 @@ void load_hx711_calibration_program()
 void load_hx711_deep_sleep_program()
 {
     // A more advanced program to compare the current value to a set threshold, waking the SoC if exceeded.
-    // The HX711 is powered down when not in use for lower power consumption. More aggressive 
+    // The HX711 is powered down when not in use for lower power consumption.
     enum {
         LBL_SLEEP,
         LBL_CHECK_LOWER,
