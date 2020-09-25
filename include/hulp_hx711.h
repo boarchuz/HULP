@@ -4,12 +4,6 @@
 #include "hulp.h"
 
 /**
- * Suggested pin config:
- *  hulp_configure_pin(gpio_data,  RTC_GPIO_MODE_INPUT_ONLY,  false, false);
- *  hulp_configure_pin(gpio_clock, RTC_GPIO_MODE_OUTPUT_ONLY, false, false, 0);
- */
-
-/**
  * Busy wait until data is ready (ie. until HX711 sets data low)
  */
 #define M_HX711_WAIT_READY(gpio_data) \
@@ -44,6 +38,29 @@
     I_ORR(reg_low16, reg_low16, R0), \
     I_JUMPS(-8, 17, JUMPS_LT), \
     I_BGE(-8, 0)
+
+/**
+ * HX711 read, setting gain to 64 */
+#define M_HX711_READ_G64(reg_high16, reg_low16, gpio_data, gpio_clock) \
+    M_HX711_READ(reg_high16, reg_low16, gpio_data, gpio_clock), \
+    I_JUMPS(-9, 27, JUMPS_LT) /* jump back twice more for total 27 clock pulses */
+
+/**
+ * Power down the HX711
+ * 
+ * The HX711 will enter power down mode when the clock pin is held high for 60uS.
+ */
+#define I_HX711_POWER_DOWN(gpio_clock) \
+    I_GPIO_SET(gpio_clock, 1)
+
+/**
+ * Power up the HX711
+ * 
+ * Return the clock pin to low. The HX711 resets and resumes normal operation.
+ */
+#define I_HX711_POWER_UP(gpio_clock) \
+    I_GPIO_SET(gpio_clock, 0)
+
 
 /**
  * Read upper 16 bits from a HX711 (lower bits will be clocked but ignored)
