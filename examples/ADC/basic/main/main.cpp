@@ -23,7 +23,7 @@ static const char *TAG = "HULP_ADC";
 //      Set the log2 of the desired number of samples here.
 //      In this example, it will be 2^3 = 8 samples. The ULP can then shift right 3 (ie. divide by 8) to find the average.
 //      **Caution: Do not set higher than 4 (16 samples) else ULP arithmetic may overflow
-#define PIN2_OVERSAMPLE_SHIFT 4
+#define PIN2_OVERSAMPLE_SHIFT 3
 
 // Pin 3 settings
 //      The internal pullup for ADC PIN3 is enabled in this example, so the idle value is ~4095 (using default 12 bit attenuation).
