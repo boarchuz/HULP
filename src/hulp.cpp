@@ -29,20 +29,16 @@ static const char* TAG = "HULP";
 
 esp_err_t hulp_configure_pin(gpio_num_t pin, rtc_gpio_mode_t mode, gpio_pull_mode_t pull_mode, uint32_t level)
 {
-    esp_err_t err = rtc_gpio_init(pin);
-    if(err != ESP_OK)
+    if( ESP_OK != rtc_gpio_set_direction(pin, RTC_GPIO_MODE_DISABLED) ||
+        ESP_OK != rtc_gpio_init(pin) ||
+        ESP_OK != gpio_set_pull_mode(pin, pull_mode) ||
+        ESP_OK != rtc_gpio_set_level(pin, level) ||
+        ESP_OK != rtc_gpio_set_direction(pin, mode)
+    )
     {
-        ESP_LOGE(TAG, "rtcio (gpio %d) init error (%d)", pin, err);
-        return err;
+        ESP_LOGE(TAG, "configure gpio %d failed", pin);
+        return ESP_FAIL;
     }
-    err = gpio_set_pull_mode(pin, pull_mode);
-    if(err != ESP_OK)
-    {
-        ESP_LOGE(TAG, "rtcio (gpio %d) pull mode error (%d)", pin, err);
-        return err;
-    }
-    rtc_gpio_set_level(pin, level);
-    rtc_gpio_set_direction(pin, mode);
     return ESP_OK;
 }
 
