@@ -101,6 +101,8 @@ esp_err_t hulp_configure_analog_pin(gpio_num_t pin, adc_atten_t attenuation, adc
     return ESP_OK;
 }
 
+#define RTCIO_FUNC_RTC_I2C 0x3
+
 esp_err_t hulp_configure_i2c_pins(gpio_num_t scl_pin, gpio_num_t sda_pin, bool scl_pullup, bool sda_pullup)
 {
     if( !(scl_pin == GPIO_NUM_2 || scl_pin == GPIO_NUM_4) )
@@ -114,40 +116,13 @@ esp_err_t hulp_configure_i2c_pins(gpio_num_t scl_pin, gpio_num_t sda_pin, bool s
         return ESP_ERR_INVALID_ARG;
     }
 
-    //SCL
-    rtc_gpio_init(scl_pin);
-	rtc_gpio_set_level(scl_pin, 0);
-	rtc_gpio_pulldown_dis(scl_pin); //GPIO_NUM_2 and GPIO_NUM_4 have default pulldown
-	if(scl_pullup)
-	{
-		rtc_gpio_pullup_en(scl_pin);
-	}
-	else
-	{
-		rtc_gpio_pullup_dis(scl_pin);
-	}
-    rtc_gpio_set_direction(scl_pin, RTC_GPIO_MODE_INPUT_OUTPUT);
-    
-    //SDA
-    rtc_gpio_init(sda_pin);
-	rtc_gpio_set_level(sda_pin, 0);
-	rtc_gpio_pulldown_dis(sda_pin);
-	if(sda_pullup)
-	{
-		rtc_gpio_pullup_en(sda_pin);
-	}
-	else
-	{
-		rtc_gpio_pullup_dis(sda_pin);
-	}
-    rtc_gpio_set_direction(sda_pin, RTC_GPIO_MODE_INPUT_OUTPUT);
+    ESP_ERROR_CHECK(hulp_configure_pin(scl_pin, RTC_GPIO_MODE_INPUT_ONLY, scl_pullup ? GPIO_PULLUP_ONLY : GPIO_FLOATING, 0));
+    SET_PERI_REG_BITS(rtc_io_desc[hulp_gtr(scl_pin)].reg, RTC_IO_TOUCH_PAD1_FUN_SEL_V, RTCIO_FUNC_RTC_I2C, rtc_io_desc[hulp_gtr(scl_pin)].func);
+    ESP_ERROR_CHECK(hulp_configure_pin(sda_pin, RTC_GPIO_MODE_INPUT_ONLY, sda_pullup ? GPIO_PULLUP_ONLY : GPIO_FLOATING, 0));
+    SET_PERI_REG_BITS(rtc_io_desc[hulp_gtr(sda_pin)].reg, RTC_IO_TOUCH_PAD1_FUN_SEL_V, RTCIO_FUNC_RTC_I2C, rtc_io_desc[hulp_gtr(sda_pin)].func);
 
     REG_SET_FIELD(RTC_IO_SAR_I2C_IO_REG, RTC_IO_SAR_I2C_SCL_SEL, scl_pin == GPIO_NUM_4 ? 0 : 1);
     REG_SET_FIELD(RTC_IO_SAR_I2C_IO_REG, RTC_IO_SAR_I2C_SDA_SEL, sda_pin == GPIO_NUM_0 ? 0 : 1);
-
-    //RTC I2C FUN_SEL = 3
-    SET_PERI_REG_BITS(rtc_io_desc[hulp_gtr(scl_pin)].reg, RTC_IO_TOUCH_PAD1_FUN_SEL_V, 0x3, rtc_io_desc[hulp_gtr(scl_pin)].func);
-    SET_PERI_REG_BITS(rtc_io_desc[hulp_gtr(sda_pin)].reg, RTC_IO_TOUCH_PAD1_FUN_SEL_V, 0x3, rtc_io_desc[hulp_gtr(sda_pin)].func);
     return ESP_OK;
 }
 
