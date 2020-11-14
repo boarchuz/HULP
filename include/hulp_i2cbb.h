@@ -8,6 +8,7 @@
 #include "soc/sens_reg.h"
 
 #include "hulp.h"
+#include "hulp_types.h"
 
 /**
  *  Convenience macro for an I2C bitbang read (8 bits) into R0, to be used in your program with M_INCLUDE_I2CBB.
@@ -269,5 +270,188 @@
 			I_GPIO_OUTPUT_EN(sda_gpio), \
 			I_GPIO_OUTPUT_DIS(scl_gpio), \
 			I_BGE(-11,0)
+
+struct hulp_i2cbb_hdr_t {
+		struct {
+			uint32_t sub : 8;
+			uint32_t unused1 : 1;
+			uint32_t slave : 7;
+			uint32_t unused2 : 16;
+	} addrs;
+		struct {
+			uint32_t num_bytes : 16;
+			uint32_t unused3 : 16;
+	} ctrl;
+};
+
+/*
+	Declare a struct packed with a hulp_i2cbb_hdr_t and your data structure in RTC SLOW MEM.
+		* Use an array of ulp_var_t if you don't have any need for a custom data structure
+		* Each 32-bit word (such as a ulp_var_t) equates to 2 I2C bytes.
+	You can initialise this struct with the desired values, or set them at runtime. It's generally 
+	more efficient to do so at compile time, using a separate structure for each command.
+	
+	For example:
+
+		RTC_DATA_ATTR struct {
+			hulp_i2cbb_hdr_t cmd = {
+				.addrs = {
+					.sub = 0x08, 		// The slave's address pointer to read from
+					.slave = 0x64, 		// The slave's 7-bit I2C address
+				},
+				.ctrl = {
+					.num_bytes = 6, 	// Number of bytes to be read with this command
+				},
+			};
+			ulp_var_t result[3];		// Each ulp_var_t can receive 2 bytes
+		} example_read_cmd;
+
+		RTC_DATA_ATTR struct {
+			hulp_i2cbb_hdr_t cmd = {
+				.addrs = {
+					.sub = 0x01, 		// The slave's address pointer to write to
+					.slave = 0x64, 		// The slave's 7-bit I2C address
+				},
+				.ctrl = {
+					.num_bytes = 3, 	// Number of bytes to write with this command
+				},
+			};
+			ulp_var_t data[] = {
+				{0xABCD},
+				{0xEF00},
+			};
+		} example_write_cmd;
+
+	Prepare reg_cmd with the RTC slow memory offset of the command structure
+		eg. I_MOVO(R1, example_read_cmd),
+	Prepare reg_return with the return address
+		eg. M_MOVL(R3, MY_READ_RETURN_LABEL),
+	Branch to label_read or label_write for the desired operation.
+
+	Return:
+		R0: err code
+			0 = Success, -1 = Bus Error (checked on first byte only), -2 = Slave NACK
+		reg_cmd: reg_cmd
+		reg_scratch: 0
+		reg_return: reg_return
+
+	Example program:
+				// Prepare and branch
+				I_MOVO(R1, example_read_cmd),
+				M_MOVL(R3, LABEL_I2C_RETURN),
+				M_BX(LABEL_I2C_READ),
+				M_LABEL(LABEL_I2C_RETURN),
+
+				// Check error code
+				M_BGE(LABEL_I2C_ERROR, 1),
+
+				// Check some value you just received and wake if > some threshold
+				I_GET(R0, R2, example_read_cmd.result[1]),
+				M_BGE(LABEL_WAKE, 1234),
+				I_HALT(),
+
+				M_LABEL(LABEL_I2C_ERROR),
+				I_GPIO_SET(LED_ERR, 1),
+				I_END(),
+
+				M_LABEL(LABEL_WAKE),
+				I_WAKE(),
+				I_HALT(),
+
+*/
+
+#define	M_INCLUDE_I2CBB_ARR(label_read, label_write, scl_gpio, sda_gpio, reg_cmd, reg_scratch, reg_return) \
+			M_LABEL(label_read), \
+			I_MOVI(reg_scratch, 39), \
+			M_MOVL(R0, label_read), \
+			I_ST(reg_return, R0, 99), \
+			I_ADDR(reg_scratch, R0, reg_scratch), \
+			I_MOVI(reg_return, 0), \
+			I_GPIO_READ(sda_gpio), \
+			I_BL(25,1), \
+			I_GPIO_READ(scl_gpio), \
+			I_BL(23,1), \
+            I_LD(R0, reg_cmd, 0), \
+			I_GPIO_OUTPUT_EN(sda_gpio), \
+			I_GPIO_OUTPUT_EN(scl_gpio), \
+			I_STAGE_RST(), \
+			I_BGE(13, 1 << 15), \
+			I_GPIO_OUTPUT_EN(sda_gpio), \
+			I_GPIO_OUTPUT_DIS(scl_gpio), \
+			I_STAGE_INC(1), \
+			I_LSHI(R0, R0, 1), \
+			I_GPIO_OUTPUT_EN(scl_gpio), \
+			I_JUMPS(-6,8,JUMPS_LT), \
+			I_GPIO_OUTPUT_DIS(sda_gpio), \
+			I_GPIO_OUTPUT_DIS(scl_gpio), \
+			I_GPIO_READ(PIN_SDA), \
+			I_GPIO_OUTPUT_EN(scl_gpio), \
+			I_BGE(7,1), \
+			I_BXR(reg_scratch), \
+			I_GPIO_OUTPUT_DIS(sda_gpio), \
+			I_BGE(-12,0), \
+			I_LD(R0, reg_cmd, 0), \
+			I_LSHI(R0, R0, 8), \
+			I_BGE(-18,0), \
+			I_SUBI(R0, R0, 2), \
+			I_GPIO_OUTPUT_EN(sda_gpio), \
+			I_GPIO_OUTPUT_DIS(scl_gpio), \
+			I_MOVI(reg_scratch, 0), \
+			I_GPIO_OUTPUT_DIS(sda_gpio), \
+			M_MOVL(reg_return, label_read), \
+			I_LD(reg_return, reg_return, 99), \
+			I_BXR(reg_return), \
+			I_ADDI(reg_scratch, reg_scratch, 2), \
+			I_BGE(-12,0), \
+			I_GPIO_OUTPUT_DIS(scl_gpio), \
+			I_ADDI(reg_scratch, reg_scratch, 5), \
+			I_LD(R0, reg_cmd, 0), \
+			I_ORI(R0, R0, 1 << 8), \
+			I_BGE(-35,0), \
+			I_ADDI(reg_scratch, reg_scratch, 3), \
+			I_GPIO_OUTPUT_EN(scl_gpio), \
+			I_GPIO_OUTPUT_DIS(sda_gpio), \
+			I_STAGE_RST(), \
+			I_GPIO_OUTPUT_DIS(scl_gpio), \
+			I_LSHI(reg_scratch, reg_scratch, 1), \
+			I_GPIO_READ(sda_gpio), \
+			I_ORR(reg_scratch, reg_scratch , R0), \
+			I_GPIO_OUTPUT_EN(scl_gpio), \
+			I_STAGE_INC(1), \
+			I_JUMPS(-6, 8, JUMPS_LT), \
+			I_GPIO_OUTPUT_EN(sda_gpio), \
+			I_GPIO_OUTPUT_DIS(scl_gpio), \
+			I_LD(R0, reg_cmd, 1), \
+			I_SUBR(R0, R0, reg_return), \
+			I_BGE(5, 2), \
+			I_STAGE_INC(1), \
+			I_ANDI(R0, reg_return, 1), \
+			I_BGE(2,1), \
+			I_LSHI(reg_scratch, reg_scratch, 8), \
+			I_RSHI(R0, reg_return, 1), \
+			I_ADDR(R0, R0, reg_cmd), \
+			I_ST(reg_scratch, R0, 2), \
+			I_ADDI(reg_return, reg_return, 1), \
+			I_JUMPS(-23, 9, JUMPS_LT), \
+			I_MOVI(R0,0), \
+			I_BGE(-38, 0), \
+			M_LABEL(label_write),I_MOVI(reg_scratch, 75), \
+			I_BGE(-73, 0), \
+			I_ADDI(reg_scratch, reg_scratch, 2), \
+			I_BGE(-48, 0), \
+			I_LD(R0, reg_cmd, 1), \
+			I_SUBR(R0, R0, reg_return), \
+			I_BL(-47, 1), \
+			I_ANDI(R0, reg_return, 1), \
+			I_BL(2, 1), \
+			I_STAGE_INC(1), \
+			I_RSHI(R0, reg_return, 1), \
+			I_ADDR(R0, R0, reg_cmd), \
+			I_LD(R0, R0, 2), \
+			I_ADDI(reg_return, reg_return, 1), \
+			I_JUMPS(-58, 9, JUMPS_GE), \
+			I_BGE(-76, 0), \
+			I_MOVI(R0,0)
+
 
 #endif // HULP_I2CBB_H
