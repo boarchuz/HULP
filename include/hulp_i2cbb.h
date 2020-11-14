@@ -330,7 +330,7 @@ struct hulp_i2cbb_hdr_t {
 
 	Return:
 		R0: err code
-			0 = Success, -1 = Bus Error (checked on first byte only), -2 = Slave NACK
+			0 = Success, -1 = Slave NACK, -2 = Bus Error (checked on first byte only)
 		reg_cmd: reg_cmd
 		reg_scratch: 0
 		reg_return: reg_return
