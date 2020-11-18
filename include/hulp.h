@@ -172,6 +172,11 @@ bool hulp_is_deep_sleep_wakeup();
 bool hulp_is_ulp_wakeup();
 
 /**
+ * Read program loaded in RTC memory to serial
+ */
+void hulp_dump_program(uint32_t start_offset, size_t num_instructions);
+
+/**
  * Get the current ULP state.
  * Note: when using hulp_ulp_run_once, only IDLE or DONE may be returned
  */
