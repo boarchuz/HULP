@@ -226,26 +226,29 @@ uint8_t hulp_ms_to_ulp_tick_shift(uint32_t time_ms)
     return (high_bit - 15);
 }
 
-int hulp_get_label_pc(uint16_t label, const ulp_insn_t *program, const size_t program_size)
+uint16_t hulp_get_label_pc(uint16_t label, const ulp_insn_t *program)
 {
-    size_t counter = 0;
-    const size_t program_words = program_size / sizeof(ulp_insn_t);
-    while(counter < program_words)
+	uint16_t pc = 0;
+
+    while(pc < ULP_RESERVE_MEM)
     {
-        if (program[counter].macro.opcode == OPCODE_MACRO)
+        if(program->macro.opcode == OPCODE_MACRO)
         {
-            if(program[counter].macro.sub_opcode == SUB_OPCODE_MACRO_LABEL && program[counter].macro.label == label)
+            if(program->macro.sub_opcode == SUB_OPCODE_MACRO_LABEL && program->macro.label == label)
             {
-                return counter;
+				ESP_LOGD(TAG, "label %u at pc %u", label, pc);
+                break;
             }
         }
         else
         {
-            ++counter;
+            ++pc;
         }
+		++program;
     }
-    ESP_LOGE(TAG, "label %u not found", label);
-    return -1;
+
+    assert(pc < ULP_RESERVE_MEM && "label not found");
+    return pc;
 }
 
 esp_err_t hulp_ulp_run(uint32_t entry_point)

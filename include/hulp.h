@@ -134,7 +134,7 @@ uint8_t hulp_ms_to_ulp_tick_shift(uint32_t time_ms);
 /**
  * Returns the offset of a label (after processing) in an array of ULP macros.
  */
-int hulp_get_label_pc(uint16_t label, const ulp_insn_t *program, const size_t program_size);
+uint16_t hulp_get_label_pc(uint16_t label, const ulp_insn_t *program);
 
 /**
  * Start the ULP coprocessor. Upon a I_HALT() instruction, the ULP will power down for the interval period before restarting.
