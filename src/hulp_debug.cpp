@@ -1,6 +1,7 @@
 #include "hulp_debug.h"
 
 #include "esp_log.h"
+#include "soc/rtc_cntl_reg.h"
 
 #include "hulp.h"
 
@@ -160,9 +161,17 @@ static void hulp_debug_isr_handler(void* ctx)
             // - Always disable timer: If user's ULP program executes a normal halt, the ULP will not wake again if debugger has disabled timer, causing unexpected behaviour. Would require altering halt to perform a timer enable or trigger interrupt so debugger can handle it -> messy, inconvenient
             // - ULP disables its wakeup timer before interrupting: This would require overwriting R0 in order to get the current config, or losing current config -> not ideal as R0 is most likely register to want debugged (though could be worked around) and adds ULP overhead. Best option if current method is unreliable.
 
+#if CONFIG_IDF_TARGET_ESP32
     bp_data.meta.config_backup.timer_en = GET_PERI_REG_MASK(RTC_CNTL_STATE0_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN);
     CLEAR_PERI_REG_MASK(RTC_CNTL_STATE0_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN);
     bp_data.meta.config_backup.entry_point = GET_PERI_REG_MASK(SENS_SAR_START_FORCE_REG, SENS_PC_INIT_M);
+#elif CONFIG_IDF_TARGET_ESP32S2
+    bp_data.meta.config_backup.timer_en = REG_GET_FIELD(RTC_CNTL_ULP_CP_TIMER_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN);
+    REG_CLR_BIT(RTC_CNTL_ULP_CP_TIMER_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN);
+    bp_data.meta.config_backup.entry_point = REG_GET_FIELD(RTC_CNTL_ULP_CP_TIMER_REG, RTC_CNTL_ULP_CP_PC_INIT);
+#else
+    #error "unsupported"
+#endif
 
     //Get which register is scratch
     bp_data.meta.reg_scr = handle->data->scr.val;

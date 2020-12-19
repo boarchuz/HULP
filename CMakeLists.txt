@@ -1,7 +1,24 @@
-set(COMPONENT_SRCS "src/hulp.cpp" "src/hulp_touch.cpp" "src/hulp_debug.cpp")
-set(COMPONENT_REQUIRES ulp)
+set(srcs 
+    "src/hulp.cpp"
+    "src/hulp_touch.cpp"
+    "src/hulp_debug.cpp")
 
-set(COMPONENT_PRIV_REQUIRES "soc")
-set(COMPONENT_ADD_INCLUDEDIRS "include")
+set(include_dirs 
+    "include"
+)
 
-register_component()
+set(requires
+    ulp
+    driver
+)
+
+set(priv_requires
+    soc
+)
+
+idf_component_register(
+    SRCS "${srcs}"
+    INCLUDE_DIRS "${include_dirs}"
+    REQUIRES "${requires}"
+    PRIV_REQUIRES "${priv_requires}"
+)

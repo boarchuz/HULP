@@ -6,9 +6,8 @@
 #include "driver/gpio.h"
 #include "driver/rtc_io.h"
 #include "driver/adc.h"
-#include "hal/gpio_types.h"
 
-#include "hulp_ulp.h"
+#include "hulp_compat.h"
 
 #include "hulp_macros.h"
 #include "hulp_types.h"

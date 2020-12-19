@@ -7,21 +7,13 @@
 #include "esp_sleep.h"
 #include "esp_log.h"
 #include "esp32/clk.h"
-#include "driver/rtc_cntl.h"
 #include "driver/gpio.h"
+#include "driver/rtc_cntl.h"
 #include "driver/rtc_io.h"
 #include "driver/adc.h"
-#include "soc/rtc.h"
-#include "soc/rtc_cntl_reg.h"
-#include "soc/sens_reg.h"
-#include "soc/rtc_i2c_reg.h"
-#include "soc/syscon_reg.h"
-#include "soc/adc_caps.h"
 #include "soc/adc_periph.h"
-#include "hal/rtc_io_hal.h"
-#include "hal/gpio_types.h"
 
-#include "hulp_ulp.h"
+#include "hulp_compat.h"
 
 #include "sdkconfig.h"
 
@@ -96,7 +88,7 @@ esp_err_t hulp_configure_analog_pin(gpio_num_t pin, adc_atten_t attenuation, adc
         REG_CLR_BIT(SENS_SAR_MEAS_START2_REG, SENS_SAR2_EN_PAD_FORCE);
         REG_CLR_BIT(SENS_SAR_READ_CTRL2_REG, SENS_SAR2_DIG_FORCE);
         REG_CLR_BIT(SENS_SAR_READ_CTRL2_REG, SENS_SAR2_PWDET_FORCE);
-        REG_SET_BIT(SYSCON_SARADC_CTRL_REG, SYSCON_SARADC_SAR2_MUX);
+        // REG_SET_BIT(SYSCON_SARADC_CTRL_REG, SYSCON_SARADC_SAR2_MUX);
     }
     return ESP_OK;
 }
@@ -182,7 +174,7 @@ void hulp_configure_hall_effect_sensor()
 
 void hulp_clear_program_memory()
 {
-    memset(RTC_SLOW_MEM, 0, ULP_RESERVE_MEM);
+    memset(RTC_SLOW_MEM, 0, HULP_ULP_RESERVE_MEM);
 }
 
 void hulp_clear_rtc_slow_memory()
@@ -230,7 +222,7 @@ uint16_t hulp_get_label_pc(uint16_t label, const ulp_insn_t *program)
 {
 	uint16_t pc = 0;
 
-    while(pc < ULP_RESERVE_MEM)
+    while(pc < HULP_ULP_RESERVE_MEM)
     {
         if(program->macro.opcode == OPCODE_MACRO)
         {
@@ -247,7 +239,7 @@ uint16_t hulp_get_label_pc(uint16_t label, const ulp_insn_t *program)
 		++program;
     }
 
-    assert(pc < ULP_RESERVE_MEM && "label not found");
+    assert(pc < HULP_ULP_RESERVE_MEM && "label not found");
     return pc;
 }
 
@@ -625,7 +617,7 @@ static int print_insn(const ulp_insn_t *ins)
 
 void hulp_dump_program(uint32_t start_offset, size_t num_instructions)
 {
-	assert((start_offset + num_instructions) < ULP_RESERVE_MEM);
+	assert((start_offset + num_instructions) < HULP_ULP_RESERVE_MEM);
 
 	const ulp_insn_t *p = (const ulp_insn_t*)&RTC_SLOW_MEM[start_offset];
 	const ulp_insn_t *end = (const ulp_insn_t*)&RTC_SLOW_MEM[start_offset + num_instructions];

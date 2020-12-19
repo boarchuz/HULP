@@ -1,12 +1,11 @@
 #ifndef HULP_TYPES_H
 #define HULP_TYPES_H
 
-#include "hulp.h"
-
 #include <stdint.h>
 
 #include "soc/rtc.h"
-#include "esp32/clk.h"
+
+#include "hulp.h"
 
 union ulp_var_t {
     struct {
@@ -115,20 +114,20 @@ struct ulp_string_t {
 };
 
 struct ulp_timestamp_t {
-		uint64_t ticks()
-		{
-			return ((uint64_t)bits.upper.val << 32) | ((uint32_t)bits.middle.val << 16) | bits.lower.val;
-		}
-        uint64_t us()
-        {
-            return rtc_time_slowclk_to_us(ticks(), esp_clk_slowclk_cal_get());
-        }
+    uint64_t ticks()
+    {
+        return ((uint64_t)bits.upper.val << 32) | ((uint32_t)bits.middle.val << 16) | bits.lower.val;
+    }
+    uint64_t us()
+    {
+        return rtc_time_slowclk_to_us(ticks(), esp_clk_slowclk_cal_get());
+    }
 
-        struct {
-            ulp_var_t upper;
-            ulp_var_t middle;
-            ulp_var_t lower;
-        } bits;
+    struct {
+        ulp_var_t upper;
+        ulp_var_t middle;
+        ulp_var_t lower;
+    } bits;
 };
 
 #endif // HULP_TYPES_H

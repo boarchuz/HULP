@@ -4,8 +4,6 @@
 #include "driver/touch_pad.h"
 #include "soc/touch_sensor_channel.h"
 #include "soc/touch_sensor_periph.h"
-#include "soc/touch_sensor_caps.h"
-#include "hal/touch_sensor_hal.h"
 
 #include "sdkconfig.h"
 
@@ -53,6 +51,5 @@ esp_err_t hulp_configure_touch_pin(gpio_num_t touch_gpio, touch_cnt_slope_t slop
         return ESP_FAIL;
     }
 
-    touch_hal_set_channel_mask(1 << touch_pad_num);
-    return ESP_OK;
+    return touch_pad_set_group_mask(0, 0, 1 << touch_pad_num);
 }

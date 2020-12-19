@@ -3,9 +3,6 @@
 
 #include "driver/gpio.h"
 #include "driver/touch_pad.h"
-#include "soc/sens_reg.h"
-#include "soc/touch_sensor_channel.h"
-#include "hal/touch_sensor_types.h"
 
 #include "hulp.h"
 

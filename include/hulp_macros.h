@@ -11,7 +11,7 @@
 #include "soc/soc_memory_layout.h"
 #include "esp_assert.h"
 
-#include "hulp.h"
+#include "hulp_compat.h"
 
 #define RTC_WORD_OFFSET(x) ({ \
             uint32_t* ptr_ = (uint32_t*)(&(x)); \
