@@ -4,7 +4,7 @@ set(srcs
     "src/hulp_debug.cpp")
 
 set(include_dirs 
-    "include"
+    "src"
 )
 
 set(requires
