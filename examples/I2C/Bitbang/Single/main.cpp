@@ -108,6 +108,6 @@ extern "C" void app_main()
     for(;;)
     {
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY); //Wait for interrupt
-        printf("Read8: %u, Read16: %u, NACK Errors: %u, Bus Errors: %u", ulp_data8.val, ulp_data16.val, ulp_nacks.val, ulp_buserrors.val);
+        printf("Read8: %u, Read16: %u, NACK Errors: %u, Bus Errors: %u\n", ulp_data8.val, ulp_data16.val, ulp_nacks.val, ulp_buserrors.val);
     }
 }
