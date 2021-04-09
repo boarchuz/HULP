@@ -1,7 +1,9 @@
 set(srcs 
-    "src/hulp.cpp"
-    "src/hulp_touch.cpp"
-    "src/hulp_debug.cpp")
+    "src/hulp.c"
+    "src/hulp_touch.c"
+    "src/hulp_uart.c"
+    "src/hulp_debug.c"
+)
 
 set(include_dirs 
     "src"

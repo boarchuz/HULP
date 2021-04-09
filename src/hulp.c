@@ -1,7 +1,7 @@
 #include "hulp.h"
 
 #include <string.h>
-#include <math.h>
+#include <inttypes.h>
 
 #include "esp_system.h"
 #include "esp_sleep.h"
@@ -11,6 +11,7 @@
 #include "driver/rtc_cntl.h"
 #include "driver/rtc_io.h"
 #include "driver/adc.h"
+#include "soc/rtc.h"
 #include "soc/adc_periph.h"
 
 #include "hulp_compat.h"
@@ -21,14 +22,15 @@ static const char* TAG = "HULP";
 
 esp_err_t hulp_configure_pin(gpio_num_t pin, rtc_gpio_mode_t mode, gpio_pull_mode_t pull_mode, uint32_t level)
 {
-    if( ESP_OK != rtc_gpio_set_direction(pin, RTC_GPIO_MODE_DISABLED) ||
+    if( 
+		ESP_OK != rtc_gpio_set_direction(pin, RTC_GPIO_MODE_DISABLED) ||
         ESP_OK != rtc_gpio_init(pin) ||
         ESP_OK != gpio_set_pull_mode(pin, pull_mode) ||
         ESP_OK != rtc_gpio_set_level(pin, level) ||
         ESP_OK != rtc_gpio_set_direction(pin, mode)
     )
     {
-        ESP_LOGE(TAG, "configure gpio %d failed", pin);
+        ESP_LOGE(TAG, "[%s] error - %d (%d, %d, %u)", __func__, pin, mode, pull_mode, level);
         return ESP_FAIL;
     }
     return ESP_OK;
@@ -118,20 +120,38 @@ esp_err_t hulp_configure_i2c_pins(gpio_num_t scl_pin, gpio_num_t sda_pin, bool s
     return ESP_OK;
 }
 
-void hulp_configure_i2c_controller(uint32_t scl_low, uint32_t scl_high, uint32_t sda_duty, uint32_t scl_start, uint32_t scl_stop, uint32_t timeout, bool scl_pushpull, bool sda_pushpull, bool rx_lsbfirst, bool tx_lsbfirst)
+esp_err_t hulp_configure_i2c_controller(const hulp_i2c_controller_config_t *config)
 {
-    REG_SET_FIELD(RTC_I2C_CTRL_REG, RTC_I2C_RX_LSB_FIRST, rx_lsbfirst ? 1 : 0);
-    REG_SET_FIELD(RTC_I2C_CTRL_REG, RTC_I2C_TX_LSB_FIRST, tx_lsbfirst ? 1 : 0);
-    REG_SET_FIELD(RTC_I2C_CTRL_REG, RTC_I2C_SCL_FORCE_OUT, scl_pushpull ? 1 : 0);
-    REG_SET_FIELD(RTC_I2C_CTRL_REG, RTC_I2C_SDA_FORCE_OUT, sda_pushpull ? 1 : 0);
+	if(!config)
+	{
+		return ESP_ERR_INVALID_ARG;
+	}
 
-    REG_SET_FIELD(RTC_I2C_SCL_LOW_PERIOD_REG, RTC_I2C_SCL_LOW_PERIOD, scl_low);
-    REG_SET_FIELD(RTC_I2C_SCL_HIGH_PERIOD_REG, RTC_I2C_SCL_HIGH_PERIOD, scl_high);
-    REG_SET_FIELD(RTC_I2C_SDA_DUTY_REG, RTC_I2C_SDA_DUTY, sda_duty);
-    REG_SET_FIELD(RTC_I2C_SCL_START_PERIOD_REG, RTC_I2C_SCL_START_PERIOD, scl_start);
-    REG_SET_FIELD(RTC_I2C_SCL_STOP_PERIOD_REG, RTC_I2C_SCL_STOP_PERIOD, scl_stop);
-    REG_SET_FIELD(RTC_I2C_TIMEOUT_REG, RTC_I2C_TIMEOUT, timeout);
+	if(
+		(config->scl_low > RTC_I2C_SCL_LOW_PERIOD_V) ||
+		(config->scl_high > RTC_I2C_SCL_HIGH_PERIOD_V) ||
+		(config->sda_duty > RTC_I2C_SDA_DUTY_V) ||
+		(config->scl_start > RTC_I2C_SCL_START_PERIOD_V) ||
+		(config->scl_stop > RTC_I2C_SCL_STOP_PERIOD_V) ||
+		(config->timeout > RTC_I2C_TIMEOUT_V)
+	)
+	{
+		return ESP_ERR_INVALID_ARG;
+	}
+
+    REG_SET_FIELD(RTC_I2C_CTRL_REG, RTC_I2C_RX_LSB_FIRST, config->rx_lsbfirst ? 1 : 0);
+    REG_SET_FIELD(RTC_I2C_CTRL_REG, RTC_I2C_TX_LSB_FIRST, config->tx_lsbfirst ? 1 : 0);
+    REG_SET_FIELD(RTC_I2C_CTRL_REG, RTC_I2C_SCL_FORCE_OUT, config->scl_pushpull ? 1 : 0);
+    REG_SET_FIELD(RTC_I2C_CTRL_REG, RTC_I2C_SDA_FORCE_OUT, config->sda_pushpull ? 1 : 0);
+
+    REG_SET_FIELD(RTC_I2C_SCL_LOW_PERIOD_REG, RTC_I2C_SCL_LOW_PERIOD, config->scl_low);
+    REG_SET_FIELD(RTC_I2C_SCL_HIGH_PERIOD_REG, RTC_I2C_SCL_HIGH_PERIOD, config->scl_high);
+    REG_SET_FIELD(RTC_I2C_SDA_DUTY_REG, RTC_I2C_SDA_DUTY, config->sda_duty);
+    REG_SET_FIELD(RTC_I2C_SCL_START_PERIOD_REG, RTC_I2C_SCL_START_PERIOD, config->scl_start);
+    REG_SET_FIELD(RTC_I2C_SCL_STOP_PERIOD_REG, RTC_I2C_SCL_STOP_PERIOD, config->scl_stop);
+    REG_SET_FIELD(RTC_I2C_TIMEOUT_REG, RTC_I2C_TIMEOUT, config->timeout);
     REG_SET_FIELD(RTC_I2C_CTRL_REG, RTC_I2C_MS_MODE, 1);
+	return ESP_OK;
 }
 
 esp_err_t hulp_register_i2c_slave(uint8_t index, uint8_t address)
@@ -205,17 +225,29 @@ uint16_t hulp_get_current_ulp_ticks(uint8_t shift)
 uint8_t hulp_ms_to_ulp_tick_shift(uint32_t time_ms)
 {
     uint64_t rtc_slow_ticks = hulp_us_to_ticks(1000ULL * time_ms);
-    uint8_t high_bit = log2(rtc_slow_ticks);
+	if(rtc_slow_ticks == 0)
+	{
+		return 1;
+	}
+
+    uint8_t high_bit = 63 - __builtin_clzll(rtc_slow_ticks);
     if(high_bit >= 32)
     {
-        high_bit = 47;  // [47:32]
+		// All 16 bits of upper register [47:32]
+        return 32;
     }
     else if(high_bit < 16)
     {
-        high_bit = 16; // if high_bit < 16, get all lower 16 bits. Note: tick count is updated every 2 ticks, so bit 0 is not interesting, therefore [16:1] rather than [15:0]
-    } // else 32 > high_bit > 16. ie. [31:16] - [16:1]
-    ESP_LOGV(TAG, "%s ms: %u, ticks: %llu, range: [%u:%u], overflow: %llu ms, resolution: %llu uS", __func__, time_ms, rtc_slow_ticks, high_bit, high_bit - 15, rtc_time_slowclk_to_us((1ULL << (high_bit+1))-1,esp_clk_slowclk_cal_get()) / 1000, rtc_time_slowclk_to_us(1ULL << (high_bit-15),esp_clk_slowclk_cal_get()));
-    return (high_bit - 15);
+		// Lower 16 bits
+		// Note: tick count is updated every 2 ticks, so bit 0 is not interesting, therefore [16:1] rather than [15:0]
+        return 1;
+    }
+	else
+	{
+		// [31:16] - [16:1]
+		return high_bit - 15;
+	}
+	// ESP_LOGI(TAG, "%s ms: %u, ticks: %"PRIu64", range: [%u:%u], overflow: %"PRIu64" ms, resolution: %"PRIu64" uS", __func__, time_ms, rtc_slow_ticks, high_bit, high_bit - 15, rtc_time_slowclk_to_us((1ULL << (high_bit+1))-1,esp_clk_slowclk_cal_get()) / 1000, rtc_time_slowclk_to_us(1ULL << (high_bit-15),esp_clk_slowclk_cal_get()));
 }
 
 uint16_t hulp_get_label_pc(uint16_t label, const ulp_insn_t *program)
@@ -239,8 +271,8 @@ uint16_t hulp_get_label_pc(uint16_t label, const ulp_insn_t *program)
 		++program;
     }
 
-    assert(pc < HULP_ULP_RESERVE_MEM && "label not found");
-    return pc;
+	ESP_LOGE(TAG, "label %u not found", label);
+	abort();
 }
 
 static uint32_t periph_sel_to_reg_base(uint32_t sel) {
@@ -660,7 +692,7 @@ esp_err_t hulp_ulp_load(const ulp_insn_t *program, size_t size_of_program, uint3
     esp_err_t err = ulp_process_macros_and_load(entry_point, program, &num_words);
     if(err != ESP_OK)
     {
-        ESP_LOGE(TAG, "failed to load program");
+        ESP_LOGE(TAG, "[%s] load error (0x%x)", __func__, err);
         return err;
     }
     ulp_set_wakeup_period(0, period_us);
@@ -684,12 +716,7 @@ bool hulp_is_ulp_wakeup()
 
 esp_err_t hulp_ulp_isr_register(intr_handler_t handler, void* handler_arg)
 {
-    esp_err_t err = rtc_isr_register(handler, handler_arg, RTC_CNTL_SAR_INT_ST_M);
-    if(err != ESP_OK)
-    {
-        return err;
-    }
-    return ESP_OK;
+    return rtc_isr_register(handler, handler_arg, RTC_CNTL_SAR_INT_ST_M);
 }
 
 esp_err_t hulp_ulp_isr_deregister(intr_handler_t handler, void* handler_arg)
@@ -764,7 +791,7 @@ uint32_t hulp_get_fast_clk_freq(uint32_t slow_clk_cycles)
     if (!clk_8m_enabled || !clk_8md256_enabled) {
         rtc_clk_8m_enable(true, true);
     }
-    uint32_t ret = (uint32_t)(1000000ULL * (1 << RTC_CLK_CAL_FRACT) * 256 / rtc_clk_cal(RTC_CAL_8MD256, slow_clk_cycles));
+    uint32_t ret = (uint32_t)(1000000ULL * (1 << RTC_CLK_CAL_FRACT) * 256 / rtc_clk_cal(RTC_CAL_8MD256, CONFIG_HULP_FAST_CLK_CAL_CYCLES));
     if (!clk_8m_enabled || !clk_8md256_enabled) {
         rtc_clk_8m_enable(clk_8m_enabled, clk_8md256_enabled);
     }

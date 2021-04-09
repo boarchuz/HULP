@@ -6,4 +6,12 @@ menu "HULP"
         help
             In calculating some timings, use hardcoded approximate fast clock frequency instead of querying accurate frequency at runtime.
 
+    config HULP_FAST_CLK_CAL_CYCLES
+        int "Fast Clock Frequency Cal Cycles"
+        depends on !HULP_USE_APPROX_FAST_CLK
+        default 100
+        range 50 1000
+        help
+            Slow clock cycles to use to determine fast clock frequency.
+
 endmenu

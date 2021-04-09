@@ -3,6 +3,10 @@
 
 #include "hulp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct hulp_debug_bp_state_t *hulp_debug_bp_handle_t;
 
 /**
@@ -11,17 +15,17 @@ typedef struct hulp_debug_bp_state_t *hulp_debug_bp_handle_t;
  * 
  * Member order is fixed; ULP BP macros expect these offsets.
  */
-struct ulp_debug_bp_data_t {
+typedef struct {
     ulp_var_t marker;
     ulp_var_t scr;
     ulp_var_t reg[3];
-};
+} ulp_debug_bp_data_t;
 
 /**
  * Structured ULP breakpoint information.
  * Generally, 'meta' should be left to hulp_debug internal functions.
  */
-struct hulp_debug_bp_cb_data_t {
+typedef struct {
     struct {
         uint16_t r0; //Value of R0
         uint16_t r1; //Value of R1
@@ -45,7 +49,7 @@ struct hulp_debug_bp_cb_data_t {
             uint32_t entry_point; //Original ULP program entry point to be restored upon continue.
         } config_backup;
     } meta;
-};
+} hulp_debug_bp_cb_data_t;
 
 /**
  * ULP breakpoint callback ISR function type.
@@ -58,7 +62,7 @@ typedef void (*hulp_debug_bp_cb_t)(hulp_debug_bp_cb_data_t* info, void* ctx);
  * 
  * Providing an optional pointer to the program array will allow the debugger to associate breakpoints with label numbers for improved debugging information.
  */
-struct hulp_debug_bp_config_t {
+typedef struct {
     ulp_debug_bp_data_t* data;
     struct {
         const ulp_insn_t* ptr;
@@ -68,7 +72,7 @@ struct hulp_debug_bp_config_t {
         hulp_debug_bp_cb_t fn;
         void* ctx;
     } callback;
-};
+} hulp_debug_bp_config_t;
 
 #define HULP_DEBUG_BP_CONFIG_DEFAULT(bp_data, ulp_program, program_size) { \
             .data = &(bp_data), \
@@ -78,12 +82,12 @@ struct hulp_debug_bp_config_t {
             }, \
             .callback = { \
                 .fn = hulp_debug_bp_callback_default, \
-                .ctx = nullptr, \
+                .ctx = NULL, \
             }, \
         }
 
 #define HULP_DEBUG_BP_CONFIG_DEFAULT_NO_LABELS(bp_data) \
-    HULP_DEBUG_BP_CONFIG_DEFAULT(bp_data, nullptr, 0)
+    HULP_DEBUG_BP_CONFIG_DEFAULT(bp_data, NULL, 0)
 
 /**
  * Initialise ULP breakpoint debugging with the provided configuration. 
@@ -91,7 +95,7 @@ struct hulp_debug_bp_config_t {
  * A pointer to a handle is optional if deinitialisation is desired later to free resources.
  * The ULP interrupt must be enabled with hulp_ulp_interrupt_en() to begin.
  */
-esp_err_t hulp_debug_bp_init(const hulp_debug_bp_config_t* config, hulp_debug_bp_handle_t* handle = nullptr);
+esp_err_t hulp_debug_bp_init(const hulp_debug_bp_config_t* config, hulp_debug_bp_handle_t* handle);
 
 /**
  * Free resources associated with the provided ULP breakpoint debugging handle.
@@ -102,7 +106,7 @@ esp_err_t hulp_debug_bp_deinit(hulp_debug_bp_handle_t handle);
  * Prints basic breakpoint debug info and continues ULP execution.
  * May be used in callback ISR, or used directly as the callback in debug initialisation config.
  */
-void hulp_debug_bp_callback_default(hulp_debug_bp_cb_data_t* bp_data, void*);
+void hulp_debug_bp_callback_default(hulp_debug_bp_cb_data_t* bp_data, void *ctx);
 
 /**
  * Basic dump of breakpoint info.
@@ -203,5 +207,9 @@ esp_err_t hulp_debug_bp_alter_reg(hulp_debug_bp_cb_data_t* bp_data, uint8_t reg,
 
 #define HULP_DEBUG_BP_INC_ST_REENTRY_DIRTY_OFFSET 6   // num instructions (excl macros) from reg_scr I_ST to the dirty reentry (I_GET)
 #define HULP_DEBUG_BP_INC_ST_REENTRY_DEFAULT_OFFSET 9 // num instructions (excl macros) from reg_scr I_ST to default reentry (M_SET_ENTRY)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // HULP_DEBUG_H

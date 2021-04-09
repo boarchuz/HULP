@@ -6,7 +6,25 @@
 
 #include "hulp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SWAPPED_TOUCH_INDEX(x) ((x) == TOUCH_PAD_NUM9 ? TOUCH_PAD_NUM8 : ((x) == TOUCH_PAD_NUM8 ? TOUCH_PAD_NUM9 : (x)))
+
+typedef struct {
+    uint16_t fastclk_meas_cycles;
+    touch_high_volt_t high_voltage;
+    touch_low_volt_t low_voltage;
+    touch_volt_atten_t attenuation;
+} hulp_touch_controller_config_t;
+
+#define HULP_TOUCH_CONTROLLER_CONFIG_DEFAULT() { \
+    .fastclk_meas_cycles = TOUCH_PAD_MEASURE_CYCLE_DEFAULT, \
+    .high_voltage = TOUCH_HVOLT_2V4, \
+    .low_voltage = TOUCH_LVOLT_0V8, \
+    .attenuation = TOUCH_HVOLT_ATTEN_1V5, \
+}
 
 /**
  * Prepare touch controller for ULP control.
@@ -14,12 +32,22 @@
  * fastclk_meas_cycles: measurement time in fastclk (8MHz) cycles. (65535 = 8.19ms)
  * Shorter = lower power consumption; Longer = higher counts (better possible signal/noise filtering)
  */
-esp_err_t hulp_configure_touch_controller(uint16_t fastclk_meas_cycles = TOUCH_PAD_MEASURE_CYCLE_DEFAULT, touch_high_volt_t high_voltage = TOUCH_HVOLT_2V4, touch_low_volt_t low_voltage = TOUCH_LVOLT_0V8, touch_volt_atten_t attenuation = TOUCH_HVOLT_ATTEN_1V5);
+esp_err_t hulp_configure_touch_controller(const hulp_touch_controller_config_t *config);
+
+typedef struct {
+    touch_cnt_slope_t slope;
+    touch_tie_opt_t tie_opt;
+} hulp_touch_pin_config_t;
+
+#define HULP_TOUCH_PIN_CONFIG_DEFAULT() { \
+    .slope = TOUCH_PAD_SLOPE_DEFAULT, \
+    .tie_opt = TOUCH_PAD_TIE_OPT_DEFAULT, \
+}
 
 /**
  * Initialise and configure a pin for touch function.
  */
-esp_err_t hulp_configure_touch_pin(gpio_num_t touch_gpio, touch_cnt_slope_t slope = TOUCH_PAD_SLOPE_7, touch_tie_opt_t tie_opt = TOUCH_PAD_TIE_OPT_DEFAULT);
+esp_err_t hulp_configure_touch_pin(gpio_num_t touch_gpio, const hulp_touch_pin_config_t *config);
 
 
 #define I_TOUCH_GET_PAD_THRESHOLD(touch_num) \
@@ -80,5 +108,9 @@ esp_err_t hulp_configure_touch_pin(gpio_num_t touch_gpio, touch_cnt_slope_t slop
  * Internal. Do not use directly.
  */
 int hulp_touch_get_pad_num(gpio_num_t pin);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // HULP_TOUCH_H

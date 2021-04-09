@@ -10,12 +10,51 @@
 
 #include "sdkconfig.h"
 
-/*
-Prep:
-Set R1 = offset of ULP string eg. I_MOVO(R1, ulp_receive_buffer)
-Put return address in R3.     eg. M_MOVL(R3, LABEL_RETURN_POINT)
-Branch to label_entry         eg. M_BX(LABEL_UART_RX)
-*/
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define HULP_UART_STRING_INIT_SIZE(capacity) {{.val = (capacity) << 8}}
+
+/**
+ * Helper to declare an array of ulp_var_t to be used as a buffer with the given capacity
+ *  eg. RTC_SLOW_ATTR ulp_var_t my_buffer HULP_UART_STRING_BUFFER(8); // Can hold string of max length 8
+ */
+#define HULP_UART_STRING_BUFFER(required_capacity) [(1 + ((required_capacity) / 2))] = HULP_UART_STRING_INIT_SIZE(required_capacity)
+
+/**
+ * Helper to declare an array of ulp_var_t of sufficient size to hold the given string literal.
+ * hulp_uart_string_set must be used to then populate the array.
+ *  eg. 
+ *      #define MY_ULP_STRING "Hello world"
+ *      RTC_SLOW_ATTR ulp_var_t my_ulp_string HULP_UART_STRING_RESERVE(MY_ULP_STRING); // Large enough to hold MY_ULP_STRING
+ *      hulp_uart_string_set(my_ulp_string, sizeof(my_ulp_string) / sizeof(ulp_var_t), MY_ULP_STRING); // Set MY_ULP_STRING
+ */
+#define HULP_UART_STRING_RESERVE(target_str) [(1 + (sizeof(target_str) / 2))] = HULP_UART_STRING_INIT_SIZE(sizeof(target_str))
+
+/**
+ * Set the array of ulp_var_t to the provided string, formatted for usage by the ULP.
+ * len: Array length of ulp_var_t, ie. (sizeof(my_string) / sizeof(ulp_var_t))
+ * 
+ * Returns -1 if any errors
+ */
+int hulp_uart_string_set(ulp_var_t *hulp_string, size_t len, const char* str);
+
+/**
+ * Get the string from the array of ulp_var_t into the provided buffer.
+ * 
+ * Returns -1 if any errors
+ */
+int hulp_uart_string_get(ulp_var_t *hulp_string, char* buffer, size_t buffer_size, bool clear);
+
+/**
+ * ULP subroutine to receive data over UART, until receiving the provided termination byte or the buffer is full.
+ * 
+ * Prep:
+ * Set R1 = offset of ULP string eg. I_MOVO(R1, ulp_receive_buffer)
+ * Put return address in R3.     eg. M_MOVL(R3, LABEL_RETURN_POINT)
+ * Branch to label_entry         eg. M_BX(LABEL_UART_RX)
+ */
 #define M_INCLUDE_UART_RX(label_entry, baud_rate, rx_gpio, termination_char) \
     M_INCLUDE_UART_RX_(label_entry, baud_rate, rx_gpio, R1, R2, R3, termination_char)
 
@@ -57,12 +96,14 @@ Branch to label_entry         eg. M_BX(LABEL_UART_RX)
         I_BXR(reg_return),                                                                                                          \
         I_HALT()                                       /*reserved word (control should never reach here)*/
 
-/*
-Prep:
-Set R1 = offset of ULP string (eg. I_MOVO(R1, ulp_receive_buffer),)
-Put return address in R3.
-Branch to label_entry
-*/
+/**
+ * ULP subroutine to transmit data over UART.
+ * 
+ * Prep:
+ * Set R1 = offset of ULP string (eg. I_MOVO(R1, ulp_receive_buffer),)
+ * Put return address in R3.
+ * Branch to label_entry
+ */
 #define M_INCLUDE_UART_TX(label_entry, baud_rate, tx_gpio) \
     M_INCLUDE_UART_TX_(label_entry, baud_rate, tx_gpio, R1, R2, R3)
 
@@ -157,5 +198,9 @@ Branch to label_entry
         I_ORI(R2, R2, 5 + ((use_final_char) ? 1 : 0)),   \
         I_ST(R2, R1, 0),    \
         I_BXR(R3)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // HULP_UART_H

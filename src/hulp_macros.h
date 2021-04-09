@@ -13,6 +13,8 @@
 
 #include "hulp_compat.h"
 
+#define hulp_log2(x) (31 - __builtin_clz(x))
+
 #define RTC_WORD_OFFSET(x) ({ \
             uint32_t* ptr_ = (uint32_t*)(&(x)); \
             TRY_STATIC_ASSERT((uint32_t)(ptr_) % sizeof(uint32_t) == 0, (Not aligned)); \
@@ -123,7 +125,7 @@
  * Init RTCIO
  */
 #define M_RTCIO_INIT(rtcio_num) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)log2(rtc_io_desc[(rtcio_num)].mux), 1), \
+    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].mux), 1), \
     I_WR_REG(rtc_io_desc[(rtcio_num)].reg, rtc_io_desc[(rtcio_num)].func, rtc_io_desc[(rtcio_num)].func + 1, 0)
 
 /**
@@ -194,7 +196,7 @@
  * Set RTCIO internal pullup.
  */
 #define I_RTCIO_PULLUP(rtcio_num, enable) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)log2(rtc_io_desc[(rtcio_num)].pullup), ( (enable) ? 1 : 0) )
+    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pullup), ( (enable) ? 1 : 0) )
 
 /**
  * Set GPIO internal pulldown.
@@ -206,14 +208,14 @@
  * Set RTCIO internal pulldown.
  */
 #define I_RTCIO_PULLDOWN(rtcio_num, enable) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)log2(rtc_io_desc[(rtcio_num)].pulldown), ( (enable) ? 1 : 0) )
+    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pulldown), ( (enable) ? 1 : 0) )
 
 /**
  * Set RTCIO internal pull mode.
  * pull_mode: GPIO_PULLUP_ONLY, GPIO_PULLDOWN_ONLY, GPIO_PULLUP_PULLDOWN, GPIO_FLOATING
  */
 #define I_RTCIO_PULL_MODE(rtcio_num, pull_mode) \
-    I_WR_REG(rtc_io_desc[(rtcio_num)].reg, (uint8_t)log2(rtc_io_desc[(rtcio_num)].pullup), (uint8_t)(log2(rtc_io_desc[(rtcio_num)].pullup) + 1), (uint8_t)( ((pull_mode) == GPIO_PULLUP_ONLY ? 1 : ((pull_mode) == GPIO_PULLDOWN_ONLY ? 2 : ((pull_mode) == GPIO_PULLUP_PULLDOWN ? 3 : 0))) ) )
+    I_WR_REG(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pullup), (uint8_t)(hulp_log2(rtc_io_desc[(rtcio_num)].pullup) + 1), (uint8_t)( ((pull_mode) == GPIO_PULLUP_ONLY ? 1 : ((pull_mode) == GPIO_PULLDOWN_ONLY ? 2 : ((pull_mode) == GPIO_PULLUP_PULLDOWN ? 3 : 0))) ) )
 
 /**
  * Set GPIO internal pull mode.
@@ -260,7 +262,7 @@
  * Latch individual RTCIO config. Use before returning to deep sleep to maintain state.
  */
 #define I_RTCIO_HOLD_EN(rtcio_num) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)log2(rtc_io_desc[(rtcio_num)].hold), 1)
+    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold), 1)
 
 /**
  * Unlatch individual GPIO config.
@@ -272,7 +274,7 @@
  * Unlatch individual RTCIO config.
  */
 #define I_RTCIO_HOLD_DIS(rtcio_num) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)log2(rtc_io_desc[(rtcio_num)].hold), 0)
+    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold), 0)
 
 /**
  * Unlatch RTCIO config. Use before returning to deep sleep to maintain state.
@@ -287,7 +289,7 @@
  * Note: This uses a different reg to I_RTCIO_HOLD_EN. Do not confuse the two.
  */
 #define I_RTCIO_FORCE_HOLD_EN(rtcio_num) \
-    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)log2(rtc_io_desc[(rtcio_num)].hold_force), 1)
+    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold_force), 1)
 
 /**
  * Unlatch GPIO config.
@@ -299,7 +301,7 @@
  * Unlatch RTCIO config.
  */
 #define I_RTCIO_FORCE_HOLD_DIS(rtcio_num) \
-    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)log2(rtc_io_desc[(rtcio_num)].hold_force), 0)
+    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold_force), 0)
 
 /**
  * Latch all RTCIOs configs.

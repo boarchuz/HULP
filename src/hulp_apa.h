@@ -10,10 +10,14 @@
 
 #include "hulp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Structured APA data for ULP/SoC access
  */
-struct ulp_apa_t {
+typedef struct {
     union {
         ulp_var_t msb;
         struct {
@@ -31,7 +35,7 @@ struct ulp_apa_t {
             uint32_t unused3 : 16;
         };
     };
-};
+} ulp_apa_t;
 
 _Static_assert(sizeof(ulp_apa_t) == (2 * sizeof(uint32_t)), "ulp_apa_t size should be 2 words" );
 
@@ -126,5 +130,10 @@ _Static_assert(sizeof(ulp_apa_t) == (2 * sizeof(uint32_t)), "ulp_apa_t size shou
         I_BGE(-17,0), \
         I_GPIO_SET(data_gpio, 0), \
         I_BXR(reg_return)
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // HULP_APA_H

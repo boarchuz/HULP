@@ -9,10 +9,10 @@
 
 static const char* TAG = "HULP-DBG";
 
-struct hulp_debug_label_pc_pair_t {
+typedef struct {
     uint16_t label_num;
     uint16_t pc;
-};
+} hulp_debug_label_pc_pair_t;
 
 struct hulp_debug_bp_state_t {
     ulp_debug_bp_data_t* data;
@@ -132,7 +132,7 @@ esp_err_t hulp_debug_bp_alter_reg(hulp_debug_bp_cb_data_t* bp_data, uint8_t reg,
     return ESP_OK;
 }
 
-void hulp_debug_bp_callback_default(hulp_debug_bp_cb_data_t* bp_data, void*)
+void hulp_debug_bp_callback_default(hulp_debug_bp_cb_data_t* bp_data, void *ctx)
 {
     hulp_debug_bp_print_info(bp_data);
     hulp_debug_bp_continue(bp_data);
@@ -191,7 +191,7 @@ static void hulp_debug_isr_handler(void* ctx)
     bp_data.meta.return_addr = bp_data.bp.pc + HULP_DEBUG_SET_BP_INSN_NUM;
     
     // Get the label number for this pc, if available
-    if(handle->labels.pc_pairs != nullptr)
+    if(handle->labels.pc_pairs != NULL)
     {
         for(size_t i = 0; i < handle->labels.num; ++i)
         {
@@ -221,7 +221,7 @@ esp_err_t hulp_debug_bp_deinit(hulp_debug_bp_handle_t handle)
             free(handle->labels.pc_pairs);
         }
         free(handle);
-        handle = nullptr;
+        handle = NULL;
     }
     return ESP_OK;
 }
@@ -358,7 +358,7 @@ esp_err_t hulp_debug_bp_disable_by_label(hulp_debug_bp_handle_t handle, uint16_t
 
 esp_err_t hulp_debug_bp_init(const hulp_debug_bp_config_t* config, hulp_debug_bp_handle_t* handle)
 {
-    hulp_debug_bp_handle_t dbg_state = (hulp_debug_bp_handle_t)calloc(1, sizeof(hulp_debug_bp_state_t));
+    hulp_debug_bp_handle_t dbg_state = calloc(1, sizeof(struct hulp_debug_bp_state_t));
 
     if(!dbg_state)
     {

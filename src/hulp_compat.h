@@ -12,14 +12,6 @@
     #include "esp32/clk.h"
     #include "esp32/ulp.h"
     #define HULP_ULP_RESERVE_MEM CONFIG_ESP32_ULP_COPROC_RESERVE_MEM
-#elif CONFIG_IDF_TARGET_ESP32S2
-    #include "esp32s2/clk.h"
-    #include "esp32s2/ulp.h"
-    #define HULP_ULP_RESERVE_MEM CONFIG_ESP32S2_ULP_COPROC_RESERVE_MEM
-#elif CONFIG_IDF_TARGET_ESP32S3
-    #include "esp32s3/clk.h"
-    #include "esp32s3/ulp.h"
-    #define HULP_ULP_RESERVE_MEM CONFIG_ESP32S3_ULP_COPROC_RESERVE_MEM
 #else
     #error "Unsupported target"
 #endif
