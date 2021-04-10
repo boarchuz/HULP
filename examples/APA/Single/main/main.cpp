@@ -57,15 +57,15 @@ void init_ulp()
         M_INCLUDE_APA1(LBL_APA_ENTRY, SCL_PIN, SDA_PIN),
     };
 
-    hulp_configure_pin(SCL_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0);
-    hulp_configure_pin(SDA_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0);
+    ESP_ERROR_CHECK(hulp_configure_pin(SCL_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0));
+    ESP_ERROR_CHECK(hulp_configure_pin(SDA_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0));
 
     hulp_peripherals_on();
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-    hulp_ulp_load(program, sizeof(program), 1ULL * 50 * 1000);
-    hulp_ulp_run();
+    ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), 1ULL * 50 * 1000, 0));
+    ESP_ERROR_CHECK(hulp_ulp_run(0));
 }
 
 extern "C" void app_main()

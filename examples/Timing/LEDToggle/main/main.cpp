@@ -47,15 +47,15 @@ void init_ulp()
             I_HALT(),
     };
 
-    hulp_configure_pin(PIN_LED1, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0);
-    hulp_configure_pin(PIN_LED2, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0);
-    hulp_configure_pin(PIN_LED3, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0);
-    hulp_configure_pin(PIN_LED4, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0);
+    ESP_ERROR_CHECK(hulp_configure_pin(PIN_LED1, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0));
+    ESP_ERROR_CHECK(hulp_configure_pin(PIN_LED2, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0));
+    ESP_ERROR_CHECK(hulp_configure_pin(PIN_LED3, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0));
+    ESP_ERROR_CHECK(hulp_configure_pin(PIN_LED4, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0));
 
     hulp_peripherals_on();
 
-    hulp_ulp_load(program, sizeof(program), 1ULL * 10 * 1000);
-    hulp_ulp_run();
+    ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), 1ULL * 10 * 1000, 0));
+    ESP_ERROR_CHECK(hulp_ulp_run(0));
 }
 
 extern "C" void app_main()

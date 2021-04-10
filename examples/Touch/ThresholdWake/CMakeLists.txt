@@ -5,4 +5,4 @@ cmake_minimum_required(VERSION 3.5)
 set(EXTRA_COMPONENT_DIRS "../../../../hulp")
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(hulp_adc_example)
+project(hulp_example_touch_wakeup)

@@ -171,6 +171,9 @@ void prepare_ulp()
             I_HALT(),
                 
     };
+
+    ESP_ERROR_CHECK(hulp_configure_pin(TRIGGER_GPIO, RTC_GPIO_MODE_INPUT_ONLY, GPIO_PULLUP_ONLY, 0));
+
     ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), 0, 0));
 
     //Prepare ULP, but do not enable timer so it won't run yet (see ulp_run())
@@ -195,7 +198,6 @@ extern "C" void app_main(void)
         hulp_configure_pin(STUB_DEBUG_GPIO, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_PULLUP_ONLY, 1);
         hulp_configure_pin(ULP_DEBUG_GPIO, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_PULLUP_ONLY, 1);
 #endif
-        hulp_configure_pin(TRIGGER_GPIO, RTC_GPIO_MODE_INPUT_ONLY, GPIO_PULLUP_ONLY, 0);
         prepare_ulp();
     }
 

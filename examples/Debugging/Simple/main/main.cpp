@@ -44,13 +44,13 @@ void init_ulp()
         M_INCLUDE_DEBUG_BP(LAB_DEBUG_ENTRY, R2, ulp_debug_data),
     };
 
-    hulp_ulp_load(program, sizeof(program), 1ULL * 1000 * 1000);
+    ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), 1ULL * 1000 * 1000, 0));
 
     //Basic debugging initialisation:
     hulp_debug_bp_config_t debug_config = HULP_DEBUG_BP_CONFIG_DEFAULT(ulp_debug_data, program, sizeof(program));
-    hulp_debug_bp_init(&debug_config);
+    ESP_ERROR_CHECK(hulp_debug_bp_init(&debug_config, NULL));
 
-    hulp_ulp_run();
+    ESP_ERROR_CHECK(hulp_ulp_run(0));
 }
 
 extern "C" void app_main()

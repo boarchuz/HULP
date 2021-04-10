@@ -97,9 +97,9 @@ void ulp_init()
             I_HALT(),
     };
 
-    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN1));
-    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN2));
-    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN3));
+    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12));
+    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN2, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12));
+    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN3, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12));
     ESP_ERROR_CHECK(rtc_gpio_pullup_en(PIN_ADC_PIN3));
 
     ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), 1000UL * ULP_WAKEUP_INTERVAL_MS, 0));
@@ -110,7 +110,7 @@ extern "C" void app_main(void)
 {
     if(hulp_is_deep_sleep_wakeup())
     {
-        ESP_LOGI(TAG, "Woken up! PIN3: Wakeup value: %u, counter: %u", ulp_vars.pin3.wakeup.reason.val, ulp_vars.pin3.wakeup.counter.val); 
+        ESP_LOGI(TAG, "Woken up! Wakeup value: %u, counter: %u", ulp_vars.pin3.wakeup.reason.val, ulp_vars.pin3.wakeup.counter.val); 
     }
     else
     {
@@ -120,17 +120,20 @@ extern "C" void app_main(void)
     // Print some values for a few seconds
     for(int i = 0; i < 5; ++i)
     {
-        ESP_LOGI(TAG, "PIN1: Value: %u", ulp_vars.pin1.val);
-        ESP_LOGI(TAG, "PIN2: Value: %u", ulp_vars.pin2.val);
-        ESP_LOGI(TAG, "PIN3: Value: %u", ulp_vars.pin3.debug.val);
+        ESP_LOGI(TAG, "GPIO %d: %5u", PIN_ADC_PIN1, ulp_vars.pin1.val);
+        ESP_LOGI(TAG, "GPIO %d: %5u", PIN_ADC_PIN2, ulp_vars.pin2.val);
+        ESP_LOGI(TAG, "GPIO %d: %5u", PIN_ADC_PIN3, ulp_vars.pin3.debug.val);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
-    // Don't go to sleep if PIN3 is still in a triggered state
-    ESP_LOGI(TAG, "Waiting for PIN 3 idle...");
-    while(ulp_vars.pin3.debug.val < PIN3_WAKE_THRESHOLD)
+    if(ulp_vars.pin3.debug.val < PIN3_WAKE_THRESHOLD)
     {
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        // Don't go to sleep if PIN3 is still in a triggered state
+        ESP_LOGI(TAG, "Waiting for GPIO %d idle...", PIN_ADC_PIN3);
+        while(ulp_vars.pin3.debug.val < PIN3_WAKE_THRESHOLD)
+        {
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+        }
     }
 
     // Tell ULP that PIN3 is now armed, and sleep

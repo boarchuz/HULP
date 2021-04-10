@@ -45,11 +45,14 @@ void init_ulp()
             I_HALT(),
     };
 
-    hulp_configure_touch_controller();
-    hulp_configure_touch_pin(PIN_TOUCH);
+    const hulp_touch_controller_config_t controller_config = HULP_TOUCH_CONTROLLER_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(hulp_configure_touch_controller(&controller_config));
+    
+    const hulp_touch_pin_config_t pin_config = HULP_TOUCH_PIN_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(hulp_configure_touch_pin(PIN_TOUCH, &pin_config));
 
-    hulp_ulp_load(program, sizeof(program), 1ULL * 10 * 1000);
-    hulp_ulp_run();
+    ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), 1ULL * 10 * 1000, 0));
+    ESP_ERROR_CHECK(hulp_ulp_run(0));
 }
 
 extern "C" void app_main()

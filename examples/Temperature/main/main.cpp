@@ -17,9 +17,9 @@ void init_ulp()
         I_HALT(),
     };
 
-    hulp_tsens_configure();
-    hulp_ulp_load(program, sizeof(program), MEAS_INTERVAL_MS * 1000, 0);
-    hulp_ulp_run();
+    hulp_tsens_configure(3);
+    ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), MEAS_INTERVAL_MS * 1000, 0));
+    ESP_ERROR_CHECK(hulp_ulp_run(0));
 }
 
 extern "C" void app_main()

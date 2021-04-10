@@ -53,8 +53,8 @@ void ulp_isr(void *task_handle_ptr)
 void init_ulp()
 {
     // Configure pin
-    ESP_ERROR_CHECK(hulp_configure_pin(PIN_HX711_SDA,  RTC_GPIO_MODE_INPUT_ONLY, GPIO_FLOATING));
-    ESP_ERROR_CHECK(hulp_configure_pin(PIN_HX711_SCL, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING));
+    ESP_ERROR_CHECK(hulp_configure_pin(PIN_HX711_SDA,  RTC_GPIO_MODE_INPUT_ONLY, GPIO_FLOATING, 0));
+    ESP_ERROR_CHECK(hulp_configure_pin(PIN_HX711_SCL, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0));
     // For the calibration phase, the ULP will send interrupts when data is ready. Prepare ISR here.
     TaskHandle_t main_handle =  xTaskGetCurrentTaskHandle();
     hulp_ulp_isr_register(&ulp_isr, main_handle);
@@ -129,7 +129,7 @@ uint32_t hx711_ulp_read(uint16_t samples)
     uint64_t total = 0;
     for(int i = 0; i < samples; ++i)
     {
-        ESP_ERROR_CHECK(hulp_ulp_run_once());
+        ESP_ERROR_CHECK(hulp_ulp_run_once(0));
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
         uint32_t this_val = hx711_val.get();
         ESP_LOGD(TAG, "Val %d/%u: %u", i+1, samples, this_val);
@@ -178,7 +178,7 @@ extern "C" void app_main(void)
         ESP_LOGI(TAG, "Wake threshold (%.2fg): %u", HX711_CALIBRATION_WEIGHT_G / 2, wake_thresh);
         hx711_threshold.put(wake_thresh);
         load_hx711_deep_sleep_program();
-        hulp_ulp_run();
+        ESP_ERROR_CHECK(hulp_ulp_run(0));
     }
     else
     {

@@ -120,20 +120,20 @@ void init_ulp()
     };
 
     hulp_debug_bp_handle_t dbg_handle;
-    ESP_ERROR_CHECK( hulp_debug_bp_init(&debug_cfg, &dbg_handle) );
+    ESP_ERROR_CHECK(hulp_debug_bp_init(&debug_cfg, &dbg_handle));
 
-    hulp_ulp_load(program, sizeof(program), 1ULL * 1000 * 1000);
+    ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), 1ULL * 1000 * 1000, 0));
 
     //Breakpoints may be disabled/enabled once the program is loaded (default: enabled)
     hulp_debug_bp_disable_by_label(dbg_handle, LAB_BREAKPOINT_1);
 
     //Everything is ready, start the ULP.
-    hulp_ulp_run();
+    ESP_ERROR_CHECK(hulp_ulp_run(0));
 }
 
 extern "C" void app_main()
 {
     init_ulp();
 
-    vTaskDelay(portMAX_DELAY);
+    vTaskDelete(NULL);
 }

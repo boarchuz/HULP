@@ -36,17 +36,17 @@ void init_ulp()
             I_GPIO_SET(LED_PIN, 1),
             I_HALT(),
     };
-
-    hulp_peripherals_on();
-    hulp_configure_pin(BUTTON_PIN, RTC_GPIO_MODE_INPUT_ONLY, GPIO_PULLUP_ONLY, 0);
-    hulp_configure_pin(LED_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0);
-    hulp_configure_pin_int(BUTTON_PIN, GPIO_INTR_ANYEDGE);
-    hulp_ulp_load(program, sizeof(program), ULP_INTERVAL_MS * 1000, 0);
-    hulp_ulp_run();
+    
+    ESP_ERROR_CHECK(hulp_configure_pin(BUTTON_PIN, RTC_GPIO_MODE_INPUT_ONLY, GPIO_PULLUP_ONLY, 0));
+    ESP_ERROR_CHECK(hulp_configure_pin(LED_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0));
+    ESP_ERROR_CHECK(hulp_configure_pin_int(BUTTON_PIN, GPIO_INTR_ANYEDGE));
+    ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), ULP_INTERVAL_MS * 1000, 0));
+    ESP_ERROR_CHECK(hulp_ulp_run(0));
 }
 
 extern "C" void app_main(void)
 {
     init_ulp();
+    hulp_peripherals_on();
     esp_deep_sleep_start();
 }

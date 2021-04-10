@@ -52,11 +52,11 @@ void init_ulp()
         M_APA_TX(LBL_APA_ENTRY, SCL_PIN, SDA_PIN, leds, NUM_LEDS, R1, R3),
     };
 
-    hulp_configure_pin(SCL_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0);
-    hulp_configure_pin(SDA_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0);
+    ESP_ERROR_CHECK(hulp_configure_pin(SCL_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0));
+    ESP_ERROR_CHECK(hulp_configure_pin(SDA_PIN, RTC_GPIO_MODE_OUTPUT_ONLY, GPIO_FLOATING, 0));
 
-    hulp_ulp_load(program, sizeof(program), 250 * 1000);
-    hulp_ulp_run();
+    ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), 250 * 1000, 0));
+    ESP_ERROR_CHECK(hulp_ulp_run(0));
 }
 
 void ulp_isr(void *task_handle_ptr)

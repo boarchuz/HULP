@@ -80,15 +80,15 @@ void init_ulp()
         M_INCLUDE_I2CBB(LBL_I2C_READ_ENTRY, LBL_I2C_WRITE_ENTRY, LBL_I2C_ARBLOST, LBL_I2C_NACK, SCL_PIN, SDA_PIN, SLAVE_ADDR),
     };
 
-    hulp_configure_pin(SCL_PIN, RTC_GPIO_MODE_INPUT_ONLY, GPIO_FLOATING, 0);
-    hulp_configure_pin(SDA_PIN, RTC_GPIO_MODE_INPUT_ONLY, GPIO_FLOATING, 0);
+    ESP_ERROR_CHECK(hulp_configure_pin(SCL_PIN, RTC_GPIO_MODE_INPUT_ONLY, GPIO_FLOATING, 0));
+    ESP_ERROR_CHECK(hulp_configure_pin(SDA_PIN, RTC_GPIO_MODE_INPUT_ONLY, GPIO_FLOATING, 0));
 
     hulp_peripherals_on();
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-    hulp_ulp_load(program, sizeof(program), 1ULL * 1000 * 1000);
-    hulp_ulp_run();
+    ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), 1ULL * 1000 * 1000, 0));
+    ESP_ERROR_CHECK(hulp_ulp_run(0));
 }
 
 void ulp_isr(void *task_handle_ptr)
@@ -98,7 +98,7 @@ void ulp_isr(void *task_handle_ptr)
 
 extern "C" void app_main()
 {
-    //ULP will trigger an interrupt when there's new data or an error
+    // ULP will trigger an interrupt when there's new data or an error
     TaskHandle_t main_handle =  xTaskGetCurrentTaskHandle();
     hulp_ulp_isr_register(&ulp_isr, &main_handle);
     hulp_ulp_interrupt_en();
@@ -107,7 +107,8 @@ extern "C" void app_main()
 
     for(;;)
     {
-        xTaskNotifyWait(0, 0, NULL, portMAX_DELAY); //Wait for interrupt
+        // Wait for interrupt
+        xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
         printf("Read8: %u, Read16: %u, NACK Errors: %u, Bus Errors: %u\n", ulp_data8.val, ulp_data16.val, ulp_nacks.val, ulp_buserrors.val);
     }
 }
