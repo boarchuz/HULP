@@ -14,4 +14,11 @@ menu "HULP"
         help
             Slow clock cycles to use to determine fast clock frequency.
 
+    config HULP_UART_TX_OD
+        bool "Open drain UART TX output"
+        default n
+        help
+            UART transmit will use push-pull configuration by default. Enable this to use open drain instead.
+            External pullups may be required for higher baud rates.
+
 endmenu

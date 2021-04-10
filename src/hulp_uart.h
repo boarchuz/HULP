@@ -70,8 +70,8 @@ int hulp_uart_string_get(ulp_var_t *hulp_string, char* buffer, size_t buffer_siz
         I_GPIO_READ(rx_gpio),                           /*Wait here until pin goes low (start bit)*/                                \
         I_BGE(-1,1),                                                                                                                \
         I_STAGE_RST(),                                                                                                              \
-        I_DELAY((uint16_t)(0.5f / (baud_rate) * hulp_get_fast_clk_freq() + 34 - 36)),                                                   \
-        I_DELAY((uint16_t)(1.0f / (baud_rate) * hulp_get_fast_clk_freq() - 34)),                                                        \
+        I_DELAY((uint16_t)(hulp_get_fast_clk_freq() / 2 / (baud_rate) + 34 - 36)),                                                   \
+        I_DELAY((uint16_t)(hulp_get_fast_clk_freq() / (baud_rate) - 34)),                                                        \
         I_GPIO_READ(rx_gpio),                           /*Read the new bit, make room for it in another reg, and OR it in*/         \
         I_RSHI(reg_return,reg_return,1),                                                                                            \
         I_LSHI(R0,R0,15),                                                                                                           \
@@ -107,6 +107,14 @@ int hulp_uart_string_get(ulp_var_t *hulp_string, char* buffer, size_t buffer_siz
 #define M_INCLUDE_UART_TX(label_entry, baud_rate, tx_gpio) \
     M_INCLUDE_UART_TX_(label_entry, baud_rate, tx_gpio, R1, R2, R3)
 
+#if CONFIG_HULP_UART_TX_OD
+#define I_HULP_UART_TX_HIGH(pin) I_GPIO_OUTPUT_DIS(pin)
+#define I_HULP_UART_TX_LOW(pin) I_GPIO_OUTPUT_EN(pin)
+#else
+#define I_HULP_UART_TX_HIGH(pin) I_GPIO_SET(pin, 1)
+#define I_HULP_UART_TX_LOW(pin) I_GPIO_SET(pin, 0)
+#endif
+
 #define M_INCLUDE_UART_TX_(label_entry, baud_rate, tx_gpio, reg_string_ptr, reg_scr, reg_return) \
     M_LABEL(label_entry), \
         M_MOVL(R0,label_entry),\
@@ -119,23 +127,23 @@ int hulp_uart_string_get(ulp_var_t *hulp_string, char* buffer, size_t buffer_siz
         I_SUBI(reg_return,reg_return,1),\
         I_MOVR(R0,reg_return),\
         I_BGE(19, 65535),\
-        I_GPIO_OUTPUT_EN((tx_gpio)),\
-        I_DELAY((uint16_t)(1.0f / (baud_rate) * hulp_get_fast_clk_freq() - 30)),\
+        I_HULP_UART_TX_LOW((tx_gpio)),\
+        I_DELAY((uint16_t)(hulp_get_fast_clk_freq() / (baud_rate) - 19)), /* Start bit, minus a little overhead */ \
         I_ANDI(R0,reg_scr,1),\
         I_BL(12, 1),\
-        I_GPIO_OUTPUT_DIS((tx_gpio)),\
-        I_DELAY((uint16_t)(1.0f / (baud_rate) * hulp_get_fast_clk_freq() - 38)),\
+        I_HULP_UART_TX_HIGH((tx_gpio)),\
+        I_DELAY((uint16_t)((hulp_get_fast_clk_freq() / (baud_rate)) - 42)),\
         I_RSHI(reg_scr,reg_scr,1),\
         I_STAGE_INC(1),\
-        I_JUMPS(-6, 8, JUMPS_LT),\
         I_JUMPS(2, 9, JUMPS_LT),\
-        I_JUMPS(-8, 16, JUMPS_LT),\
-        I_GPIO_OUTPUT_DIS((tx_gpio)),\
-        I_DELAY((uint16_t)(1.0f / (baud_rate) * hulp_get_fast_clk_freq())),\
+        I_JUMPS(-7, 16, JUMPS_LT),\
+        I_JUMPS(-8, 8, JUMPS_LT),\
+        I_HULP_UART_TX_HIGH((tx_gpio)),\
+        I_DELAY((uint16_t)(hulp_get_fast_clk_freq() / (baud_rate) - 0)),\
         I_JUMPS(-16, 9, JUMPS_LT),\
         I_BGE(-20, 0),\
-        I_GPIO_OUTPUT_EN((tx_gpio)),\
-        I_DELAY((uint16_t)(1.0f / (baud_rate) * hulp_get_fast_clk_freq() - 38 - 4)),\
+        I_HULP_UART_TX_LOW((tx_gpio)),\
+        I_DELAY((uint16_t)((hulp_get_fast_clk_freq() / (baud_rate)) - 48)),\
         I_BGE(-11, 0),\
         M_MOVL(reg_return,label_entry),\
         I_LD(reg_return,reg_return,31),\
