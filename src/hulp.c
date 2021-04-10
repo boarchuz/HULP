@@ -781,7 +781,7 @@ ulp_state_t hulp_get_state()
     }
 }
 
-uint32_t hulp_get_fast_clk_freq(uint32_t slow_clk_cycles)
+uint32_t hulp_get_fast_clk_freq()
 {
 #ifdef CONFIG_HULP_USE_APPROX_FAST_CLK
     return (uint32_t)RTC_FAST_CLK_FREQ_APPROX;
