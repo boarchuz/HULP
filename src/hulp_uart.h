@@ -151,8 +151,7 @@ int hulp_uart_string_get(ulp_var_t *hulp_string, char* buffer, size_t buffer_siz
         I_HALT()
 
 /**
- * This will convert the value in R0 into an ASCII string. Very useful for debugging in combination with UART TX.
- *  **Note: Destructive!!! R0 will hold 0 on return.
+ * This will convert the value in R0 into an ASCII string (decimal). Very useful for debugging in combination with UART TX.
  * 
  *  As R1, R2, and R3 are also used in the subroutine, you should store the value beforehand and retrieve afterwards if still required.
  *  The string is always 5 digits, padded with leading zeros where necessary (ie. "00000", "00001", ... "65535").
@@ -175,7 +174,8 @@ int hulp_uart_string_get(ulp_var_t *hulp_string, char* buffer, size_t buffer_siz
  */
 #define M_INCLUDE_PRINTF_U_(label_entry, reg_string_ptr, reg_scr, reg_return, use_final_char, final_char) \
     M_LABEL(label_entry), \
-        I_MOVI(R2, '0' << 8 | '0'),  /* Reset counters for digits (10^4) (lower bits) and (10^3) (upper bits) with ASCII zero '0' */ \
+        I_ST(R0, R1, 3), \
+        I_MOVI(reg_scr, '0' << 8 | '0'),  /* Reset counters for digits (10^4) (lower bits) and (10^3) (upper bits) with ASCII zero '0' */ \
         I_BL(4, 10000),              /* Loop incrementing (10^4) counter: '0' + 1 = '1' + 1 = '2' + 1 = '3' etc */ \
         I_ADDI(R2, R2, 1),  \
         I_SUBI(R0, R0, 10000),  \
@@ -196,14 +196,58 @@ int hulp_uart_string_get(ulp_var_t *hulp_string, char* buffer, size_t buffer_siz
         I_BGE(-3, 0),   \
         I_ST(R2, R1, 2),    \
         I_MOVI(R2, ((use_final_char) ? (uint8_t)(final_char) : 0) << 8 | '0'),    /* Lastly the units (10^0) at metadata+3 */    \
-        I_BL(4, 1), \
-        I_ADDI(R2, R2, 1),  \
-        I_SUBI(R0, R0, 1),  \
-        I_BGE(-3, 0),   \
+        I_ADDR(R2, R0, R2),  \
+        I_LD(R0, R1, 3), \
         I_ST(R2, R1, 3),    \
         I_LD(R2, R1, 0),    /* Load the metadata (ie. offset+0) and set length=5*/    \
         I_ANDI(R2, R2, 0xFF << 8),  \
         I_ORI(R2, R2, 5 + ((use_final_char) ? 1 : 0)),   \
+        I_ST(R2, R1, 0),    \
+        I_BXR(R3)
+
+/**
+ * Format value as hex string. See M_INCLUDE_PRINTF_U
+ */
+#define M_INCLUDE_PRINTF_X(label_entry) \
+    M_INCLUDE_PRINTF_X_(label_entry, R1, R2, R3)
+
+#define M_INCLUDE_PRINTF_X_(label_entry, reg_string_ptr, reg_scr, reg_return) \
+    M_LABEL(label_entry), \
+        I_ST(R0, R1, 2), \
+        I_MOVI(R2, '0' << 8 | '0'), \
+        I_BL(3, 40960),   \
+        I_ADDI(R2, R2, ('A' - '0')),  \
+        I_SUBI(R0, R0, 40960),    \
+        I_BL(4, 4096),   \
+        I_ADDI(R2, R2, 1),  \
+        I_SUBI(R0, R0, 4096),    \
+        I_BGE(-3, 0),   \
+        I_BL(3, 2560),    \
+        I_ADDI(R2, R2, ('A' - '0') << 8), \
+        I_SUBI(R0, R0, 2560), \
+        I_BL(4, 256),    \
+        I_ADDI(R2, R2, 1 << 8), \
+        I_SUBI(R0, R0, 256), \
+        I_BGE(-3, 0),   \
+        I_ST(R2, R1, 1),    \
+        I_MOVI(R2, '0' << 8 | '0'), \
+        I_BL(3, 160),   \
+        I_ADDI(R2, R2, 'A' - '0'),  \
+        I_SUBI(R0, R0, 160),    \
+        I_BL(4, 16),   \
+        I_ADDI(R2, R2, 1),  \
+        I_SUBI(R0, R0, 16),    \
+        I_BGE(-3, 0),   \
+        I_BL(3, 10),    \
+        I_ADDI(R2, R2, ('A' - '0') << 8), \
+        I_SUBI(R0, R0, 10), \
+        I_LSHI(R0, R0, 8), \
+        I_ADDR(R2, R0, R2), \
+        I_LD(R0, R1, 2), \
+        I_ST(R2, R1, 2),    \
+        I_LD(R2, R1, 0),    /* Load the metadata (ie. offset+0) and set length=4*/    \
+        I_ANDI(R2, R2, 0xFF << 8),  \
+        I_ORI(R2, R2, 4),   \
         I_ST(R2, R1, 0),    \
         I_BXR(R3)
 
