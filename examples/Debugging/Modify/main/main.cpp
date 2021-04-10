@@ -18,7 +18,7 @@ enum {
     LAB_DEBUG_ENTRY,
 };
 
-void ulp_breakpoint_handler(hulp_debug_bp_cb_data_t* bp_data, void*)
+void ulp_breakpoint_handler(hulp_debug_bp_cb_data_t* bp_data, void *ctx)
 {
     //This is an ISR. No lengthy operations, logging, printf, etc.
 
@@ -82,7 +82,7 @@ void ulp_breakpoint_handler(hulp_debug_bp_cb_data_t* bp_data, void*)
 
 void init_ulp()
 {
-    const ulp_insn_t program[] {
+    const ulp_insn_t program[] = {
             I_ADDI(R3, R3, 1),
             I_MOVI(R1, 0),
 
@@ -115,7 +115,7 @@ void init_ulp()
         },
         .callback = {
             .fn = ulp_breakpoint_handler,
-            .ctx = nullptr,
+            .ctx = NULL,
         },
     };
 

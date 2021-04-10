@@ -46,11 +46,13 @@ void init_ulp()
     hulp_register_i2c_slave(1, SLAVE2_ADDR);
 #endif
 
-    hulp_configure_i2c_pins(SCL_PIN, SDA_PIN);
-    hulp_configure_i2c_controller();
+    ESP_ERROR_CHECK(hulp_configure_i2c_pins(SCL_PIN, SDA_PIN, true, true));
+
+    const hulp_i2c_controller_config_t config = HULP_I2C_CONTROLLER_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(hulp_configure_i2c_controller(&config));
     
-    hulp_ulp_load(program, sizeof(program), ULP_WAKEUP_INTERVAL_MS * 1000);
-    hulp_ulp_run();
+    ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), ULP_WAKEUP_INTERVAL_MS * 1000, 0));
+    ESP_ERROR_CHECK(hulp_ulp_run(0));
 }
 
 extern "C" void app_main()

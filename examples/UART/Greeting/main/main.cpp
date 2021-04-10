@@ -11,8 +11,6 @@
 
 #include "sdkconfig.h"
 
-static const char* TAG = "test";
-
 #define PIN_ULP_TX GPIO_NUM_25
 #define PIN_ULP_RX GPIO_NUM_26
 

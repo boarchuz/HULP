@@ -17,7 +17,7 @@ void init_ulp()
         LAB_DEBUG_ENTRY,
     };
 
-    const ulp_insn_t program[] {
+    const ulp_insn_t program[] = {
 
             I_ADDI(R3, R3, 1),
 
