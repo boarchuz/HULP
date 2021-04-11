@@ -22,6 +22,9 @@ typedef union {
         uint8_t val_bytes[2];
         uint8_t meta_bytes[2];
     };
+    struct {
+        uint8_t bytes[4];
+    };
     ulp_insn_t insn;
     uint32_t word;
 } ulp_var_t;
