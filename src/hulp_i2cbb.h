@@ -366,7 +366,7 @@ struct hulp_i2cbb_hdr_t {
 #define M_INCLUDE_I2CBB_CMD_(label_read, label_write, scl_gpio, sda_gpio, reg_ptr, reg_scratch, reg_return) \
 	M_LABEL(label_read), \
 		I_MOVI(reg_scratch, 39), \
-		M_MOVL(R0, LBL_READ_ENTRY), \
+		M_MOVL(R0, label_read), \
 		I_ST(reg_return, R0, 86), \
 		I_MOVI(reg_return, 0), \
 		I_ADDR(reg_scratch, R0, reg_scratch), \
