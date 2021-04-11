@@ -174,36 +174,36 @@ int hulp_uart_string_get(ulp_var_t *hulp_string, char* buffer, size_t buffer_siz
  */
 #define M_INCLUDE_PRINTF_U_(label_entry, reg_string_ptr, reg_scr, reg_return, use_final_char, final_char) \
     M_LABEL(label_entry), \
-        I_ST(R0, R1, 3), \
+        I_ST(R0, reg_string_ptr, 3), \
         I_MOVI(reg_scr, '0' << 8 | '0'),  /* Reset counters for digits (10^4) (lower bits) and (10^3) (upper bits) with ASCII zero '0' */ \
         I_BL(4, 10000),              /* Loop incrementing (10^4) counter: '0' + 1 = '1' + 1 = '2' + 1 = '3' etc */ \
-        I_ADDI(R2, R2, 1),  \
+        I_ADDI(reg_scr, reg_scr, 1),  \
         I_SUBI(R0, R0, 10000),  \
         I_BGE(-3, 0),   \
         I_BL(4, 1000),              /* Loop incrementing (10^3) counter */ \
-        I_ADDI(R2, R2, 1 << 8), \
+        I_ADDI(reg_scr, reg_scr, 1 << 8), \
         I_SUBI(R0, R0, 1000),   \
         I_BGE(-3, 0),   \
-        I_ST(R2, R1, 1),            /* Store ASCII counters for digits (10^4) and (10^3) at offset metadata+1 */ \
-        I_MOVI(R2, '0' << 8 | '0'), /* Do it all over again for (10^2) and (10^1), at metadata+2 */ \
+        I_ST(reg_scr, reg_string_ptr, 1),            /* Store ASCII counters for digits (10^4) and (10^3) at offset metadata+1 */ \
+        I_MOVI(reg_scr, '0' << 8 | '0'), /* Do it all over again for (10^2) and (10^1), at metadata+2 */ \
         I_BL(4, 100),   \
-        I_ADDI(R2, R2, 1),  \
+        I_ADDI(reg_scr, reg_scr, 1),  \
         I_SUBI(R0, R0, 100),    \
         I_BGE(-3, 0),   \
         I_BL(4, 10),    \
-        I_ADDI(R2, R2, 1 << 8), \
+        I_ADDI(reg_scr, reg_scr, 1 << 8), \
         I_SUBI(R0, R0, 10), \
         I_BGE(-3, 0),   \
-        I_ST(R2, R1, 2),    \
-        I_MOVI(R2, ((use_final_char) ? (uint8_t)(final_char) : 0) << 8 | '0'),    /* Lastly the units (10^0) at metadata+3 */    \
-        I_ADDR(R2, R0, R2),  \
-        I_LD(R0, R1, 3), \
-        I_ST(R2, R1, 3),    \
-        I_LD(R2, R1, 0),    /* Load the metadata (ie. offset+0) and set length=5*/    \
-        I_ANDI(R2, R2, 0xFF << 8),  \
-        I_ORI(R2, R2, 5 + ((use_final_char) ? 1 : 0)),   \
-        I_ST(R2, R1, 0),    \
-        I_BXR(R3)
+        I_ST(reg_scr, reg_string_ptr, 2),    \
+        I_MOVI(reg_scr, ((use_final_char) ? (uint8_t)(final_char) : 0) << 8 | '0'),    /* Lastly the units (10^0) at metadata+3 */    \
+        I_ADDR(reg_scr, R0, reg_scr),  \
+        I_LD(R0, reg_string_ptr, 3), \
+        I_ST(reg_scr, reg_string_ptr, 3),    \
+        I_LD(reg_scr, reg_string_ptr, 0),    /* Load the metadata (ie. offset+0) and set length=5*/    \
+        I_ANDI(reg_scr, reg_scr, 0xFF << 8),  \
+        I_ORI(reg_scr, reg_scr, 5 + ((use_final_char) ? 1 : 0)),   \
+        I_ST(reg_scr, reg_string_ptr, 0),    \
+        I_BXR(reg_return)
 
 /**
  * Format value as hex string. See M_INCLUDE_PRINTF_U
@@ -213,43 +213,43 @@ int hulp_uart_string_get(ulp_var_t *hulp_string, char* buffer, size_t buffer_siz
 
 #define M_INCLUDE_PRINTF_X_(label_entry, reg_string_ptr, reg_scr, reg_return) \
     M_LABEL(label_entry), \
-        I_ST(R0, R1, 2), \
-        I_MOVI(R2, '0' << 8 | '0'), \
+        I_ST(R0, reg_string_ptr, 2), \
+        I_MOVI(reg_scr, '0' << 8 | '0'), \
         I_BL(3, 40960),   \
-        I_ADDI(R2, R2, ('A' - '0')),  \
+        I_ADDI(reg_scr, reg_scr, ('A' - '0')),  \
         I_SUBI(R0, R0, 40960),    \
         I_BL(4, 4096),   \
-        I_ADDI(R2, R2, 1),  \
+        I_ADDI(reg_scr, reg_scr, 1),  \
         I_SUBI(R0, R0, 4096),    \
         I_BGE(-3, 0),   \
         I_BL(3, 2560),    \
-        I_ADDI(R2, R2, ('A' - '0') << 8), \
+        I_ADDI(reg_scr, reg_scr, ('A' - '0') << 8), \
         I_SUBI(R0, R0, 2560), \
         I_BL(4, 256),    \
-        I_ADDI(R2, R2, 1 << 8), \
+        I_ADDI(reg_scr, reg_scr, 1 << 8), \
         I_SUBI(R0, R0, 256), \
         I_BGE(-3, 0),   \
-        I_ST(R2, R1, 1),    \
-        I_MOVI(R2, '0' << 8 | '0'), \
+        I_ST(reg_scr, reg_string_ptr, 1),    \
+        I_MOVI(reg_scr, '0' << 8 | '0'), \
         I_BL(3, 160),   \
-        I_ADDI(R2, R2, 'A' - '0'),  \
+        I_ADDI(reg_scr, reg_scr, 'A' - '0'),  \
         I_SUBI(R0, R0, 160),    \
         I_BL(4, 16),   \
-        I_ADDI(R2, R2, 1),  \
+        I_ADDI(reg_scr, reg_scr, 1),  \
         I_SUBI(R0, R0, 16),    \
         I_BGE(-3, 0),   \
         I_BL(3, 10),    \
-        I_ADDI(R2, R2, ('A' - '0') << 8), \
+        I_ADDI(reg_scr, reg_scr, ('A' - '0') << 8), \
         I_SUBI(R0, R0, 10), \
         I_LSHI(R0, R0, 8), \
-        I_ADDR(R2, R0, R2), \
-        I_LD(R0, R1, 2), \
-        I_ST(R2, R1, 2),    \
-        I_LD(R2, R1, 0),    /* Load the metadata (ie. offset+0) and set length=4*/    \
-        I_ANDI(R2, R2, 0xFF << 8),  \
-        I_ORI(R2, R2, 4),   \
-        I_ST(R2, R1, 0),    \
-        I_BXR(R3)
+        I_ADDR(reg_scr, R0, reg_scr), \
+        I_LD(R0, reg_string_ptr, 2), \
+        I_ST(reg_scr, reg_string_ptr, 2),    \
+        I_LD(reg_scr, reg_string_ptr, 0),    /* Load the metadata (ie. offset+0) and set length=4*/    \
+        I_ANDI(reg_scr, reg_scr, 0xFF << 8),  \
+        I_ORI(reg_scr, reg_scr, 4),   \
+        I_ST(reg_scr, reg_string_ptr, 0),    \
+        I_BXR(reg_return)
 
 #ifdef __cplusplus
 }
