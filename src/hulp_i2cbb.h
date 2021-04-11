@@ -371,7 +371,7 @@ typedef struct {
 	M_LABEL(label_read), \
 		I_MOVI(reg_scratch, 39), \
 		M_MOVL(R0, label_read), \
-		I_ST(reg_return, R0, 86), \
+		I_ST(reg_return, R0, 88), \
 		I_MOVI(reg_return, 0), \
 		I_ADDR(reg_scratch, R0, reg_scratch), \
 		I_GPIO_READ(sda_gpio), \
@@ -405,7 +405,7 @@ typedef struct {
 		I_GPIO_OUTPUT_EN(sda_gpio), \
 		I_GPIO_OUTPUT_DIS(scl_gpio), \
 		M_MOVL(reg_return, label_read), \
-		I_LD(reg_return, reg_return, 86), \
+		I_LD(reg_return, reg_return, 88), \
 		I_GPIO_OUTPUT_DIS(sda_gpio), \
 		I_BXR(reg_return), \
 		I_BGE(-11, 0), \
@@ -424,29 +424,31 @@ typedef struct {
 		I_GPIO_OUTPUT_EN(scl_gpio), \
 		I_STAGE_INC(1), \
 		I_JUMPS(-6, 8, JUMPS_LT), \
-		I_GPIO_OUTPUT_EN(sda_gpio), \
-		I_GPIO_OUTPUT_DIS(scl_gpio), \
 		I_LD(R0, reg_ptr, 1), \
 		I_SUBR(R0, R0, reg_return), \
-		I_BGE(5, 2), \
+		I_BGE(7, 2), \
+		I_GPIO_OUTPUT_DIS(scl_gpio), \
 		I_STAGE_INC(1), \
 		I_ANDI(R0, reg_return, 1), \
+		I_GPIO_OUTPUT_EN(scl_gpio), \
 		I_BGE(2, 1), \
 		I_LSHI(reg_scratch, reg_scratch, 8), \
+		I_GPIO_OUTPUT_EN(sda_gpio), \
 		I_RSHI(R0, reg_return, 1), \
 		I_ADDR(R0, R0, reg_ptr), \
+		I_GPIO_OUTPUT_DIS(scl_gpio), \
 		I_ST(reg_scratch, R0, 2), \
 		I_ADDI(reg_return, reg_return, 1), \
-		I_JUMPS(-23, 9, JUMPS_LT), \
+		I_JUMPS(-25, 9, JUMPS_LT), \
 		I_MOVI(R0, 0), \
-		I_BGE(-35, 0), \
+		I_BGE(-37, 0), \
 	M_LABEL(label_write), \
-		I_MOVI(reg_scratch, 73), \
-		I_BGE(-71, 0), \
-		I_BGE(-45, 0), \
+		I_MOVI(reg_scratch, 75), \
+		I_BGE(-73, 0), \
+		I_BGE(-47, 0), \
 		I_LD(R0, reg_ptr, 1), \
 		I_SUBR(R0, R0, reg_return), \
-		I_BL(-43, 1), \
+		I_BL(-45, 1), \
 		I_ANDI(R0, reg_return, 1), \
 		I_BL(2, 1), \
 		I_STAGE_INC(1), \
@@ -454,9 +456,9 @@ typedef struct {
 		I_ADDR(R0, R0, reg_ptr), \
 		I_LD(R0, R0, 2), \
 		I_ADDI(reg_return, reg_return, 1), \
-		I_JUMPS(-54, 9, JUMPS_GE), \
-		I_BGE(-73, 0), \
-		I_MOVI(R0, 0)
+		I_JUMPS(-56, 9, JUMPS_GE), \
+		I_BGE(-75, 0), \
+		I_HALT()
 
 #ifdef __cplusplus
 }
