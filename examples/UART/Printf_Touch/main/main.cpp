@@ -30,7 +30,7 @@
 
 // Need a buffer for formatting hex/dec to ASCII
 #define ULP_BUFFER_CAPACITY MAX(HULP_PRINTF_X_MIN_CAP, HULP_PRINTF_U_MIN_CAP)
-RTC_DATA_ATTR ulp_var_t ulp_buffer HULP_UART_STRING_RESERVE(ULP_BUFFER_CAPACITY);
+RTC_DATA_ATTR ulp_var_t ulp_buffer HULP_UART_STRING_BUFFER(ULP_BUFFER_CAPACITY);
 
 // And some strings to format the output, eg. "Pin 00032: 04779 (0x12AB)\n"
 #define ULP_STRING_FMT_1 "Pin "
