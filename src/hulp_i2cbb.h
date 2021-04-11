@@ -9,6 +9,10 @@
 
 #include "hulp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  *  Convenience macro for an I2C bitbang read (8 bits) into R0, to be used in your program with M_INCLUDE_I2CBB.
  *  
@@ -270,18 +274,18 @@
 			I_GPIO_OUTPUT_DIS(scl_gpio), \
 			I_BGE(-11,0)
 
-struct hulp_i2cbb_hdr_t {
-		struct {
-			uint32_t sub : 8;
-			uint32_t unused1 : 1;
-			uint32_t slave : 7;
-			uint32_t unused2 : 16;
+typedef struct {
+	struct {
+		uint32_t sub : 8;
+		uint32_t unused1 : 1;
+		uint32_t slave : 7;
+		uint32_t unused2 : 16;
 	} addrs;
-		struct {
-			uint32_t num_bytes : 16;
-			uint32_t unused3 : 16;
+	struct {
+		uint32_t num_bytes : 16;
+		uint32_t unused3 : 16;
 	} ctrl;
-};
+} hulp_i2cbb_hdr_t;
 
 /*
 	Allows I2C bitbanging with any number of bytes to read or write.
@@ -453,5 +457,9 @@ struct hulp_i2cbb_hdr_t {
 		I_JUMPS(-54, 9, JUMPS_GE), \
 		I_BGE(-73, 0), \
 		I_MOVI(R0, 0)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // HULP_I2CBB_H
