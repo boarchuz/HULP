@@ -261,7 +261,7 @@ uint16_t hulp_get_label_pc(uint16_t label, const ulp_insn_t *program)
             if(program->macro.sub_opcode == SUB_OPCODE_MACRO_LABEL && program->macro.label == label)
             {
 				ESP_LOGD(TAG, "label %u at pc %u", label, pc);
-                break;
+                return pc;
             }
         }
         else

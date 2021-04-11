@@ -487,8 +487,8 @@
 /**
  * Set the entry point to the given label. Next time the ULP runs, it will begin from that point.
  */
-#define M_SET_ENTRY_LBL(label_entry, program_ptr, program_size) \
-    M_SET_ENTRY((uint16_t)hulp_get_label_pc(label_entry, program_ptr, program_size))
+#define M_SET_ENTRY_LBL(label_entry, program_ptr) \
+    M_SET_ENTRY((uint16_t)hulp_get_label_pc(label_entry, program_ptr))
 
 /**
  * Get interrupt triggered bits for RTCIO
