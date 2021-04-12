@@ -274,62 +274,69 @@ extern "C" {
 			I_GPIO_OUTPUT_DIS(scl_gpio), \
 			I_BGE(-11,0)
 
-typedef struct {
-	struct {
-		uint32_t sub : 8;
-		uint32_t unused1 : 1;
-		uint32_t slave : 7;
-		uint32_t unused2 : 16;
-	} addrs;
-	struct {
-		uint32_t num_bytes : 16;
-		uint32_t unused3 : 16;
-	} ctrl;
-} hulp_i2cbb_hdr_t;
+/**
+ * Initialise the header of a I2CBB command array
+ *  See HULP_I2C_CMD_1B description for usage
+ */
+#define HULP_I2C_CMD_HDR(_slave_addr, _slave_reg, _num_bytes) \
+    {.val = ((((uint16_t)(_slave_addr)) & 0x7F) << 9) | (((_slave_reg) & 0xFF) << 0)},{.val = (_num_bytes)}
+
+/**
+ * Initialise two bytes in I2CBB command array
+ *  See HULP_I2C_CMD_1B description for usage
+ */
+#define HULP_I2C_CMD_2B(_first_byte, _second_byte) \
+    {.val = (((_first_byte) & 0xFF) << 8) | (((_second_byte) & 0xFF) << 0)}
+
+/**
+ * Initialise a byte in I2CBB command array
+ *  Should only be used where uneven number of bytes are to be written, else use HULP_I2C_CMD_2B
+ * 
+ * eg. Initialise a command array to write 5 bytes {0x12, 0x34, 0x56, 0x78, 0x9A} to 0x70:
+ * 
+ *  RTC_SLOW_ATTR ulp_var_t ulp_write_cmd[] = {
+ *      HULP_I2C_CMD_HDR(SLAVE_I2C_ADDRESS, 0x70, 5),
+ *      HULP_I2C_CMD_2B(0x12, 0x34),
+ *      HULP_I2C_CMD_2B(0x56, 0x78),
+ *      HULP_I2C_CMD_1B(0x9A)
+ *  };
+ */
+#define HULP_I2C_CMD_1B(_byte) \
+    HULP_I2C_CMD_2B(_byte, 0)
+
+/**
+ * Number of header words in I2CBB Command
+ * 
+ * Can help to access data in a command array.
+ *  [0] : Addresses
+ *  [1] : Number of bytes to read/write
+ *  [2...] : Data
+ * 
+ * eg. my_read_cmd[HULP_I2C_CMD_DATA_OFFSET + 6].val // Get value of the 7th data byte (index 6)
+ */
+#define HULP_I2C_CMD_DATA_OFFSET 2
+
+/**
+ * Macro for declaring a read command buffer of desired size
+ * 
+ * eg. Initialise a command array with buffer large enough to read 4 bytes from 0x15:
+ * 
+ *  RTC_SLOW_ATTR ulp_var_t ulp_read_cmd[HULP_I2C_CMD_BUF_SIZE(4)] = {
+ *      HULP_I2C_CMD_HDR(SLAVE_I2C_ADDRESS, 0x15, 4),
+ *  };
+ */
+#define HULP_I2C_CMD_BUF_SIZE(_num_bytes) (HULP_I2C_CMD_DATA_OFFSET + ((_num_bytes) + 1) / 2)
 
 /*
 	Allows I2C bitbanging with any number of bytes to read or write.
-	Use when needing to write multiple or read many bytes at once, otherwise prefer previous types.
+	Use when needing to write multiple or read many bytes at once.
 		eg. for slaves that require 16 bit writes, or to efficiently get large readouts from sensors
-
-	Declare a struct packed with a hulp_i2cbb_hdr_t and your data in RTC SLOW MEM.
-		* Simplest data struct is an array of ulp_var_t, each of which can encode 2 bytes
-	You can initialise this struct with the desired values, or set them at runtime. It's generally 
-	more efficient to do so at compile time, using a separate structure for each command.
 	
-	For example:
-
-		RTC_DATA_ATTR struct {
-			hulp_i2cbb_hdr_t cmd = {
-				.addrs = {
-					.sub = 0x08, 		// The slave's address pointer to read from
-					.slave = 0x64, 		// The slave's 7-bit I2C address
-				},
-				.ctrl = {
-					.num_bytes = 6, 	// Number of bytes to be read with this command
-				},
-			};
-			ulp_var_t result[3];		// Each ulp_var_t can receive 2 bytes
-		} example_read_cmd;
-
-		RTC_DATA_ATTR struct {
-			hulp_i2cbb_hdr_t cmd = {
-				.addrs = {
-					.sub = 0x01, 		// The slave's address pointer to write to
-					.slave = 0x64, 		// The slave's 7-bit I2C address
-				},
-				.ctrl = {
-					.num_bytes = 3, 	// Number of bytes to write with this command
-				},
-			};
-			ulp_var_t data[] = {
-				{0xABCD},
-				{0xEF00},
-			};
-		} example_write_cmd;
+	See HULP_I2C_CMD_1B description for initialising a write command array.
+	See HULP_I2C_CMD_BUF_SIZE description for initialising a read command array.
 	
 	Flow:
-		Prepare reg_ptr with the RTC slow memory offset of the command struct
+		Prepare reg_ptr with the RTC slow memory offset of the command array
 			eg. I_MOVO(R1, example_read_cmd),
 		Prepare reg_return with the return address
 			eg. M_MOVL(R3, MY_READ_RETURN_LABEL),
@@ -352,7 +359,7 @@ typedef struct {
 				// Check error code
 				M_BGE(LABEL_I2C_ERROR, 1),
 				// Check some value you just received and wake if > some threshold
-				I_GET(R0, R0, example_read_cmd.result[1]),
+				I_GET(R0, R0, example_read_cmd[HULP_I2C_CMD_DATA_OFFSET]),
 				M_BGE(LABEL_WAKE, 1234),
 				I_HALT(),
 				M_LABEL(LABEL_I2C_ERROR),
