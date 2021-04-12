@@ -236,7 +236,6 @@ esp_err_t hulp_configure_pin_int(gpio_num_t gpio_num, gpio_int_type_t intr_type)
 
 /**
  * @brief Get the frequency of RTC Fast Clock
- * @param slow_clk_cycles Number of RTC Slow Clock cycles for calibration
  */
 uint32_t hulp_get_fast_clk_freq();
 

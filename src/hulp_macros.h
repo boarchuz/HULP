@@ -579,6 +579,59 @@
  */
 #define I_EXT1_DIS() I_WR_REG_BIT(RTC_CNTL_WAKEUP_STATE_REG, RTC_CNTL_WAKEUP_ENA_S + 1, 0)
 
+/**
+ * Delay for 1-10 microseconds
+ */
+#define M_DELAY_US_1_10(delay_us) I_DELAY(((hulp_get_fast_clk_freq() * (delay_us)) / 1000000) + 1 - 6)
+
+/**
+ * Delay for 10-100 microseconds
+ */
+#define M_DELAY_US_10_100(delay_us) I_DELAY(((hulp_get_fast_clk_freq() * (delay_us)) / 1000000) - 6)
+
+/**
+ * Delay for 100-5000 microseconds
+ */
+#define M_DELAY_US_100_5000(delay_us) I_DELAY((((hulp_get_fast_clk_freq() / 1000) * (delay_us)) / 1000) - 6)
+
+/**
+ * Delay for 5000-20000 microseconds
+ */
+#define M_DELAY_US_5000_20000(delay_us) \
+    I_DELAY(((hulp_get_fast_clk_freq() / 1000) * (delay_us) / 1000) / 3 - 6), \
+    I_DELAY(((hulp_get_fast_clk_freq() / 1000) * (delay_us) / 1000) / 3 - 6), \
+    I_DELAY(((hulp_get_fast_clk_freq() / 1000) * (delay_us) / 1000) / 3 - 6)
+
+/**
+ * Delay for 20-1000 milliseconds
+ *  Note: Uses stage counter
+ */
+#define M_DELAY_MS_20_1000(delay_ms) \
+    I_STAGE_RST(), \
+    I_STAGE_INC(1), \
+    I_DELAY((((hulp_get_fast_clk_freq() / 1000) * (delay_ms)) / 250) - 4 - 6 - 6), \
+    I_JUMPS(-2, 250, JUMPS_LT)
+
+/**
+ * Delay for 20-60000 milliseconds
+ *  Note: Uses R0
+ */
+#define M_DELAY_MS_20_60000(delay_ms) \
+    I_MOVI(R0, 0), \
+    I_ADDI(R0, R0, 1), \
+    I_DELAY((((hulp_get_fast_clk_freq() / 1000) * (delay_ms)) / 5000) - 4 - 6 - 6), \
+    I_BL(-2, 5000)
+
+/**
+ * Delay for 1-400 seconds
+ *  Note: Uses R0
+ */
+#define M_DELAY_S_1_400(delay_s) \
+    I_MOVI(R0, 0), \
+    I_ADDI(R0, R0, 1), \
+    I_DELAY((((hulp_get_fast_clk_freq()) * (delay_s)) / 60000) - 4 - 6 - 6), \
+    I_BL(-2, 60000)
+
 
 #define MIN_ULP_SLEEP_US (rtc_time_slowclk_to_us(ULP_FSM_PREPARE_SLEEP_CYCLES + ULP_FSM_WAKEUP_SLEEP_CYCLES + REG_GET_FIELD(RTC_CNTL_TIMER2_REG, RTC_CNTL_ULPCP_TOUCH_START_WAIT), esp_clk_slowclk_cal_get()))
 
