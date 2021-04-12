@@ -397,6 +397,20 @@
     I_WAKE()
 
 /**
+ * Enable wakeup via ULP
+ * Allow I_WAKE instruction to wake the SoC from sleep.
+ */
+#define I_ULP_WAKEUP_EN() \
+    I_WR_REG_BIT(RTC_CNTL_STATE0_REG, RTC_CNTL_SLP_WAKEUP_S, 1)
+
+/**
+ * Disable wakeup via ULP
+ * Prevent I_WAKE instruction from waking the SoC from sleep.
+ */
+#define I_ULP_WAKEUP_DIS() \
+    I_WR_REG_BIT(RTC_CNTL_STATE0_REG, RTC_CNTL_SLP_WAKEUP_S, 0)
+
+/**
  * Read up to 16 bits of the 48-bit RTC tick registers, from low_bit.
  */
 #define I_RD_TICKS_REG(low_bit) \
