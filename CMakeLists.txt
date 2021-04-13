@@ -2,6 +2,7 @@ set(srcs
     "src/hulp.c"
     "src/hulp_touch.c"
     "src/hulp_uart.c"
+    "src/hulp_regwr.c"
     "src/hulp_debug.c"
 )
 
