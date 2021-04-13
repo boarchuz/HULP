@@ -242,11 +242,6 @@ uint32_t hulp_get_fast_clk_freq();
 /**
  * Internal. Do not use directly.
  */
-#define hulp_gtr(gpio_num) ((uint8_t)rtc_io_number_get(gpio_num))
-
-/**
- * Internal. Do not use directly.
- */
 int hulp_adc_get_periph_index(gpio_num_t pin);
 
 /**

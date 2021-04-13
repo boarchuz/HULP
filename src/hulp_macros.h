@@ -13,6 +13,55 @@
 
 #include "hulp_compat.h"
 
+#if CONFIG_HULP_TRY_CONST
+#define SOC_REG_TO_ULP_PERIPH_SEL(reg) (uint32_t)(((reg) - DR_REG_RTCIO_BASE) / 0x400)
+static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
+    RTCIO_GPIO0_CHANNEL,    //GPIO0
+    -1,//GPIO1
+    RTCIO_GPIO2_CHANNEL,    //GPIO2
+    -1,//GPIO3
+    RTCIO_GPIO4_CHANNEL,    //GPIO4
+    -1,//GPIO5
+    -1,//GPIO6
+    -1,//GPIO7
+    -1,//GPIO8
+    -1,//GPIO9
+    -1,//GPIO10
+    -1,//GPIO11
+    RTCIO_GPIO12_CHANNEL,   //GPIO12
+    RTCIO_GPIO13_CHANNEL,   //GPIO13
+    RTCIO_GPIO14_CHANNEL,   //GPIO14
+    RTCIO_GPIO15_CHANNEL,   //GPIO15
+    -1,//GPIO16
+    -1,//GPIO17
+    -1,//GPIO18
+    -1,//GPIO19
+    -1,//GPIO20
+    -1,//GPIO21
+    -1,//GPIO22
+    -1,//GPIO23
+    -1,//GPIO24
+    RTCIO_GPIO25_CHANNEL,   //GPIO25
+    RTCIO_GPIO26_CHANNEL,   //GPIO26
+    RTCIO_GPIO27_CHANNEL,   //GPIO27
+    -1,//GPIO28
+    -1,//GPIO29
+    -1,//GPIO30
+    -1,//GPIO31
+    RTCIO_GPIO32_CHANNEL,   //GPIO32
+    RTCIO_GPIO33_CHANNEL,   //GPIO33
+    RTCIO_GPIO34_CHANNEL,   //GPIO34
+    RTCIO_GPIO35_CHANNEL,   //GPIO35
+    RTCIO_GPIO36_CHANNEL,   //GPIO36
+    RTCIO_GPIO37_CHANNEL,   //GPIO37
+    RTCIO_GPIO38_CHANNEL,   //GPIO38
+    RTCIO_GPIO39_CHANNEL,   //GPIO39
+};
+#define hulp_gtr(gpio_num) ((uint8_t)s_rtc_io_num_map[gpio_num])
+#else // CONFIG_HULP_TRY_CONST
+#define hulp_gtr(gpio_num) ((uint8_t)rtc_io_number_get(gpio_num))
+#endif // CONFIG_HULP_TRY_CONST
+
 #define hulp_log2(x) (31 - __builtin_clz(x))
 
 #define RTC_WORD_OFFSET(x) ({ \
