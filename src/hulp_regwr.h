@@ -29,11 +29,21 @@
 #define HULP_WR_REG_GEN_ENTRY 1024
 
 /**
+ * Number of instructions to be reserved at above address
+ */
+#define HULP_WR_REG_GEN_ENTRY_COUNT 3
+
+/**
  * Branch here to write the register with the prepared parameters.
  * 
  * Return instruction must exist. Generally, prefer HULP_WR_REG_GEN_ENTRY.
  */
 #define HULP_WR_REG_GEN_ENTRY_HAS_RET 831
+
+/**
+ * Number of instructions to be reserved at above address
+ */
+#define HULP_WR_REG_GEN_ENTRY_HAS_RET_COUNT 3
 
 /**
  * Sets instructions to generate a register write instruction
