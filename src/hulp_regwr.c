@@ -2,6 +2,33 @@
 
 #include "hulp.h"
 
+#include "sdkconfig.h"
+
+// Layout of RTC Slow Memory if using regwr
+struct hulp_regwr_rtc_slow_map_check {
+    // Normal usage
+    ulp_insn_t normal1[HULP_REGWR_WORK_AREA_START];
+    // Each register write bit range will write to 3 particular (possibly overlapping) instructions in this region.
+    // May be used as temporary storage between register writes (register write will modify the corresponding region with its required instructions)
+    // Unused regions may be used as normal.
+    //      eg. if only one range [18:16] is used, then almost all of this is free for normal usage. If all ranges are used, all is reserved.
+    ulp_insn_t regwr_work_area[HULP_REGWR_WORK_AREA_END - HULP_REGWR_WORK_AREA_START];
+    // Normal usage
+    ulp_insn_t normal2[HULP_WR_REG_GEN_ENTRY_HAS_RET - HULP_REGWR_WORK_AREA_END];
+    // Reserved
+    ulp_insn_t regwr_gen_wr[HULP_WR_REG_GEN_ENTRY_HAS_RET_COUNT];
+    // Normal usage
+    ulp_insn_t normal3[(HULP_WR_REG_GEN_ENTRY) - (HULP_WR_REG_GEN_ENTRY_HAS_RET + HULP_WR_REG_GEN_ENTRY_HAS_RET_COUNT)];
+    // Reserved
+    ulp_insn_t regwr_gen_ret[HULP_WR_REG_GEN_ENTRY_COUNT];
+    // Normal usage
+    ulp_insn_t normal4[((CONFIG_ESP32_ULP_COPROC_RESERVE_MEM / 4) > (HULP_WR_REG_GEN_ENTRY + HULP_WR_REG_GEN_ENTRY_COUNT)) ? (CONFIG_ESP32_ULP_COPROC_RESERVE_MEM / sizeof(ulp_insn_t)) - (HULP_WR_REG_GEN_ENTRY + HULP_WR_REG_GEN_ENTRY_COUNT) : 0];
+};
+
+_Static_assert(offsetof(struct hulp_regwr_rtc_slow_map_check, regwr_work_area) == (HULP_REGWR_WORK_AREA_START * sizeof(ulp_insn_t)), "wrong offset: work area");
+_Static_assert(offsetof(struct hulp_regwr_rtc_slow_map_check, regwr_gen_wr) == (HULP_WR_REG_GEN_ENTRY_HAS_RET * sizeof(ulp_insn_t)), "wrong offset: gen wr");
+_Static_assert(offsetof(struct hulp_regwr_rtc_slow_map_check, regwr_gen_ret) == (HULP_WR_REG_GEN_ENTRY * sizeof(ulp_insn_t)), "wrong offset: gen ret");
+
 esp_err_t hulp_regwr_load_generate_ret()
 {
 /**
