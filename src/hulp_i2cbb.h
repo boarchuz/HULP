@@ -282,6 +282,17 @@ extern "C" {
     {.val = ((((uint16_t)(_slave_addr)) & 0x7F) << 9) | (((_slave_reg) & 0xFF) << 0)},{.val = (_num_bytes)}
 
 /**
+ * Initialise the header of a I2CBB command array for reading without writing pointer
+ * By default, a read command consists of a write transaction to set the slave register pointer, followed by the configured read transaction.
+ * 		slave_address[WR]+slave_reg + slave_address[RD]+num_bytes...
+ * Use this, instead, to skip the pointer write to perform only the read.
+ * 		slave_address[RD]+num_bytes...
+ *  See HULP_I2C_CMD_1B description for usage
+ */
+#define HULP_I2C_CMD_HDR_NO_PTR(_slave_addr, _num_bytes) \
+    {.val = ((((uint16_t)(_slave_addr)) & 0x7F) << 9) | (1 << 8)},{.val = (_num_bytes)}
+
+/**
  * Initialise two bytes in I2CBB command array
  *  See HULP_I2C_CMD_1B description for usage
  */
@@ -378,7 +389,7 @@ extern "C" {
 	M_LABEL(label_read), \
 		I_MOVI(reg_scratch, 39), \
 		M_MOVL(R0, label_read), \
-		I_ST(reg_return, R0, 88), \
+		I_ST(reg_return, R0, 90), \
 		I_MOVI(reg_return, 0), \
 		I_ADDR(reg_scratch, R0, reg_scratch), \
 		I_GPIO_READ(sda_gpio), \
@@ -389,38 +400,41 @@ extern "C" {
 		I_GPIO_OUTPUT_EN(sda_gpio), \
 		I_GPIO_OUTPUT_EN(scl_gpio), \
 		I_STAGE_RST(), \
-		I_BL(13, 32768), \
+		I_BL(17, 32768), \
 		I_GPIO_OUTPUT_DIS(sda_gpio), \
-		I_GPIO_OUTPUT_DIS(scl_gpio), \
 		I_STAGE_INC(1), \
+		I_GPIO_OUTPUT_DIS(scl_gpio), \
+		I_JUMPS(3, 8, JUMPS_LT), \
+		I_BL(3, 32768), \
+		I_STAGE_INC(100), \
 		I_LSHI(R0, R0, 1), \
 		I_GPIO_OUTPUT_EN(scl_gpio), \
-		I_JUMPS(-6, 8, JUMPS_LT), \
+		I_JUMPS(-9, 8, JUMPS_LT), \
 		I_GPIO_OUTPUT_DIS(sda_gpio), \
 		I_GPIO_OUTPUT_DIS(scl_gpio), \
 		I_GPIO_READ(sda_gpio), \
 		I_GPIO_OUTPUT_EN(scl_gpio), \
-		I_BGE(8, 1), \
+		I_BGE(5, 1), \
+		I_LD(R0, reg_ptr, 0), \
 		I_BXR(reg_scratch), \
 		I_GPIO_OUTPUT_EN(sda_gpio), \
-		I_BGE(-12, 0), \
-		I_ADDI(reg_scratch, reg_scratch, 1), \
-		I_LD(R0, reg_ptr, 0), \
-		I_LSHI(R0, R0, 8), \
-		I_BGE(-19, 0), \
+		I_BGE(-16, 0), \
 		I_SUBI(R0, R0, 2), \
 		I_GPIO_OUTPUT_EN(sda_gpio), \
 		I_GPIO_OUTPUT_DIS(scl_gpio), \
 		M_MOVL(reg_return, label_read), \
-		I_LD(reg_return, reg_return, 88), \
+		I_LD(reg_return, reg_return, 90), \
 		I_GPIO_OUTPUT_DIS(sda_gpio), \
 		I_BXR(reg_return), \
-		I_BGE(-11, 0), \
+		I_JUMPS(11, 50, JUMPS_GE), \
+		I_ADDI(reg_scratch, reg_scratch, 65504), \
+		I_ADDI(reg_scratch, reg_scratch, 37), \
+		I_LSHI(R0, R0, 8), \
+		I_BGE(-31, 0), \
 		I_GPIO_OUTPUT_DIS(scl_gpio), \
-		I_ADDI(reg_scratch, reg_scratch, 5), \
-		I_LD(R0, reg_ptr, 0), \
+		I_ADDI(reg_scratch, reg_scratch, 4), \
 		I_ORI(R0, R0, 256), \
-		I_BGE(-34, 0), \
+		I_BGE(-37, 0), \
 		I_GPIO_OUTPUT_EN(scl_gpio), \
 		I_GPIO_OUTPUT_DIS(sda_gpio), \
 		I_STAGE_RST(), \
@@ -448,14 +462,13 @@ extern "C" {
 		I_ADDI(reg_return, reg_return, 1), \
 		I_JUMPS(-25, 9, JUMPS_LT), \
 		I_MOVI(R0, 0), \
-		I_BGE(-37, 0), \
+		I_BGE(-40, 0), \
 	M_LABEL(label_write), \
-		I_MOVI(reg_scratch, 75), \
-		I_BGE(-73, 0), \
-		I_BGE(-47, 0), \
+		I_MOVI(reg_scratch, 41), \
+		I_BGE(-76, 0), \
 		I_LD(R0, reg_ptr, 1), \
 		I_SUBR(R0, R0, reg_return), \
-		I_BL(-45, 1), \
+		I_BL(-47, 1), \
 		I_ANDI(R0, reg_return, 1), \
 		I_BL(2, 1), \
 		I_STAGE_INC(1), \
@@ -463,8 +476,8 @@ extern "C" {
 		I_ADDR(R0, R0, reg_ptr), \
 		I_LD(R0, R0, 2), \
 		I_ADDI(reg_return, reg_return, 1), \
-		I_JUMPS(-56, 9, JUMPS_GE), \
-		I_BGE(-75, 0), \
+		I_JUMPS(-46, 9, JUMPS_GE), \
+		I_BGE(-77, 0), \
 		I_HALT()
 
 #ifdef __cplusplus
