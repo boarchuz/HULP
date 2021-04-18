@@ -357,6 +357,7 @@ extern "C" {
 	Return:
 		R0: err code
 			0 = Success, -1 = Slave NACK, -2 = Bus Error (checked on first byte only)
+			ALU: Zero on success, overflow on error.
 		reg_ptr: reg_ptr
 		reg_scratch: undefined
 		reg_return: reg_return
@@ -368,7 +369,7 @@ extern "C" {
 				M_BX(LABEL_I2C_READ),
 				M_LABEL(LABEL_I2C_RETURN),
 				// Check error code
-				M_BGE(LABEL_I2C_ERROR, 1),
+				M_BGE(LABEL_I2C_ERROR, 1), // or M_BXF(LABEL_I2C_ERROR) (allows long jumps)
 				// Check some value you just received and wake if > some threshold
 				I_GET(R0, R0, example_read_cmd[HULP_I2C_CMD_DATA_OFFSET]),
 				M_BGE(LABEL_WAKE, 1234),
@@ -461,7 +462,7 @@ extern "C" {
 		I_ST(reg_scratch, R0, 2), \
 		I_ADDI(reg_return, reg_return, 1), \
 		I_JUMPS(-25, 9, JUMPS_LT), \
-		I_MOVI(R0, 0), \
+		I_ANDI(R0, R0, 0), \
 		I_BGE(-40, 0), \
 	M_LABEL(label_write), \
 		I_MOVI(reg_scratch, 41), \
