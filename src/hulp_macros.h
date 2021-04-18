@@ -75,6 +75,31 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
 #define RTCIO_HAS_DEFAULT_PULLDOWN(x) ((x == GPIO_NUM_2) || (x == GPIO_NUM_4) || (x == GPIO_NUM_12) || (x == GPIO_NUM_13))
 
 /**
+ * Get a 'unique' label automatically (using line number)
+ * 
+ * Use in place of short-lived labels where no other reference is required.
+ * 
+ * Ensure that no other labels conflict with the range CONFIG_HULP_LABEL_AUTO_BASE - 65535
+ * 
+ * eg. M_RETURN(HULP_LBLA(), R3, LBL_SUBROUTINE),
+ */
+#define HULP_LBLA() ({ \
+            TRY_STATIC_ASSERT(__LINE__ <= (UINT16_MAX - CONFIG_HULP_LABEL_AUTO_BASE), (Auto label overflow)); \
+            (CONFIG_HULP_LABEL_AUTO_BASE + __LINE__); \
+        })
+
+/**
+ * Label based on the provided name
+ * 
+ * Chance of conflicts and may inflate binary size. Not recommended in most cases.
+ * 
+ * eg.  M_BX(HULP_LBL(My label)),   // Goto "My label"
+ *      M_LABEL(HULP_LBL(My label)), // Create "My label"
+ *      
+ */
+#define HULP_LBL(lbl_name) ((uint16_t)( (uint32_t)(#lbl_name) % UINT16_MAX))
+
+/**
  * Move the offset (in words) of a ulp_var_t or similar into reg_dest.
  *  You may then use it with regular I_LD and I_ST instructions, for example.
  *  It is strongly suggested to use I_GET and I_PUT methods provided by HULP instead.

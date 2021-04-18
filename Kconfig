@@ -1,5 +1,12 @@
 menu "HULP"
 
+    config HULP_LABEL_AUTO_BASE
+        int "Auto Label Base"
+        default 60000
+        range 0 65535
+        help
+            Starting number for automatic labels. If using HULP_LBLA(), label numbers between this number and 65535 are reserved and should not be used.
+
     config HULP_USE_APPROX_FAST_CLK
         bool "Use Approximate Fast Clock Frequency"
         default n
