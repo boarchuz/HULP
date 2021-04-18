@@ -149,6 +149,13 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_ST(reg_src, reg_offset, (uint16_t)(RTC_WORD_OFFSET(var) - (val_offset)))
 
 /**
+ * Read a bit from peripheral register into R0
+ *
+ * This instruction can access RTC_CNTL_, RTC_IO_, SENS_, and RTC_I2C peripheral registers.
+ */
+#define I_RD_REG_BIT(reg, shift) I_RD_REG(reg, shift, shift)
+
+/**
  * Request and block until the RTC ticks register is updated.
  */
 #define M_UPDATE_TICKS() \
@@ -185,18 +192,10 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_ADC(reg_dest, (uint32_t)hulp_adc_get_periph_index(pin), (uint32_t)(hulp_adc_get_channel_num(pin)))
 
 /**
- * Read GPIO input value into R0 lsb
- * ie. R0 == 0 (low) or R0 == 1 (high)
+ * Set RTCIO output level.
  */
-#define I_GPIO_READ(gpio_num) \
-    I_RTCIO_READ(hulp_gtr(gpio_num))
-
-/**
- * Read RTCIO input value into R0 lsb
- * ie. R0 == 0 (low) or R0 == 1 (high)
- */
-#define I_RTCIO_READ(rtcio_num) \
-    I_RTCIOS_READ((rtcio_num), 1)
+#define I_RTCIO_SET(rtcio_num, level) \
+    I_WR_REG_BIT( ( (level) ? RTC_GPIO_OUT_W1TS_REG : RTC_GPIO_OUT_W1TC_REG ), (uint8_t)( (level) ? (RTC_GPIO_OUT_DATA_W1TS_S + (rtcio_num)) : (RTC_GPIO_OUT_DATA_W1TC_S + (rtcio_num)) ), 1)
 
 /**
  * Set GPIO output level.
@@ -205,11 +204,10 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_RTCIO_SET(hulp_gtr(gpio_num), level)
 
 /**
- * Set RTCIO output level.
+ * Enable RTCIO output.
  */
-#define I_RTCIO_SET(rtcio_num, level) \
-    I_WR_REG_BIT( ( (level) ? RTC_GPIO_OUT_W1TS_REG : RTC_GPIO_OUT_W1TC_REG ), (uint8_t)( (level) ? (RTC_GPIO_OUT_DATA_W1TS_S + (rtcio_num)) : (RTC_GPIO_OUT_DATA_W1TC_S + (rtcio_num)) ), 1)
-    // I_WR_REG_BIT( RTC_GPIO_OUT_REG, (uint8_t)( RTC_GPIO_OUT_DATA_S + (rtcio_num)), (level))
+#define I_RTCIO_OUTPUT_EN(rtcio_num) \
+    I_WR_REG_BIT(RTC_GPIO_ENABLE_W1TS_REG, (uint8_t)(RTC_GPIO_ENABLE_W1TS_S + rtcio_num), 1)
 
 /**
  * Enable GPIO output.
@@ -218,10 +216,10 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_RTCIO_OUTPUT_EN(hulp_gtr(gpio_num))
 
 /**
- * Enable RTCIO output.
+ * Disable RTCIO output.
  */
-#define I_RTCIO_OUTPUT_EN(rtcio_num) \
-    I_WR_REG_BIT(RTC_GPIO_ENABLE_W1TS_REG, (uint8_t)(RTC_GPIO_ENABLE_W1TS_S + rtcio_num), 1)
+#define I_RTCIO_OUTPUT_DIS(rtcio_num) \
+    I_WR_REG_BIT(RTC_GPIO_ENABLE_W1TC_REG, (uint8_t)(RTC_GPIO_ENABLE_W1TC_S + rtcio_num), 1)
 
 /**
  * Disable GPIO output.
@@ -230,10 +228,10 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_RTCIO_OUTPUT_DIS(hulp_gtr(gpio_num))
 
 /**
- * Disable RTCIO output.
+ * Set RTCIO internal pullup.
  */
-#define I_RTCIO_OUTPUT_DIS(rtcio_num) \
-    I_WR_REG_BIT(RTC_GPIO_ENABLE_W1TC_REG, (uint8_t)(RTC_GPIO_ENABLE_W1TC_S + rtcio_num), 1)
+#define I_RTCIO_PULLUP(rtcio_num, enable) \
+    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pullup), ( (enable) ? 1 : 0) )
 
 /**
  * Set GPIO internal pullup.
@@ -242,10 +240,22 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_RTCIO_PULLUP(hulp_gtr(gpio_num), enable)
 
 /**
- * Set RTCIO internal pullup.
+ * Get RTCIO pullup enabled (1/0) into R0
  */
-#define I_RTCIO_PULLUP(rtcio_num, enable) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pullup), ( (enable) ? 1 : 0) )
+#define I_RTCIO_PULLUP_RD(rtcio_num) \
+    I_RD_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pullup))
+
+/**
+ * Get GPIO pullup enabled (1/0) into R0
+ */
+#define I_GPIO_PULLUP_RD(gpio_num) \
+    I_RTCIO_PULLUP_RD(hulp_gtr(gpio_num))
+
+/**
+ * Set RTCIO internal pulldown.
+ */
+#define I_RTCIO_PULLDOWN(rtcio_num, enable) \
+    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pulldown), ( (enable) ? 1 : 0) )
 
 /**
  * Set GPIO internal pulldown.
@@ -254,10 +264,16 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_RTCIO_PULLDOWN(hulp_gtr(gpio_num), enable)
 
 /**
- * Set RTCIO internal pulldown.
+ * Get RTCIO pulldown enabled (1/0) into R0
  */
-#define I_RTCIO_PULLDOWN(rtcio_num, enable) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pulldown), ( (enable) ? 1 : 0) )
+#define I_RTCIO_PULLDOWN_RD(rtcio_num) \
+    I_RD_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pulldown))
+
+/**
+ * Get GPIO pulldown enabled (1/0) into R0
+ */
+#define I_GPIO_PULLDOWN_RD(gpio_num) \
+    I_RTCIO_PULLDOWN_RD(hulp_gtr(gpio_num))
 
 /**
  * Set RTCIO internal pull mode.
@@ -273,6 +289,27 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
 #define I_GPIO_PULL_MODE(gpio_num, pull_mode) \
     I_RTCIO_PULL_MODE(hulp_gtr(gpio_num), pull_mode)
 
+/**
+ * Get RTCIO output level setting (0/1)
+ */
+#define I_RTCIO_SET_RD(rtcio_num) \
+    I_RD_REG_BIT(RTC_GPIO_OUT_REG, (uint8_t)(RTC_GPIO_OUT_DATA_S + (rtcio_num)))
+
+/**
+ * Get GPIO output level setting (0/1)
+ */
+#define I_GPIO_SET_RD(gpio_num) \
+    I_RTCIO_SET_RD(hulp_gtr(gpio_num))
+
+/**
+ * Toggle RTCIO output value.
+ * This is a simple implementation and should not be used if timing requirements are strict.
+ */
+#define M_RTCIO_TOGGLE(rtcio_num) \
+    I_RTCIO_SET_RD(RTC_GPIO_OUT_REG, (uint8_t)(RTC_GPIO_OUT_DATA_S + (rtcio_num))), \
+    I_RTCIO_SET((rtcio_num), 0), \
+    I_BGE(2,1), \
+    I_RTCIO_SET((rtcio_num), 1)
 
 /**
  * Toggle GPIO output value.
@@ -280,16 +317,6 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  */
 #define M_GPIO_TOGGLE(gpio_num) \
     M_RTCIO_TOGGLE(hulp_gtr(gpio_num))
-
-/**
- * Toggle RTCIO output value.
- * This is a simple implementation and should not be used if timing requirements are strict.
- */
-#define M_RTCIO_TOGGLE(rtcio_num) \
-    I_RD_REG_BIT(RTC_GPIO_OUT_REG, (uint8_t)(RTC_GPIO_OUT_DATA_S + (rtcio_num))), \
-    I_RTCIO_SET((rtcio_num), 0), \
-    I_BGE(2,1), \
-    I_RTCIO_SET((rtcio_num), 1)
 
 /**
  * Read RTCIO input values into R0.
@@ -301,11 +328,18 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
         (uint8_t)(RTC_GPIO_IN_NEXT_S + (( ((low_rtcio) + (num) - 1) < 17) ? ((low_rtcio) + (num) - 1) : (17 - low_rtcio))))
 
 /**
- * Latch GPIO config. Use before returning to deep sleep to maintain state.
- * The state will not change (eg. output level) until a later I_GPIO_UNHOLD.
+ * Read RTCIO input value into R0 lsb
+ * ie. R0 == 0 (low) or R0 == 1 (high)
  */
-#define I_GPIO_HOLD_EN(gpio_num) \
-    I_RTCIO_HOLD_EN(hulp_gtr(gpio_num))
+#define I_RTCIO_READ(rtcio_num) \
+    I_RTCIOS_READ((rtcio_num), 1)
+
+/**
+ * Read GPIO input value into R0 lsb
+ * ie. R0 == 0 (low) or R0 == 1 (high)
+ */
+#define I_GPIO_READ(gpio_num) \
+    I_RTCIO_READ(hulp_gtr(gpio_num))
 
 /**
  * Latch individual RTCIO config. Use before returning to deep sleep to maintain state.
@@ -314,16 +348,30 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold), 1)
 
 /**
- * Unlatch individual GPIO config.
+ * Latch GPIO config. Use before returning to deep sleep to maintain state.
+ * The state will not change (eg. output level) until a later I_GPIO_UNHOLD.
  */
-#define I_GPIO_HOLD_DIS(gpio_num) \
-    I_RTCIO_HOLD_DIS(hulp_gtr(gpio_num))
+#define I_GPIO_HOLD_EN(gpio_num) \
+    I_RTCIO_HOLD_EN(hulp_gtr(gpio_num))
 
 /**
  * Unlatch individual RTCIO config.
  */
 #define I_RTCIO_HOLD_DIS(rtcio_num) \
     I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold), 0)
+
+/**
+ * Unlatch individual GPIO config.
+ */
+#define I_GPIO_HOLD_DIS(gpio_num) \
+    I_RTCIO_HOLD_DIS(hulp_gtr(gpio_num))
+
+/**
+ * Latch RTCIO config. Use before returning to deep sleep to maintain state.
+ * Note: This uses a different reg to I_RTCIO_HOLD_EN. Do not confuse the two.
+ */
+#define I_RTCIO_FORCE_HOLD_EN(rtcio_num) \
+    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold_force), 1)
 
 /**
  * Unlatch RTCIO config. Use before returning to deep sleep to maintain state.
@@ -334,23 +382,16 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_RTCIO_FORCE_HOLD_EN(hulp_gtr(gpio_num))
 
 /**
- * Latch RTCIO config. Use before returning to deep sleep to maintain state.
- * Note: This uses a different reg to I_RTCIO_HOLD_EN. Do not confuse the two.
+ * Unlatch RTCIO config.
  */
-#define I_RTCIO_FORCE_HOLD_EN(rtcio_num) \
-    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold_force), 1)
+#define I_RTCIO_FORCE_HOLD_DIS(rtcio_num) \
+    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold_force), 0)
 
 /**
  * Unlatch GPIO config.
  */
 #define I_GPIO_FORCE_HOLD_DIS(gpio_num) \
     I_RTCIO_FORCE_HOLD_DIS(hulp_gtr(gpio_num))
-
-/**
- * Unlatch RTCIO config.
- */
-#define I_RTCIO_FORCE_HOLD_DIS(rtcio_num) \
-    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold_force), 0)
 
 /**
  * Latch all RTCIOs configs.
@@ -375,14 +416,14 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
 /**
  * Set GPIO output strength. Ensure pin is output capable!
  */
-#define I_GPIO_SET_DRIVE_CAP(gpio_num, drive_cap) \
-    I_RTCIO_SET_DRIVE_CAP(hulp_gtr(gpio_num), drive_cap)
+#define I_RTCIO_SET_DRIVE_CAP(rtcio_num, drive_cap) \
+    I_WR_REG(rtc_io_desc[(rtcio_num)].reg, rtc_io_desc[(rtcio_num)].drv_s, rtc_io_desc[(rtcio_num)].drv_s + 1, (uint8_t)(drive_cap))
 
 /**
  * Set GPIO output strength. Ensure pin is output capable!
  */
-#define I_RTCIO_SET_DRIVE_CAP(rtcio_num, drive_cap) \
-    I_WR_REG(rtc_io_desc[(rtcio_num)].reg, rtc_io_desc[(rtcio_num)].drv_s, rtc_io_desc[(rtcio_num)].drv_s + 1, (uint8_t)(drive_cap))
+#define I_GPIO_SET_DRIVE_CAP(gpio_num, drive_cap) \
+    I_RTCIO_SET_DRIVE_CAP(hulp_gtr(gpio_num), drive_cap)
 
 /**
  * Set RTC peripherals automatic power down
@@ -401,13 +442,6 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  */
 #define I_PWR_PERI_FORCE_PU(enable) \
     I_WR_REG_BIT(RTC_CNTL_PWC_REG, RTC_CNTL_PWC_FORCE_PU_S, (enable) ? 1 : 0)
-
-/**
- * Read a bit from peripheral register into R0
- *
- * This instruction can access RTC_CNTL_, RTC_IO_, SENS_, and RTC_I2C peripheral registers.
- */
-#define I_RD_REG_BIT(reg, shift) I_RD_REG(reg, shift, shift)
 
 /**
  * Ensure num_bits is >= bits in val (eg. 0b111 must have num_bits >=3; higher bits will be written regardless)
