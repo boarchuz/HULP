@@ -613,6 +613,13 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     M_SET_ENTRY((uint16_t)hulp_get_label_pc(label_entry, program_ptr))
 
 /**
+ * Set the entry point to some offset from this PC
+ */
+#define M_SET_ENTRY_O(label_temp, program_ptr, offset) \
+    M_LABEL(label_temp), \
+    M_SET_ENTRY((uint16_t)hulp_get_label_pc(label_temp, program_ptr) + 2 + (offset))
+
+/**
  * Get interrupt triggered bits for RTCIO
  */
 #define I_RTCIO_INT_RD(low_rtcio, num) I_RD_REG(RTC_GPIO_STATUS_REG, (uint8_t)(RTC_GPIO_STATUS_INT_S + (low_rtcio)), \
