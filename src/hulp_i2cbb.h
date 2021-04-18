@@ -406,7 +406,7 @@ extern "C" {
 		I_GPIO_OUTPUT_DIS(scl_gpio), \
 		I_JUMPS(3, 8, JUMPS_LT), \
 		I_BL(3, 32768), \
-		I_STAGE_INC(100), \
+		I_STAGE_INC(50), \
 		I_LSHI(R0, R0, 1), \
 		I_GPIO_OUTPUT_EN(scl_gpio), \
 		I_JUMPS(-9, 8, JUMPS_LT), \
@@ -471,12 +471,12 @@ extern "C" {
 		I_BL(-47, 1), \
 		I_ANDI(R0, reg_return, 1), \
 		I_BL(2, 1), \
-		I_STAGE_INC(1), \
+		I_STAGE_INC(100), \
 		I_RSHI(R0, reg_return, 1), \
 		I_ADDR(R0, R0, reg_ptr), \
 		I_LD(R0, R0, 2), \
 		I_ADDI(reg_return, reg_return, 1), \
-		I_JUMPS(-46, 9, JUMPS_GE), \
+		I_JUMPS(-46, 100, JUMPS_GE), \
 		I_BGE(-77, 0), \
 		I_HALT()
 
