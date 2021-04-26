@@ -7,11 +7,9 @@
 
 static const char *TAG = "MAIN";
 
-#define SCL_PIN GPIO_NUM_26
-#define SDA_PIN GPIO_NUM_25
-#define SLAVE_ADDR 0x44     // should be either 0x44 or 0x45
-static gpio_num_t LED_ERR = GPIO_NUM_13;
-static const uint16_t max_temp_difference_raw = 37;     // actually 37.4485 which is about 0.1C
+static const uint8_t SLAVE_ADDR = 0x44;     // should be either 0x44 or 0x45
+static const gpio_num_t SCL_PIN = GPIO_NUM_26, SDA_PIN = GPIO_NUM_25, LED_ERR = GPIO_NUM_13;
+static const uint16_t MAX_TEMP_DIFFERENCE_RAW = 37;     // actually 37.4485 which is about 0.1C
 
 static RTC_SLOW_ATTR ulp_var_t ulp_write_cmd[] = {
         // write 0x24, 0x00 which is high repeatability with no clock stretching
@@ -66,21 +64,21 @@ void init_ulp() {
             // deal with negative
             M_BGE(LABEL_NEGATIVE, 0x8000),
 
-            M_BGE(LABEL_WAKE, max_temp_difference_raw),
+            M_BGE(LABEL_WAKE, MAX_TEMP_DIFFERENCE_RAW),
             I_HALT(),
 
             M_LABEL(LABEL_NEGATIVE),
-                M_BL(LABEL_WAKE, 0xFFFF - max_temp_difference_raw),
-                I_HALT(),
+            M_BL(LABEL_WAKE, (uint16_t ) (1 - MAX_TEMP_DIFFERENCE_RAW)),
+            I_HALT(),
 
             M_LABEL(LABEL_WAKE),
-				I_WAKE(),
-				I_HALT(),
+            I_WAKE(),
+            I_HALT(),
 
             M_LABEL(LABEL_I2C_ERROR),
-                I_GPIO_SET(LED_ERR, 0), // turn on led
-                I_END(),                     // end ulp program so it won't run again
-                I_HALT(),
+            I_GPIO_SET(LED_ERR, 1), // turn on led
+            I_END(),                // end ulp program so it won't run again
+            I_HALT(),
 
             M_INCLUDE_I2CBB_CMD(LABEL_I2C_READ, LABEL_I2C_WRITE, SCL_PIN, SDA_PIN)
     };
