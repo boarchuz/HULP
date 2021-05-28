@@ -14,7 +14,7 @@
 #include "hulp_compat.h"
 
 #if CONFIG_HULP_TRY_CONST
-#define SOC_REG_TO_ULP_PERIPH_SEL(reg) (uint32_t)(((reg) - DR_REG_RTCIO_BASE) / 0x400)
+#define SOC_REG_TO_ULP_PERIPH_SEL(reg) (uint32_t)(((reg) - DR_REG_RTCCNTL_BASE) / 0x400)
 static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     RTCIO_GPIO0_CHANNEL,    //GPIO0
     -1,//GPIO1
