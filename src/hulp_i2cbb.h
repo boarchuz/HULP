@@ -388,98 +388,97 @@ extern "C" {
 
 #define M_INCLUDE_I2CBB_CMD_(label_read, label_write, scl_gpio, sda_gpio, reg_ptr, reg_scratch, reg_return) \
 	M_LABEL(label_read), \
-		I_MOVI(reg_scratch, 39), \
-		M_MOVL(R0, label_read), \
-		I_ST(reg_return, R0, 90), \
-		I_MOVI(reg_return, 0), \
-		I_ADDR(reg_scratch, R0, reg_scratch), \
-		I_GPIO_READ(sda_gpio), \
-		I_BL(26, 1), \
-		I_GPIO_READ(scl_gpio), \
-		I_BL(24, 1), \
-		I_LD(R0, reg_ptr, 0), \
-		I_GPIO_OUTPUT_EN(sda_gpio), \
-		I_GPIO_OUTPUT_EN(scl_gpio), \
-		I_STAGE_RST(), \
-		I_BL(17, 32768), \
-		I_GPIO_OUTPUT_DIS(sda_gpio), \
-		I_STAGE_INC(1), \
-		I_GPIO_OUTPUT_DIS(scl_gpio), \
-		I_JUMPS(3, 8, JUMPS_LT), \
-		I_BL(3, 32768), \
-		I_STAGE_INC(50), \
-		I_LSHI(R0, R0, 1), \
-		I_GPIO_OUTPUT_EN(scl_gpio), \
-		I_JUMPS(-9, 8, JUMPS_LT), \
-		I_GPIO_OUTPUT_DIS(sda_gpio), \
-		I_GPIO_OUTPUT_DIS(scl_gpio), \
-		I_GPIO_READ(sda_gpio), \
-		I_GPIO_OUTPUT_EN(scl_gpio), \
-		I_BGE(5, 1), \
-		I_LD(R0, reg_ptr, 0), \
-		I_BXR(reg_scratch), \
-		I_GPIO_OUTPUT_EN(sda_gpio), \
-		I_BGE(-16, 0), \
-		I_SUBI(R0, R0, 2), \
-		I_GPIO_OUTPUT_EN(sda_gpio), \
-		I_GPIO_OUTPUT_DIS(scl_gpio), \
-		M_MOVL(reg_return, label_read), \
-		I_LD(reg_return, reg_return, 90), \
-		I_GPIO_OUTPUT_DIS(sda_gpio), \
-		I_BXR(reg_return), \
-		I_JUMPS(11, 50, JUMPS_GE), \
-		I_ADDI(reg_scratch, reg_scratch, 65504), \
-		I_ADDI(reg_scratch, reg_scratch, 37), \
-		I_LSHI(R0, R0, 8), \
-		I_BGE(-31, 0), \
-		I_GPIO_OUTPUT_DIS(scl_gpio), \
-		I_ADDI(reg_scratch, reg_scratch, 4), \
-		I_ORI(R0, R0, 256), \
-		I_BGE(-37, 0), \
-		I_GPIO_OUTPUT_EN(scl_gpio), \
-		I_GPIO_OUTPUT_DIS(sda_gpio), \
-		I_STAGE_RST(), \
-		I_GPIO_OUTPUT_DIS(scl_gpio), \
-		I_LSHI(reg_scratch, reg_scratch, 1), \
-		I_GPIO_READ(sda_gpio), \
-		I_ORR(reg_scratch, reg_scratch, R0), \
-		I_GPIO_OUTPUT_EN(scl_gpio), \
-		I_STAGE_INC(1), \
-		I_JUMPS(-6, 8, JUMPS_LT), \
-		I_LD(R0, reg_ptr, 1), \
-		I_SUBR(R0, R0, reg_return), \
-		I_BGE(7, 2), \
-		I_GPIO_OUTPUT_DIS(scl_gpio), \
-		I_STAGE_INC(1), \
-		I_ANDI(R0, reg_return, 1), \
-		I_GPIO_OUTPUT_EN(scl_gpio), \
-		I_BGE(2, 1), \
-		I_LSHI(reg_scratch, reg_scratch, 8), \
-		I_GPIO_OUTPUT_EN(sda_gpio), \
-		I_RSHI(R0, reg_return, 1), \
-		I_ADDR(R0, R0, reg_ptr), \
-		I_GPIO_OUTPUT_DIS(scl_gpio), \
-		I_ST(reg_scratch, R0, 2), \
-		I_ADDI(reg_return, reg_return, 1), \
-		I_JUMPS(-25, 9, JUMPS_LT), \
-		I_ANDI(R0, R0, 0), \
-		I_BGE(-40, 0), \
+        I_MOVI(reg_scratch, 32), \
+        M_MOVL(R0, label_read), \
+        I_ST(reg_return, R0, 89), \
+        I_MOVI(reg_return, 0), \
+        I_ADDR(reg_scratch, R0, reg_scratch), \
+        I_GPIO_READ(sda_gpio), \
+        I_BL(62, 1), \
+        I_GPIO_READ(scl_gpio), \
+        I_BL(60, 1), \
+        I_LD(R0, reg_ptr, 0), \
+        I_GPIO_OUTPUT_EN(sda_gpio), \
+        I_GPIO_OUTPUT_EN(scl_gpio), \
+        I_STAGE_RST(), \
+        I_BL(17, 32768), \
+        I_GPIO_OUTPUT_DIS(sda_gpio), \
+        I_STAGE_INC(1), \
+        I_GPIO_OUTPUT_DIS(scl_gpio), \
+        I_JUMPS(3, 8, JUMPS_LT), \
+        I_BL(3, 32768), \
+        I_STAGE_INC(50), \
+        I_LSHI(R0, R0, 1), \
+        I_GPIO_OUTPUT_EN(scl_gpio), \
+        I_JUMPS(-9, 8, JUMPS_LT), \
+        I_GPIO_OUTPUT_DIS(sda_gpio), \
+        I_GPIO_OUTPUT_DIS(scl_gpio), \
+        I_GPIO_READ(sda_gpio), \
+        I_GPIO_OUTPUT_EN(scl_gpio), \
+        I_BGE(41, 1), \
+        I_LD(R0, reg_ptr, 0), \
+        I_BXR(reg_scratch), \
+        I_GPIO_OUTPUT_EN(sda_gpio), \
+        I_BGE(-16, 0), \
+        I_JUMPS(12, 50, JUMPS_GE), \
+        I_ADDI(reg_scratch, reg_scratch, 65498), \
+        I_ADDI(reg_scratch, reg_scratch, 43), \
+        I_LSHI(R0, R0, 8), \
+        I_BGE(-24, 0), \
+        I_GPIO_OUTPUT_DIS(scl_gpio), \
+        I_ADDI(reg_scratch, reg_scratch, 5), \
+        I_ORI(R0, R0, 256), \
+        I_BGE(-30, 0), \
+        I_ADDI(reg_return, reg_return, 1), \
+        I_GPIO_OUTPUT_EN(scl_gpio), \
+        I_GPIO_OUTPUT_DIS(sda_gpio), \
+        I_STAGE_RST(), \
+        I_GPIO_OUTPUT_DIS(scl_gpio), \
+        I_LSHI(reg_scratch, reg_scratch, 1), \
+        I_GPIO_READ(sda_gpio), \
+        I_ORR(reg_scratch, reg_scratch, R0), \
+        I_GPIO_OUTPUT_EN(scl_gpio), \
+        I_STAGE_INC(1), \
+        I_JUMPS(-6, 8, JUMPS_LT), \
+        I_LD(R0, reg_ptr, 1), \
+        I_SUBR(R0, R0, reg_return), \
+        I_BGE(7, 2), \
+        I_GPIO_OUTPUT_DIS(scl_gpio), \
+        I_STAGE_INC(1), \
+        I_ANDI(R0, reg_return, 1), \
+        I_GPIO_OUTPUT_EN(scl_gpio), \
+        I_BGE(2, 1), \
+        I_LSHI(reg_scratch, reg_scratch, 8), \
+        I_GPIO_OUTPUT_EN(sda_gpio), \
+        I_RSHI(R0, reg_return, 1), \
+        I_ADDR(R0, R0, reg_ptr), \
+        I_GPIO_OUTPUT_DIS(scl_gpio), \
+        I_ST(reg_scratch, R0, 2), \
+        I_JUMPS(-25, 9, JUMPS_LT), \
+        I_MOVI(R0, 2), \
+        I_GPIO_OUTPUT_EN(sda_gpio), \
+        I_GPIO_OUTPUT_DIS(scl_gpio), \
+        M_MOVL(reg_return, label_read), \
+        I_LD(reg_return, reg_return, 89), \
+        I_GPIO_OUTPUT_DIS(sda_gpio), \
+        I_SUBI(R0, R0, 2), \
+        I_BXR(reg_return), \
 	M_LABEL(label_write), \
-		I_MOVI(reg_scratch, 41), \
-		I_BGE(-76, 0), \
-		I_LD(R0, reg_ptr, 1), \
-		I_SUBR(R0, R0, reg_return), \
-		I_BL(-47, 1), \
-		I_ANDI(R0, reg_return, 1), \
-		I_BL(2, 1), \
-		I_STAGE_INC(100), \
-		I_RSHI(R0, reg_return, 1), \
-		I_ADDR(R0, R0, reg_ptr), \
-		I_LD(R0, R0, 2), \
-		I_ADDI(reg_return, reg_return, 1), \
-		I_JUMPS(-46, 100, JUMPS_GE), \
-		I_BGE(-77, 0), \
-		I_HALT()
+        I_MOVI(reg_scratch, 34), \
+        I_BGE(-75, 0), \
+        I_LD(R0, reg_ptr, 1), \
+        I_SUBR(R0, R0, reg_return), \
+        I_BL(-12, 1), \
+        I_ANDI(R0, reg_return, 1), \
+        I_BL(2, 1), \
+        I_STAGE_INC(100), \
+        I_RSHI(R0, reg_return, 1), \
+        I_ADDR(R0, R0, reg_ptr), \
+        I_LD(R0, R0, 2), \
+        I_ADDI(reg_return, reg_return, 1), \
+        I_JUMPS(-52, 100, JUMPS_GE), \
+        I_BGE(-76, 0), \
+        I_HALT()
 
 #ifdef __cplusplus
 }
