@@ -57,12 +57,14 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     RTCIO_GPIO38_CHANNEL,   //GPIO38
     RTCIO_GPIO39_CHANNEL,   //GPIO39
 };
-#define hulp_gtr(gpio_num) ((uint8_t)s_rtc_io_num_map[gpio_num])
-#else // CONFIG_HULP_TRY_CONST
-#define hulp_gtr(gpio_num) ((uint8_t)rtc_io_number_get(gpio_num))
-#endif // CONFIG_HULP_TRY_CONST
 
-#define hulp_log2(x) (31 - __builtin_clz(x))
+#define hulp_gtr(gpio_num) ((uint8_t)s_rtc_io_num_map[gpio_num])
+
+#define RTC_WORD_OFFSET(x) ((uint16_t)((uint32_t*)(&(x)) - RTC_SLOW_MEM))
+
+#else // CONFIG_HULP_TRY_CONST
+
+#define hulp_gtr(gpio_num) ((uint8_t)rtc_io_number_get(gpio_num))
 
 #define RTC_WORD_OFFSET(x) ({ \
             uint32_t* ptr_ = (uint32_t*)(&(x)); \
@@ -70,6 +72,10 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
             TRY_STATIC_ASSERT(esp_ptr_in_rtc_slow(ptr_), (Not in RTC Slow Mem)); \
             ((uint16_t)(ptr_ - RTC_SLOW_MEM)); \
         })
+
+#endif // CONFIG_HULP_TRY_CONST
+
+#define hulp_log2(x) (31 - __builtin_clz(x))
 
 #define RTCIO_HAS_DEFAULT_PULLUP(x) ((x == GPIO_NUM_0) || (x == GPIO_NUM_14) || (x == GPIO_NUM_15))
 #define RTCIO_HAS_DEFAULT_PULLDOWN(x) ((x == GPIO_NUM_2) || (x == GPIO_NUM_4) || (x == GPIO_NUM_12) || (x == GPIO_NUM_13))
