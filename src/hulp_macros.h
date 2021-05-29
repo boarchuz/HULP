@@ -253,6 +253,18 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_RTCIO_OUTPUT_DIS(hulp_gtr(gpio_num))
 
 /**
+ * Get RTCIO output enabled (1/0) into R0
+ */
+#define I_RTCIO_OUTPUT_RD(rtcio_num) \
+    I_RD_REG_BIT(RTC_GPIO_ENABLE_REG, (uint8_t)(RTC_GPIO_ENABLE_S + (rtcio_num)))
+
+/**
+ * Get GPIO output enabled (1/0) into R0
+ */
+#define I_GPIO_OUTPUT_RD(gpio_num) \
+    I_RTCIO_OUTPUT_RD(hulp_gtr(gpio_num))
+
+/**
  * Set RTCIO internal pullup.
  */
 #define I_RTCIO_PULLUP(rtcio_num, enable) \
