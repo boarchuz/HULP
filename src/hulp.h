@@ -10,7 +10,7 @@
 #include "hulp_macros.h"
 #include "hulp_types.h"
 
-#include "sdkconfig.h"
+#include "hulp_config.h"
 
 #ifdef __cplusplus
 extern "C" {

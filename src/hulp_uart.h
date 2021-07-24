@@ -8,7 +8,7 @@
 
 #include "hulp.h"
 
-#include "sdkconfig.h"
+#include "hulp_config.h"
 
 #ifdef __cplusplus
 extern "C" {

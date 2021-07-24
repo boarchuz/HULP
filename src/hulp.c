@@ -16,7 +16,7 @@
 
 #include "hulp_compat.h"
 
-#include "sdkconfig.h"
+#include "hulp_config.h"
 
 static const char* TAG = "HULP";
 

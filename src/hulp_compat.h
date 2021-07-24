@@ -2,7 +2,7 @@
 #define HULP_COMPAT_H
 
 #include "esp_idf_version.h"
-#include "sdkconfig.h"
+#include "hulp_config.h"
 
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4,2,0)
     #error "Unsupported IDF version"

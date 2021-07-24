@@ -5,7 +5,7 @@
 #include "soc/touch_sensor_channel.h"
 #include "soc/touch_sensor_periph.h"
 
-#include "sdkconfig.h"
+#include "hulp_config.h"
 
 static const char* TAG = "HULP-TCH";
 

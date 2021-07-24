@@ -2,7 +2,7 @@
 
 #include "hulp.h"
 
-#include "sdkconfig.h"
+#include "hulp_config.h"
 
 // Layout of RTC Slow Memory if using regwr
 struct hulp_regwr_rtc_slow_map_check {
