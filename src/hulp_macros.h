@@ -349,7 +349,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * This is a simple implementation and should not be used if timing requirements are strict.
  */
 #define M_RTCIO_TOGGLE(rtcio_num) \
-    I_RTCIO_SET_RD(RTC_GPIO_OUT_REG, (uint8_t)(RTC_GPIO_OUT_DATA_S + (rtcio_num))), \
+    I_RTCIO_SET_RD(rtcio_num), \
     I_RTCIO_SET((rtcio_num), 0), \
     I_BGE(2,1), \
     I_RTCIO_SET((rtcio_num), 1)
