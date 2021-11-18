@@ -90,9 +90,9 @@ void ulp_init()
             I_HALT(),
     };
 
-    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN1));
-    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN2));
-    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN3));
+    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12));
+    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN2, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12));
+    ESP_ERROR_CHECK(hulp_configure_analog_pin(PIN_ADC_PIN3, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12));
     ESP_ERROR_CHECK(rtc_gpio_pullup_en(PIN_ADC_PIN3));
 
     ESP_ERROR_CHECK(hulp_ulp_load(program, sizeof(program), 1000UL * ULP_WAKEUP_INTERVAL_MS, 0));
