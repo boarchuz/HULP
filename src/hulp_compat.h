@@ -9,7 +9,11 @@
 #endif
 
 #if CONFIG_IDF_TARGET_ESP32
-    #include "esp32/clk.h"
+    #if ESP_IDF_VERSION_MAJOR > 4
+        #include "esp_private/esp_clk.h"
+    #else
+        #include "esp32/clk.h"
+    #endif
     #include "esp32/ulp.h"
     #define HULP_ULP_RESERVE_MEM CONFIG_ESP32_ULP_COPROC_RESERVE_MEM
 #else
