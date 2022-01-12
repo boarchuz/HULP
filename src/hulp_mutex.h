@@ -13,7 +13,7 @@ extern "C" {
 
 /**
  * Mutex object for managing resource access between ULP and SoC
- * 
+ *
  * ULP:
  *  Take with M_MUTEX_TAKE (or M_MUTEX_TRY_TAKE), release with M_MUTEX_RELEASE
  * SoC:
@@ -27,7 +27,7 @@ typedef struct {
 
 /**
  * ULP: Flag mutex wanted
- * 
+ *
  * mutex: ulp_mutex_t object
  * reg_nonzero: R0-R3 which has any known value != 0
  * reg_nonzero_val: The known value in specified register
@@ -39,7 +39,7 @@ typedef struct {
 /**
  * ULP: Check if mutex held (after M_MUTEX_REQUEST)
  * R0 == 0 on success
- * 
+ *
  * mutex: ulp_mutex_t object
  * reg_any: R1-R3 which has any known value
  * reg_any_val: The known value in specified register
@@ -53,7 +53,7 @@ typedef struct {
  * ULP: Take mutex (non-blocking)
  * R0 == 0 on success
  * Must release (M_MUTEX_RELEASE) regardless of result
- * 
+ *
  * mutex: ulp_mutex_t object
  * reg_nonzero: R1-R3 which has any known value != 0
  * reg_nonzero_val: The known value in specified register
@@ -64,7 +64,7 @@ typedef struct {
 
 /**
  * ULP: Take mutex
- * 
+ *
  * mutex: ulp_mutex_t object
  * reg_nonzero: R1-R3 which has any known value != 0
  * reg_nonzero_val: The known value in specified register
@@ -75,7 +75,7 @@ typedef struct {
 
 /**
  * ULP: Release mutex
- * 
+ *
  * mutex: ulp_mutex_t object previously taken
  * reg_zero: R0-R3 which has known value of 0
  */
@@ -109,16 +109,16 @@ static inline void hulp_mutex_soc_release(ulp_mutex_t *mutex)
 
 /**
  * SoC: Take mutex
- * 
+ *
  * mutex: pointer to ulp_mutex_t object
- * 
+ *
  * eg.
  *  HULP_MUTEX_SOC_TAKE_WHILE(&ulp_led_mutex) {
  *      // Do this while waiting for ULP to release
  *      vTaskDelay(1); // or ets_delay_us(10), etc
  *  }
  *  // Critical Section
- *  // ... 
+ *  // ...
  *  HULP_MUTEX_SOC_RELEASE(&ulp_led_mutex);
  */
 #define HULP_MUTEX_SOC_TAKE_WHILE(_mutex) \
@@ -131,4 +131,4 @@ static inline void hulp_mutex_soc_release(ulp_mutex_t *mutex)
 }
 #endif
 
-#endif // HULP_MUTEX_H
+#endif /* HULP_MUTEX_H */

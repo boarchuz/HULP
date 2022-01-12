@@ -27,7 +27,7 @@ esp_err_t hulp_configure_touch_controller(const hulp_touch_controller_config_t *
     }
 
     esp_err_t err;
-    if( 
+    if(
         ESP_OK != (err = touch_pad_init()) ||
         ESP_OK != (err = touch_pad_set_fsm_mode(TOUCH_FSM_MODE_SW)) ||
         ESP_OK != (err = touch_pad_set_voltage(config->high_voltage, config->low_voltage, config->attenuation)) ||

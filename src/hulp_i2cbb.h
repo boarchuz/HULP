@@ -15,7 +15,7 @@ extern "C" {
 
 /**
  *  Convenience macro for an I2C bitbang read (8 bits) into R0, to be used in your program with M_INCLUDE_I2CBB.
- *  
+ *
  *  label: Provide a new unique label number (used as return point).
  *  label_read: The label to jump to for I2C reads (ie. the same one provided to M_INCLUDE_I2CBB)
  *  subaddress: The slave's subaddress to read from.
@@ -28,7 +28,7 @@ extern "C" {
 
 /**
  *  Convenience macro for an I2C bitbang read (16 bits) into R0
- * 
+ *
  *  label: Provide a new unique label number (used as return point).
  *  label_read: The label to jump to for I2C reads (ie. the same one provided to M_INCLUDE_I2CBB)
  *  subaddress: The slave's subaddress to read from.
@@ -41,7 +41,7 @@ extern "C" {
 
 /**
  *  Convenience macro for an I2C bitbang write
- *  
+ *
  *  label: Provide a new unique label number (used as return point).
  *  label_write: The label to jump to for I2C writes (ie. the same one provided to M_INCLUDE_I2CBB)
  *  subaddress: The slave's subaddress to write to.
@@ -62,7 +62,7 @@ extern "C" {
 
 /**
  *  This macro expands to populate your ULP program with subroutines for basic I2C master bitbanging.
- * 
+ *
  * 	See examples or M_INCLUDE_I2CBB description for setup.
  */
 
@@ -73,22 +73,22 @@ extern "C" {
  *  This macro expands to populate your ULP program with subroutines for basic I2C master bitbanging functionality.
  * 	Operations: 8 bit read, 16 bit read, 8 bit write. Only one slave device is supported.
  *  Additionally, there are callbacks for slave NACK and arbitration loss.
- * 
- * 	Flow: 
+ *
+ * 	Flow:
  * 		Read: -Prepare reg_data with the slave's sub address in the upper 8 bits. 		eg. I_MOVI( R1, (SUBADDRESS << 8) )
  *            	[Optional] To read 16 bits, additionally set bit 0 at the same time.	eg. I_MOVI( R1, (SUBADDRESS << 8) | 1) )
  * 			  -Prepare reg_return with the return address. 							eg. M_MOVL(R3, LABEL_I2C_SUCCESS_RETURN)
  * 			  -Branch to label_read. 													eg. M_BX(LABEL_I2C_READ)
  * 			On success: Branches to the address in reg_return; R0 = result, reg_data = reg_data, reg_scratch = 0, reg_return = reg_return, stage = undef
  * 			On error: Branches to label_arblost_error_handler or label_nack_error_handler; R0 = undef, reg_data = reg_data, reg_scratch = 0, reg_return = reg_return, stage = undef
- * 
+ *
  *  	Write: -Prepare reg_data with the slave's sub address in the upper 8 bits, and the value in the lower 8 bits. eg. I_MOVI(R1, (SUBADDRESS << 8) | (WRITE_VALUE) )
  * 			   -Prepare reg_return with the return address. eg. M_MOVL(R3, LABEL_I2C_SUCCESS_RETURN)
  * 			   -Branch to label_write. eg. M_BX(LABEL_I2C_WRITE)
  * 			On success: Branches to the address in reg_return; R0 = 0(ACK), reg_data = reg_data, reg_scratch = 0, reg_return = reg_return.
  * 			On error: Branches to label_arblost_error_handler or label_nack_error_handler; R0 = undef, reg_data = reg_data, reg_scratch = 0, reg_return = reg_return.
- *  
- * 
+ *
+ *
  * 	label_write: A label to identify the I2C write entry. Branch to this label to write.
  *  label_read: A label to identify the I2C read entry. Branch to this label in your program to read (8 or 16 bits).
  *  label_arblost_error_handler / label_nack_error_handler: Provide labels to branch to in the event of an error.
@@ -302,9 +302,9 @@ extern "C" {
 /**
  * Initialise a byte in I2CBB command array
  *  Should only be used where uneven number of bytes are to be written, else use HULP_I2C_CMD_2B
- * 
+ *
  * eg. Initialise a command array to write 5 bytes {0x12, 0x34, 0x56, 0x78, 0x9A} to 0x70:
- * 
+ *
  *  RTC_SLOW_ATTR ulp_var_t ulp_write_cmd[] = {
  *      HULP_I2C_CMD_HDR(SLAVE_I2C_ADDRESS, 0x70, 5),
  *      HULP_I2C_CMD_2B(0x12, 0x34),
@@ -317,21 +317,21 @@ extern "C" {
 
 /**
  * Number of header words in I2CBB Command
- * 
+ *
  * Can help to access data in a command array.
  *  [0] : Addresses
  *  [1] : Number of bytes to read/write
  *  [2...] : Data
- * 
+ *
  * eg. my_read_cmd[HULP_I2C_CMD_DATA_OFFSET + 6].val // Get value of the 7th data byte (index 6)
  */
 #define HULP_I2C_CMD_DATA_OFFSET 2
 
 /**
  * Macro for declaring a read command buffer of desired size
- * 
+ *
  * eg. Initialise a command array with buffer large enough to read 4 bytes from 0x15:
- * 
+ *
  *  RTC_SLOW_ATTR ulp_var_t ulp_read_cmd[HULP_I2C_CMD_BUF_SIZE(4)] = {
  *      HULP_I2C_CMD_HDR(SLAVE_I2C_ADDRESS, 0x15, 4),
  *  };
@@ -342,10 +342,10 @@ extern "C" {
 	Allows I2C bitbanging with any number of bytes to read or write.
 	Use when needing to write multiple or read many bytes at once.
 		eg. for slaves that require 16 bit writes, or to efficiently get large readouts from sensors
-	
+
 	See HULP_I2C_CMD_1B description for initialising a write command array.
 	See HULP_I2C_CMD_BUF_SIZE description for initialising a read command array.
-	
+
 	Flow:
 		Prepare reg_ptr with the RTC slow memory offset of the command array
 			eg. I_MOVO(R1, example_read_cmd),
@@ -484,4 +484,4 @@ extern "C" {
 }
 #endif
 
-#endif // HULP_I2CBB_H
+#endif /* HULP_I2CBB_H */

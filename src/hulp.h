@@ -48,7 +48,7 @@ esp_err_t hulp_configure_analog_pin(gpio_num_t pin, adc_atten_t attenuation, adc
 /**
  * Prepares GPIOs for use with ULP hardware I2C.
  * Do not use this for bitbanging I2C. See examples for bitbanging configuration.
- *  
+ *
  * RTC I2C signals can be mapped onto the following pins only:
  *    SCL: GPIO_NUM_2 or GPIO_NUM_4
  *    SDA: GPIO_NUM_0 or GPIO_NUM_15
@@ -100,13 +100,13 @@ esp_err_t hulp_register_i2c_slave(uint8_t index, uint8_t address);
  * Force RTC peripherals power domain to remain on in sleep.
  * Necessary to maintain some pin states during sleep, internal PU/PD resistors, ULP wakeup interval switching, etc.
  */
-void hulp_peripherals_on();
+void hulp_peripherals_on(void);
 
 /**
- * Prepare the hall effect sensor for the ULP. 
+ * Prepare the hall effect sensor for the ULP.
  * Sensor uses ADC channels on GPIO_36 (SENS_VP) and GPIO_39 (SENS_VN). Nothing should be externally connected to these pins.
  */
-void hulp_configure_hall_effect_sensor();
+void hulp_configure_hall_effect_sensor(void);
 
 /**
  * Configure the temperature sensor for the ULP
@@ -116,13 +116,13 @@ void hulp_tsens_configure(uint8_t clk_div);
 
 /**
  * Zero-out ULP_RESERVE_MEM bytes of RTC slow mem
- */ 
-void hulp_clear_program_memory();
+ */
+void hulp_clear_program_memory(void);
 
 /**
  * Zero-out lower 4K of RTC slow mem
  */
-void hulp_clear_rtc_slow_memory();
+void hulp_clear_rtc_slow_memory(void);
 
 /**
  * Convert a time (in milliseconds) to an optimally-shifted 16-bit RTC tick count.
@@ -130,7 +130,7 @@ void hulp_clear_rtc_slow_memory();
 uint16_t hulp_ms_to_ulp_ticks(uint32_t time_ms);
 
 /**
- * Variant of hulp_ms_to_ulp_ticks that allows specifying a reference shift. 
+ * Variant of hulp_ms_to_ulp_ticks that allows specifying a reference shift.
  *  Useful if you have a changing time period or multiple time periods that must be referenced to the same range of ticks.
  *  Otherwise, for example, a shorter time period may resolve to a larger 16-bit tick count using a *different* bit range.
  *  Typically, you'd use the maximum possible time to calulcate the shift using hulp_ms_to_ulp_tick_shift()
@@ -139,7 +139,7 @@ uint16_t hulp_ms_to_ulp_ticks_with_shift(uint32_t time_ms, uint8_t shift);
 
 /**
  * Get the current 16-bit shifted value of the RTC ticks register.
- * Use hulp_ms_to_ulp_tick_shift() to get the shift associated with a given time. 
+ * Use hulp_ms_to_ulp_tick_shift() to get the shift associated with a given time.
  */
 uint16_t hulp_get_current_ulp_ticks(uint8_t shift);
 
@@ -176,17 +176,17 @@ esp_err_t hulp_ulp_load(const ulp_insn_t *program, size_t program_size, uint32_t
  * If it is currently running, the ULP will continue until the next I_HALT() instruction.
  * Use hulp_ulp_run/hulp_ulp_run_once to restart.
  */
-void hulp_ulp_end();
+void hulp_ulp_end(void);
 
 /**
  * True if most recent reset was a wake from deep sleep (to distinguish from power-on reset, for example), false if any other cause.
  */
-bool hulp_is_deep_sleep_wakeup();
+bool hulp_is_deep_sleep_wakeup(void);
 
 /**
  * True if deep sleep wakeup was triggered by the ULP, false if any other cause.
  */
-bool hulp_is_ulp_wakeup();
+bool hulp_is_ulp_wakeup(void);
 
 /**
  * Read program loaded in RTC memory to serial
@@ -197,7 +197,7 @@ void hulp_dump_program(uint32_t start_offset, size_t num_instructions);
  * Get the current ULP state.
  * Note: when using hulp_ulp_run_once, only IDLE or DONE may be returned
  */
-ulp_state_t hulp_get_state();
+ulp_state_t hulp_get_state(void);
 
 /**
  * Register an ISR for ULP interrupts.
@@ -206,7 +206,7 @@ ulp_state_t hulp_get_state();
 esp_err_t hulp_ulp_isr_register(intr_handler_t handler, void* handler_arg);
 
 /**
- * Deregister a ULP ISR. 
+ * Deregister a ULP ISR.
  * Simply calls rtc_isr_deregister. Included for consistency with hulp_ulp_isr_register.
  */
 esp_err_t hulp_ulp_isr_deregister(intr_handler_t handler, void* handler_arg);
@@ -215,18 +215,18 @@ esp_err_t hulp_ulp_isr_deregister(intr_handler_t handler, void* handler_arg);
  * Enable ULP interrupts.
  * The ULP can trigger interrupts with the I_WAKE() instruction.
  */
-void hulp_ulp_interrupt_en();
+void hulp_ulp_interrupt_en(void);
 
 /**
  * Disable ULP interrupts.
  */
-void hulp_ulp_interrupt_dis();
+void hulp_ulp_interrupt_dis(void);
 
 /**
  * Configure RTC pin interrupt.
  * The ESP32 ULP has no ISR functionality, however it can read a register to determine if this interrupt has been triggered.
- * Assuming latency is acceptable, this allows flexibility to sleep or do other work without missing activity on a pin that 
- * would otherwise need to be polled, as well as enabling the handling of pulses that may be too short to practically detect 
+ * Assuming latency is acceptable, this allows flexibility to sleep or do other work without missing activity on a pin that
+ * would otherwise need to be polled, as well as enabling the handling of pulses that may be too short to practically detect
  * using the ULP.
  * intr_type: GPIO_INTR_DISABLE, GPIO_INTR_ANYEDGE, GPIO_INTR_LOW_LEVEL, or GPIO_INTR_HIGH_LEVEL
  * RTC peripherals domain may need to be forced on for this to function correctly: hulp_peripherals_on()
@@ -237,7 +237,7 @@ esp_err_t hulp_configure_pin_int(gpio_num_t gpio_num, gpio_int_type_t intr_type)
 /**
  * @brief Get the frequency of RTC Fast Clock
  */
-uint32_t hulp_get_fast_clk_freq();
+uint32_t hulp_get_fast_clk_freq(void);
 
 /**
  * Internal. Do not use directly.
@@ -253,4 +253,4 @@ int hulp_adc_get_channel_num(gpio_num_t pin);
 }
 #endif
 
-#endif // HULP_H
+#endif /* HULP_H */

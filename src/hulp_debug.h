@@ -12,7 +12,7 @@ typedef struct hulp_debug_bp_state_t *hulp_debug_bp_handle_t;
 /**
  * Type for ULP to communicate breakpoint data to SoC handler. Do not access this directly.
  * Object must be in RTC_SLOW_MEM for ULP access (declare with RTC_DATA_ATTR).
- * 
+ *
  * Member order is fixed; ULP BP macros expect these offsets.
  */
 typedef struct {
@@ -59,7 +59,7 @@ typedef void (*hulp_debug_bp_cb_t)(hulp_debug_bp_cb_data_t* info, void* ctx);
 
 /**
  * ULP breakpoint debugging config for initialisation.
- * 
+ *
  * Providing an optional pointer to the program array will allow the debugger to associate breakpoints with label numbers for improved debugging information.
  */
 typedef struct {
@@ -90,8 +90,8 @@ typedef struct {
     HULP_DEBUG_BP_CONFIG_DEFAULT(bp_data, NULL, 0)
 
 /**
- * Initialise ULP breakpoint debugging with the provided configuration. 
- * 
+ * Initialise ULP breakpoint debugging with the provided configuration.
+ *
  * A pointer to a handle is optional if deinitialisation is desired later to free resources.
  * The ULP interrupt must be enabled with hulp_ulp_interrupt_en() to begin.
  */
@@ -162,10 +162,10 @@ esp_err_t hulp_debug_bp_alter_reg(hulp_debug_bp_cb_data_t* bp_data, uint8_t reg,
 
 /**
  * Set a breakpoint in a ULP program.
- *  
+ *
  * If breakpoints have been initialised in HULP, interrupts are enabled, and this BP is enabled, the ULP will log information and halt at this point.
  * The current state can then be debugged and manipulated via hulp_debug methods before continuing execution when ready.
- * 
+ *
  *  label_bp_dep_entry: The same label number provided to M_INCLUDE_DEBUG_BP
  *  reg_scr: Unfortunately, 1 register must be used as a scratch register (its value will be overwritten before breaking).
  *  bp_data: The same ulp_debug_bp_data_t provided to M_INCLUDE_DEBUG_BP
@@ -185,7 +185,7 @@ esp_err_t hulp_debug_bp_alter_reg(hulp_debug_bp_cb_data_t* bp_data, uint8_t reg,
 /**
  * Include subroutine necessary for ULP breakpoints.
  * Typically this macro is at the end of your program (eg. after I_HALT).
- * 
+ *
  *  label_entry: A unique label number for this subroutine. This label should be provided to every M_DEBUG_SET_BP so the breakpoint knows where to find this subroutine.
  *  reg_scr: Unfortunately, 1 register must be used as a scratch register (its value will be overwritten before breaking).
  *  bp_data: A ulp_debug_bp_data_t in RTC_SLOW_MEM
@@ -212,4 +212,4 @@ esp_err_t hulp_debug_bp_alter_reg(hulp_debug_bp_cb_data_t* bp_data, uint8_t reg,
 }
 #endif
 
-#endif // HULP_DEBUG_H
+#endif /* HULP_DEBUG_H */

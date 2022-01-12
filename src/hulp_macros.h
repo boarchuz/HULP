@@ -82,11 +82,11 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
 
 /**
  * Get a 'unique' label automatically (using line number)
- * 
+ *
  * Use in place of short-lived labels where no other reference is required.
- * 
+ *
  * Ensure that no other labels conflict with the range CONFIG_HULP_LABEL_AUTO_BASE - 65535
- * 
+ *
  * eg. M_RETURN(HULP_LBLA(), R3, LBL_SUBROUTINE),
  */
 #define HULP_LBLA() ({ \
@@ -96,12 +96,12 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
 
 /**
  * Label based on the provided name
- * 
+ *
  * Chance of conflicts and may inflate binary size. Not recommended in most cases.
- * 
+ *
  * eg.  M_BX(HULP_LBL(My label)),   // Goto "My label"
  *      M_LABEL(HULP_LBL(My label)), // Create "My label"
- *      
+ *
  */
 #define HULP_LBL(lbl_name) ((uint16_t)( (uint32_t)(#lbl_name) % UINT16_MAX))
 
@@ -109,10 +109,10 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Move the offset (in words) of a ulp_var_t or similar into reg_dest.
  *  You may then use it with regular I_LD and I_ST instructions, for example.
  *  It is strongly suggested to use I_GET and I_PUT methods provided by HULP instead.
- * 
+ *
  *  reg_dest: General purpose register to hold offset value (R0-R3).
  *  var: A variable of type ulp_var_t or similar.
- * 
+ *
  *  eg.
  *      I_MOVO(R3, ulp_my_variable),    // R3 = word offset of ulp_my_variable
  *      I_LD(R0, R3, 0),                // Load the value at the address in R3 into R0
@@ -124,11 +124,11 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
 
 /**
  * Load the value of a ulp_var_t into a general purpose register.
- * 
+ *
  *  reg_dest: General purpose register to load value into (R0-R3).
  *  reg_zero: General purpose register containing 0. May be the same as reg_dest.
  *  var: A variable of type ulp_var_t or similar.
- * 
+ *
  *  eg.
  *      I_MOVI(R3, 0),                  // A register must have known value 0 to use I_GET/I_PUT.
  *      I_GET(R0, R3, ulp_my_variable), // Get ulp_my_variable's value into R0.
@@ -140,23 +140,23 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
 
 /**
  * A more flexible variant of I_GET that allows specifying the value (val_offset) of the offset register (reg_offset).
- * 
+ *
  *  reg_dest: General purpose register to load value into (R0-R3).
  *  reg_offset: General purpose register containing a known value. May be the same as reg_src.
  *  val_offset: The known value of reg_offset.
  *  var: A 4-byte, word-aligned variable in RTC_SLOW_MEM. Use HULP's ulp_var_t family for convenience.
- * 
+ *
  */
 #define I_GETO(reg_dest, reg_offset, val_offset, var) \
     I_LD(reg_dest, reg_offset, (uint16_t)(RTC_WORD_OFFSET(var) - (val_offset)))
 
 /**
  * Store the value of a general purpose register into ulp_var_t.
- * 
+ *
  *  reg_src: General purpose register containing the value to be stored (R0-R3)
  *  reg_zero: General purpose register containing 0. May be the same as reg_src (if storing 0).
  *  var: a ulp_var_t or similar.
- * 
+ *
  *  eg.
  *      I_MOVI(R3, 0),                          // A register must have known value 0 to use I_GET/I_PUT.
  *      I_MOVI(R0, 123),
@@ -169,12 +169,12 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
 
 /**
  * A more flexible variant of I_PUT that allows specifying the value (val_offset) of the offset register (reg_offset).
- * 
+ *
  *  reg_src: General purpose register containing the value to be stored (R0-R3)
  *  reg_offset: General purpose register containing a known value. May be the same as reg_src.
  *  val_offset: The known value of reg_offset.
  *  var: A 4-byte, word-aligned variable in RTC_SLOW_MEM. Use HULP's ulp_var_t family for convenience.
- * 
+ *
  */
 #define I_PUTO(reg_src, reg_offset, val_offset, var) \
     I_ST(reg_src, reg_offset, (uint16_t)(RTC_WORD_OFFSET(var) - (val_offset)))
@@ -570,7 +570,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  *          //Handle I2C
  *      M_LABEL(MY_HALT_LABEL),
  *          I_HALT(),
- * 
+ *
  * id_label: A unique label number for this block
  * interval_ms: Time (ms) between each execution of this task
  * else_goto_label: The label number to branch to if interval_ms has not elapsed (typically this would be at the very end of the task)
@@ -857,4 +857,4 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_BGE(2, 1), \
     I_WR_REG(reg, (uint8_t)((shift) + 0), (uint8_t)((shift) + 7), 0b011111111)
 
-#endif // HULP_MACROS_H
+#endif /* HULP_MACROS_H */

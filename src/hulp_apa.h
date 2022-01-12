@@ -48,15 +48,15 @@ _Static_assert(sizeof(ulp_apa_t) == (2 * sizeof(uint32_t)), "ulp_apa_t size shou
  * @param num_apas The number of APAs in the array.
  * @param reg_scr General purpose scratch register (R1-R3).
  * @param reg_return The general purpose scratch register containing the return address (R1-R3).
- * 
+ *
  * @code{c}
  *      #define NUM_APAS 10
  *      RTC_DATA_ATTR ulp_apa_t apas[NUM_APAS];
- * 
+ *
  *      M_MOVL(R3, LBL_RETURN_POINT), //Prepare return
  *      M_BX(LBL_APA_ENTRY), //Branch to the label given as APA entry
  *      M_LABEL(LBL_RETURN_POINT), //Will return here after TX
- * 
+ *
  *      M_APA_TX(LBL_APA_ENTRY, GPIO_NUM_26, GPIO_NUM_27, apas, NUM_APAS, R1, R3),
  * @endcode
  */
@@ -136,4 +136,4 @@ _Static_assert(sizeof(ulp_apa_t) == (2 * sizeof(uint32_t)), "ulp_apa_t size shou
 }
 #endif
 
-#endif // HULP_APA_H
+#endif /* HULP_APA_H */

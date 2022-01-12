@@ -35,4 +35,4 @@ _Static_assert(sizeof(ulp_var_t) == 4, "ulp_var_t size should be 4 bytes");
 }
 #endif
 
-#endif // HULP_TYPES_H
+#endif /* HULP_TYPES_H */

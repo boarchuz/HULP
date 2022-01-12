@@ -18,4 +18,4 @@
     I_WR_REG_BIT(RTC_IO_HALL_SENS_REG, RTC_IO_HALL_PHASE_S, 1)
 
 
-#endif // HULP_HALL_H
+#endif /* HULP_HALL_H */

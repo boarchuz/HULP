@@ -33,7 +33,7 @@ struct hulp_debug_bp_state_t {
 static void hulp_debug_parse_data_regs_inserting_scratch_val(const ulp_debug_bp_data_t* data, uint16_t* dest)
 {
     const uint16_t scr_reg = data->scr.val;
-    
+
     for(uint16_t cur_reg = R0; cur_reg <= R3; ++cur_reg)
     {
         if(cur_reg == scr_reg)
@@ -189,7 +189,7 @@ static void hulp_debug_isr_handler(void* ctx)
 
     //Set default continue point based on the marker pc (done in this way as part of breakpoint struct so that it can be altered between breakpoint and continue if desired)
     bp_data.meta.return_addr = bp_data.bp.pc + HULP_DEBUG_SET_BP_INSN_NUM;
-    
+
     // Get the label number for this pc, if available
     if(handle->labels.pc_pairs != NULL)
     {
@@ -244,7 +244,7 @@ static size_t hulp_debug_count_ulp_program_labels(const ulp_insn_t* program, siz
 static size_t hulp_debug_populate_ulp_program_label_pcs(hulp_debug_label_pc_pair_t* label_pairs, size_t max_label_pairs, const ulp_insn_t* program, size_t num_words)
 {
     size_t current_pc = 0;
-    
+
     const ulp_insn_t* program_end = program + num_words;
     const hulp_debug_label_pc_pair_t* labelpairs_end = label_pairs + max_label_pairs;
 
@@ -297,7 +297,7 @@ esp_err_t hulp_debug_bp_set_continue_label(hulp_debug_bp_cb_data_t* bp_data, uin
     }
 
     return hulp_debug_get_pc_from_label_pairs(bp_data->meta.handle, label_num, &(bp_data->meta.return_addr));
-    
+
 }
 
 /**
@@ -308,7 +308,7 @@ esp_err_t hulp_debug_bp_set_continue_label(hulp_debug_bp_cb_data_t* bp_data, uin
 static esp_err_t hulp_debug_bp_pc_set_branch_offset(uint16_t pc, uint16_t offset)
 {
     //A common misuse will be to try to disable a BP before the program is loaded into RTC memory.
-    //For a rudimentary check, a ulp_insn_t array consisting of the M_DEBUG_SET_BP is declared and compared against the instruction at the provided pc. 
+    //For a rudimentary check, a ulp_insn_t array consisting of the M_DEBUG_SET_BP is declared and compared against the instruction at the provided pc.
     const ulp_insn_t template_insn_check = (ulp_insn_t[]){M_DEBUG_SET_BP(0,0,template_insn_check)}[0];
     ulp_insn_t* bp_en_insn = (ulp_insn_t*)(RTC_SLOW_MEM + pc);
 

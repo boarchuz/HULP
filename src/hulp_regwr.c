@@ -29,11 +29,11 @@ _Static_assert(offsetof(struct hulp_regwr_rtc_slow_map_check, regwr_work_area) =
 _Static_assert(offsetof(struct hulp_regwr_rtc_slow_map_check, regwr_gen_wr) == (HULP_WR_REG_GEN_ENTRY_HAS_RET * sizeof(ulp_insn_t)), "wrong offset: gen wr");
 _Static_assert(offsetof(struct hulp_regwr_rtc_slow_map_check, regwr_gen_ret) == (HULP_WR_REG_GEN_ENTRY * sizeof(ulp_insn_t)), "wrong offset: gen ret");
 
-esp_err_t hulp_regwr_load_generate_ret()
+esp_err_t hulp_regwr_load_generate_ret(void)
 {
 /**
  * Generates a I_BXR(R3) instruction at the end of the provided work area
- * 
+ *
  * Executing at 1025 generates a I_BXR instruction
  *      -> I_BXR(x)
  * [1:0] determines the register
@@ -50,11 +50,11 @@ esp_err_t hulp_regwr_load_generate_ret()
     return ulp_process_macros_and_load(HULP_WR_REG_GEN_ENTRY, program, &program_size);
 }
 
-esp_err_t hulp_regwr_load_generate_wr()
+esp_err_t hulp_regwr_load_generate_wr(void)
 {
 /**
  * Generates a ST instruction at the provided work area address in R0, then branches to it to execute
- * 
+ *
  * Executing at 832 generates a ST instruction
  *      -> I_ST(x, x, x)
  * [15:10] determine the offset value of the generated ST instruction, ie. (1 << 10) -> offset 1
@@ -63,7 +63,7 @@ esp_err_t hulp_regwr_load_generate_wr()
  *      -> I_ST(x, R0, 1)
  * [1:0] is Rsrc
  *      -> I_ST(R2, R0, 1)
- * 
+ *
  * Executing this generated ST at the correct PC produces a WR_REG with the required bit range, and R2's value determines its register/val
  */
     const ulp_insn_t program[] = {

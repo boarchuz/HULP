@@ -11,4 +11,4 @@
     #define CONFIG_HULP_FAST_CLK_CAL_CYCLES 100
 #endif
 
-#endif // HULP_CONFIG_H
+#endif /* HULP_CONFIG_H */

@@ -20,4 +20,4 @@
     #error "Unsupported target"
 #endif
 
-#endif // HULP_COMPAT_H
+#endif /* HULP_COMPAT_H */

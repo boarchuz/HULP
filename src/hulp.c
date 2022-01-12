@@ -173,11 +173,12 @@ void hulp_tsens_configure(uint8_t clk_div)
     REG_CLR_BIT(SENS_SAR_TSENS_CTRL_REG, SENS_TSENS_POWER_UP_FORCE);
 }
 
-void hulp_peripherals_on()
+void hulp_peripherals_on(void)
 {
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
 }
-void hulp_configure_hall_effect_sensor()
+
+void hulp_configure_hall_effect_sensor(void)
 {
     //GPIO 36
     adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_6);
@@ -191,12 +192,12 @@ void hulp_configure_hall_effect_sensor()
     REG_SET_BIT(RTC_IO_HALL_SENS_REG, RTC_IO_XPD_HALL);
 }
 
-void hulp_clear_program_memory()
+void hulp_clear_program_memory(void)
 {
     memset(RTC_SLOW_MEM, 0, HULP_ULP_RESERVE_MEM);
 }
 
-void hulp_clear_rtc_slow_memory()
+void hulp_clear_rtc_slow_memory(void)
 {
     memset(RTC_SLOW_MEM, 0, 0x1000);
 }
@@ -698,17 +699,17 @@ esp_err_t hulp_ulp_load(const ulp_insn_t *program, size_t size_of_program, uint3
     return ESP_OK;
 }
 
-void hulp_ulp_end()
+void hulp_ulp_end(void)
 {
     CLEAR_PERI_REG_MASK(RTC_CNTL_STATE0_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN);
 }
 
-bool hulp_is_deep_sleep_wakeup()
+bool hulp_is_deep_sleep_wakeup(void)
 {
     return (esp_reset_reason() == ESP_RST_DEEPSLEEP);
 }
 
-bool hulp_is_ulp_wakeup()
+bool hulp_is_ulp_wakeup(void)
 {
     return (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_ULP);
 }
@@ -723,12 +724,12 @@ esp_err_t hulp_ulp_isr_deregister(intr_handler_t handler, void* handler_arg)
     return rtc_isr_deregister(handler, handler_arg);
 }
 
-void hulp_ulp_interrupt_en()
+void hulp_ulp_interrupt_en(void)
 {
     REG_SET_BIT(RTC_CNTL_INT_ENA_REG, RTC_CNTL_ULP_CP_INT_ENA_M);
 }
 
-void hulp_ulp_interrupt_dis()
+void hulp_ulp_interrupt_dis(void)
 {
     REG_CLR_BIT(RTC_CNTL_INT_ENA_REG, RTC_CNTL_ULP_CP_INT_ENA_M);
 }
@@ -754,7 +755,7 @@ esp_err_t hulp_configure_pin_int(gpio_num_t gpio_num, gpio_int_type_t intr_type)
     return ESP_OK;
 }
 
-ulp_state_t hulp_get_state()
+ulp_state_t hulp_get_state(void)
 {
     uint32_t ulp_state_bits = REG_READ(RTC_CNTL_LOW_POWER_ST_REG) & (0xF << 13);
 
@@ -780,7 +781,7 @@ ulp_state_t hulp_get_state()
     }
 }
 
-uint32_t hulp_get_fast_clk_freq()
+uint32_t hulp_get_fast_clk_freq(void)
 {
 #ifdef CONFIG_HULP_USE_APPROX_FAST_CLK
     return (uint32_t)RTC_FAST_CLK_FREQ_APPROX;

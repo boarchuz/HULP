@@ -113,4 +113,4 @@ int hulp_touch_get_pad_num(gpio_num_t pin);
 }
 #endif
 
-#endif // HULP_TOUCH_H
+#endif /* HULP_TOUCH_H */
