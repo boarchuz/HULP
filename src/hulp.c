@@ -711,6 +711,7 @@ esp_err_t hulp_ulp_load(const ulp_insn_t *program, size_t size_of_program, uint3
         ESP_LOGE(TAG, "[%s] load error (0x%x)", __func__, err);
         return err;
     }
+    hulp_set_start_delay();
     ulp_set_wakeup_period(0, period_us);
     return ESP_OK;
 }
