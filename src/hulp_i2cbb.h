@@ -100,84 +100,84 @@ extern "C" {
  *  reg_return: A register containing the address to branch to on success. R1-R3.
  */
 #define M_INCLUDE_I2CBB_(label_read, label_write, label_arblost_error_handler, label_nack_error_handler, scl_gpio, sda_gpio, slave_address, reg_data, reg_scratch, reg_return) \
-		M_LABEL(label_read), \
-			M_MOVL(reg_scratch, label_read), \
-			I_ADDI(reg_scratch,reg_scratch,33), \
-			I_GPIO_READ(sda_gpio), \
-			I_BL(24,1), \
-			I_GPIO_READ(scl_gpio), \
-			I_BL(22,1), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_EN(scl_gpio), \
-			I_MOVI(R0, ((slave_address << 1) | 0) << 8), \
-			I_STAGE_RST(), \
-			I_BGE(8,1 << 15), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_STAGE_INC(1), \
-			I_LSHI(R0,R0,1), \
-			I_GPIO_OUTPUT_EN(scl_gpio), \
-			I_JUMPS(4,8,JUMPS_GE), \
-			I_BGE(-7,0), \
-			I_GPIO_OUTPUT_DIS(sda_gpio), \
-			I_BGE(-7,0), \
-			I_GPIO_OUTPUT_DIS(sda_gpio), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_GPIO_READ(sda_gpio), \
-			I_GPIO_OUTPUT_EN(scl_gpio), \
-			I_BGE(2,1), \
-			I_BXR(reg_scratch), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_MOVI(reg_scratch, 0), \
-			I_GPIO_OUTPUT_DIS(sda_gpio), \
-			I_BGE(2,1), \
-			M_BX(label_arblost_error_handler), \
-			M_BX(label_nack_error_handler), \
-			I_ADDI(reg_scratch,reg_scratch,5), \
-			I_MOVR(R0, reg_data), \
-			I_BGE(-26,0), \
-			I_ADDI(reg_scratch,reg_scratch,34), \
-			I_BGE(-3,0), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_ADDI(reg_scratch,reg_scratch,7), \
-			I_MOVI(R0, ((slave_address << 1) | 1) << 8), \
-			I_DELAY(10), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_EN(scl_gpio), \
-			I_BGE(-35,0), \
-			I_STAGE_RST(), \
-			I_MOVI(reg_scratch, 0), \
-			I_ANDI(R0, reg_data, 1), \
-			I_BGE(2,1), \
-			I_STAGE_INC(9), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_LSHI(reg_scratch,reg_scratch,1), \
-			I_GPIO_READ(sda_gpio), \
-			I_ADDR(reg_scratch,reg_scratch,R0), \
-			I_GPIO_OUTPUT_EN(scl_gpio), \
-			I_STAGE_INC(1), \
-			I_JUMPS(4,17,JUMPS_GE), \
-			I_JUMPS(-7,8,JUMPS_LT), \
-			I_GPIO_OUTPUT_DIS(sda_gpio), \
-			I_JUMPS(-9,9,JUMPS_GE), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_MOVR(R0, reg_scratch), \
-			I_JUMPS(-9,17,JUMPS_LT), \
-			I_MOVI(reg_scratch, 0), \
-			I_GPIO_OUTPUT_DIS(sda_gpio), \
-			I_BXR(reg_return), \
-		M_LABEL(label_write), \
-			M_MOVL(reg_scratch, label_read), \
-			I_ADDI(reg_scratch,reg_scratch,36), \
-			I_BGE(-67,0), \
-			I_ADDI(reg_scratch,reg_scratch,3), \
-			I_LSHI(R0, reg_data, 8), \
-			I_BGE(-63,0), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_BGE(-11,0)
+        M_LABEL(label_read), \
+            M_MOVL(reg_scratch, label_read), \
+            I_ADDI(reg_scratch,reg_scratch,33), \
+            I_GPIO_READ(sda_gpio), \
+            I_BL(24,1), \
+            I_GPIO_READ(scl_gpio), \
+            I_BL(22,1), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_EN(scl_gpio), \
+            I_MOVI(R0, ((slave_address << 1) | 0) << 8), \
+            I_STAGE_RST(), \
+            I_BGE(8,1 << 15), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_STAGE_INC(1), \
+            I_LSHI(R0,R0,1), \
+            I_GPIO_OUTPUT_EN(scl_gpio), \
+            I_JUMPS(4,8,JUMPS_GE), \
+            I_BGE(-7,0), \
+            I_GPIO_OUTPUT_DIS(sda_gpio), \
+            I_BGE(-7,0), \
+            I_GPIO_OUTPUT_DIS(sda_gpio), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_GPIO_READ(sda_gpio), \
+            I_GPIO_OUTPUT_EN(scl_gpio), \
+            I_BGE(2,1), \
+            I_BXR(reg_scratch), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_MOVI(reg_scratch, 0), \
+            I_GPIO_OUTPUT_DIS(sda_gpio), \
+            I_BGE(2,1), \
+            M_BX(label_arblost_error_handler), \
+            M_BX(label_nack_error_handler), \
+            I_ADDI(reg_scratch,reg_scratch,5), \
+            I_MOVR(R0, reg_data), \
+            I_BGE(-26,0), \
+            I_ADDI(reg_scratch,reg_scratch,34), \
+            I_BGE(-3,0), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_ADDI(reg_scratch,reg_scratch,7), \
+            I_MOVI(R0, ((slave_address << 1) | 1) << 8), \
+            I_DELAY(10), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_EN(scl_gpio), \
+            I_BGE(-35,0), \
+            I_STAGE_RST(), \
+            I_MOVI(reg_scratch, 0), \
+            I_ANDI(R0, reg_data, 1), \
+            I_BGE(2,1), \
+            I_STAGE_INC(9), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_LSHI(reg_scratch,reg_scratch,1), \
+            I_GPIO_READ(sda_gpio), \
+            I_ADDR(reg_scratch,reg_scratch,R0), \
+            I_GPIO_OUTPUT_EN(scl_gpio), \
+            I_STAGE_INC(1), \
+            I_JUMPS(4,17,JUMPS_GE), \
+            I_JUMPS(-7,8,JUMPS_LT), \
+            I_GPIO_OUTPUT_DIS(sda_gpio), \
+            I_JUMPS(-9,9,JUMPS_GE), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_MOVR(R0, reg_scratch), \
+            I_JUMPS(-9,17,JUMPS_LT), \
+            I_MOVI(reg_scratch, 0), \
+            I_GPIO_OUTPUT_DIS(sda_gpio), \
+            I_BXR(reg_return), \
+        M_LABEL(label_write), \
+            M_MOVL(reg_scratch, label_read), \
+            I_ADDI(reg_scratch,reg_scratch,36), \
+            I_BGE(-67,0), \
+            I_ADDI(reg_scratch,reg_scratch,3), \
+            I_LSHI(R0, reg_data, 8), \
+            I_BGE(-63,0), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_BGE(-11,0)
 
 
 /*
@@ -196,83 +196,83 @@ extern "C" {
 
 #define M_INCLUDE_I2CBB_MULTI_(label_read, label_write, label_arblost_error_handler, label_nack_error_handler, scl_gpio, sda_gpio, reg_data, reg_scratch, reg_return) \
         M_LABEL(label_read), \
-			M_MOVL(reg_scratch, label_read), \
-			I_ADDI(reg_scratch,reg_scratch,33), \
-			I_GPIO_READ(sda_gpio), \
-			I_BL(24,1), \
-			I_GPIO_READ(scl_gpio), \
-			I_BL(22,1), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_EN(scl_gpio), \
-			I_RD_REG(SENS_SAR_SLAVE_ADDR4_REG, 21 - 15, 21), \
-			I_STAGE_RST(), \
-			I_BGE(8,1 << 15), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_STAGE_INC(1), \
-			I_LSHI(R0,R0,1), \
-			I_GPIO_OUTPUT_EN(scl_gpio), \
-			I_JUMPS(4,8,JUMPS_GE), \
-			I_BGE(-7,0), \
-			I_GPIO_OUTPUT_DIS(sda_gpio), \
-			I_BGE(-7,0), \
-			I_GPIO_OUTPUT_DIS(sda_gpio), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_GPIO_READ(sda_gpio), \
-			I_GPIO_OUTPUT_EN(scl_gpio), \
-			I_BGE(2,1), \
-			I_BXR(reg_scratch), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_MOVI(reg_scratch, 0), \
-			I_GPIO_OUTPUT_DIS(sda_gpio), \
-			I_BGE(2,1), \
-			M_BX(label_arblost_error_handler), \
-			M_BX(label_nack_error_handler), \
-			I_ADDI(reg_scratch,reg_scratch,5), \
-			I_MOVR(R0, reg_data), \
-			I_BGE(-26,0), \
-			I_ADDI(reg_scratch,reg_scratch,34), \
-			I_BGE(-3,0), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_ADDI(reg_scratch,reg_scratch,7), \
-			I_RD_REG(SENS_SAR_SLAVE_ADDR4_REG, 21 - 15, 21), \
-			I_ORI(R0, R0, 1 << 8), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_EN(scl_gpio), \
-			I_BGE(-35,0), \
-			I_STAGE_RST(), \
-			I_MOVI(reg_scratch, 0), \
-			I_ANDI(R0, reg_data, 1), \
-			I_BGE(2,1), \
-			I_STAGE_INC(9), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_LSHI(reg_scratch,reg_scratch,1), \
-			I_GPIO_READ(sda_gpio), \
-			I_ADDR(reg_scratch,reg_scratch,R0), \
-			I_GPIO_OUTPUT_EN(scl_gpio), \
-			I_STAGE_INC(1), \
-			I_JUMPS(4,17,JUMPS_GE), \
-			I_JUMPS(-7,8,JUMPS_LT), \
-			I_GPIO_OUTPUT_DIS(sda_gpio), \
-			I_JUMPS(-9,9,JUMPS_GE), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_MOVR(R0, reg_scratch), \
-			I_JUMPS(-9,17,JUMPS_LT), \
-			I_MOVI(reg_scratch, 0), \
-			I_GPIO_OUTPUT_DIS(sda_gpio), \
-			I_BXR(reg_return), \
-		M_LABEL(label_write), \
-			M_MOVL(reg_scratch, label_read), \
-			I_ADDI(reg_scratch,reg_scratch,36), \
-			I_BGE(-67,0), \
-			I_ADDI(reg_scratch,reg_scratch,3), \
-			I_LSHI(R0, reg_data, 8), \
-			I_BGE(-63,0), \
-			I_GPIO_OUTPUT_EN(sda_gpio), \
-			I_GPIO_OUTPUT_DIS(scl_gpio), \
-			I_BGE(-11,0)
+            M_MOVL(reg_scratch, label_read), \
+            I_ADDI(reg_scratch,reg_scratch,33), \
+            I_GPIO_READ(sda_gpio), \
+            I_BL(24,1), \
+            I_GPIO_READ(scl_gpio), \
+            I_BL(22,1), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_EN(scl_gpio), \
+            I_RD_REG(SENS_SAR_SLAVE_ADDR4_REG, 21 - 15, 21), \
+            I_STAGE_RST(), \
+            I_BGE(8,1 << 15), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_STAGE_INC(1), \
+            I_LSHI(R0,R0,1), \
+            I_GPIO_OUTPUT_EN(scl_gpio), \
+            I_JUMPS(4,8,JUMPS_GE), \
+            I_BGE(-7,0), \
+            I_GPIO_OUTPUT_DIS(sda_gpio), \
+            I_BGE(-7,0), \
+            I_GPIO_OUTPUT_DIS(sda_gpio), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_GPIO_READ(sda_gpio), \
+            I_GPIO_OUTPUT_EN(scl_gpio), \
+            I_BGE(2,1), \
+            I_BXR(reg_scratch), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_MOVI(reg_scratch, 0), \
+            I_GPIO_OUTPUT_DIS(sda_gpio), \
+            I_BGE(2,1), \
+            M_BX(label_arblost_error_handler), \
+            M_BX(label_nack_error_handler), \
+            I_ADDI(reg_scratch,reg_scratch,5), \
+            I_MOVR(R0, reg_data), \
+            I_BGE(-26,0), \
+            I_ADDI(reg_scratch,reg_scratch,34), \
+            I_BGE(-3,0), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_ADDI(reg_scratch,reg_scratch,7), \
+            I_RD_REG(SENS_SAR_SLAVE_ADDR4_REG, 21 - 15, 21), \
+            I_ORI(R0, R0, 1 << 8), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_EN(scl_gpio), \
+            I_BGE(-35,0), \
+            I_STAGE_RST(), \
+            I_MOVI(reg_scratch, 0), \
+            I_ANDI(R0, reg_data, 1), \
+            I_BGE(2,1), \
+            I_STAGE_INC(9), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_LSHI(reg_scratch,reg_scratch,1), \
+            I_GPIO_READ(sda_gpio), \
+            I_ADDR(reg_scratch,reg_scratch,R0), \
+            I_GPIO_OUTPUT_EN(scl_gpio), \
+            I_STAGE_INC(1), \
+            I_JUMPS(4,17,JUMPS_GE), \
+            I_JUMPS(-7,8,JUMPS_LT), \
+            I_GPIO_OUTPUT_DIS(sda_gpio), \
+            I_JUMPS(-9,9,JUMPS_GE), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_MOVR(R0, reg_scratch), \
+            I_JUMPS(-9,17,JUMPS_LT), \
+            I_MOVI(reg_scratch, 0), \
+            I_GPIO_OUTPUT_DIS(sda_gpio), \
+            I_BXR(reg_return), \
+        M_LABEL(label_write), \
+            M_MOVL(reg_scratch, label_read), \
+            I_ADDI(reg_scratch,reg_scratch,36), \
+            I_BGE(-67,0), \
+            I_ADDI(reg_scratch,reg_scratch,3), \
+            I_LSHI(R0, reg_data, 8), \
+            I_BGE(-63,0), \
+            I_GPIO_OUTPUT_EN(sda_gpio), \
+            I_GPIO_OUTPUT_DIS(scl_gpio), \
+            I_BGE(-11,0)
 
 /**
  * Initialise the header of a I2CBB command array
@@ -339,55 +339,55 @@ extern "C" {
 #define HULP_I2C_CMD_BUF_SIZE(_num_bytes) (HULP_I2C_CMD_DATA_OFFSET + ((_num_bytes) + 1) / 2)
 
 /*
-	Allows I2C bitbanging with any number of bytes to read or write.
-	Use when needing to write multiple or read many bytes at once.
-		eg. for slaves that require 16 bit writes, or to efficiently get large readouts from sensors
+    Allows I2C bitbanging with any number of bytes to read or write.
+    Use when needing to write multiple or read many bytes at once.
+        eg. for slaves that require 16 bit writes, or to efficiently get large readouts from sensors
 
-	See HULP_I2C_CMD_1B description for initialising a write command array.
-	See HULP_I2C_CMD_BUF_SIZE description for initialising a read command array.
+    See HULP_I2C_CMD_1B description for initialising a write command array.
+    See HULP_I2C_CMD_BUF_SIZE description for initialising a read command array.
 
-	Flow:
-		Prepare reg_ptr with the RTC slow memory offset of the command array
-			eg. I_MOVO(R1, example_read_cmd),
-		Prepare reg_return with the return address
-			eg. M_MOVL(R3, MY_READ_RETURN_LABEL),
-		Branch to label_read or label_write for the desired operation.
-			eg. M_BX(MY_READ_LABEL)
+    Flow:
+        Prepare reg_ptr with the RTC slow memory offset of the command array
+            eg. I_MOVO(R1, example_read_cmd),
+        Prepare reg_return with the return address
+            eg. M_MOVL(R3, MY_READ_RETURN_LABEL),
+        Branch to label_read or label_write for the desired operation.
+            eg. M_BX(MY_READ_LABEL)
 
-	Return:
-		R0: err code
-			0 = Success, -1 = Slave NACK, -2 = Bus Error (checked on first byte only)
-			ALU: Zero on success, overflow on error.
-		reg_ptr: reg_ptr
-		reg_scratch: undefined
-		reg_return: reg_return
+    Return:
+        R0: err code
+            0 = Success, -1 = Slave NACK, -2 = Bus Error (checked on first byte only)
+            ALU: Zero on success, overflow on error.
+        reg_ptr: reg_ptr
+        reg_scratch: undefined
+        reg_return: reg_return
 
-	Example program:
-				// Prepare and branch
-				I_MOVO(R1, example_read_cmd),
-				M_MOVL(R3, LABEL_I2C_RETURN),
-				M_BX(LABEL_I2C_READ),
-				M_LABEL(LABEL_I2C_RETURN),
-				// Check error code
-				M_BGE(LABEL_I2C_ERROR, 1), // or M_BXF(LABEL_I2C_ERROR) (allows long jumps)
-				// Check some value you just received and wake if > some threshold
-				I_GET(R0, R0, example_read_cmd[HULP_I2C_CMD_DATA_OFFSET]),
-				M_BGE(LABEL_WAKE, 1234),
-				I_HALT(),
-				M_LABEL(LABEL_I2C_ERROR),
-				I_GPIO_SET(LED_ERR, 1),
-				I_END(),
-				M_LABEL(LABEL_WAKE),
-				I_WAKE(),
-				I_HALT(),
-				// Include the subroutine
-				M_INCLUDE_I2CBB_CMD(LABEL_I2C_READ, LABEL_I2C_WRITE, GPIO_NUM_25, GPIO_NUM_26)
+    Example program:
+                // Prepare and branch
+                I_MOVO(R1, example_read_cmd),
+                M_MOVL(R3, LABEL_I2C_RETURN),
+                M_BX(LABEL_I2C_READ),
+                M_LABEL(LABEL_I2C_RETURN),
+                // Check error code
+                M_BGE(LABEL_I2C_ERROR, 1), // or M_BXF(LABEL_I2C_ERROR) (allows long jumps)
+                // Check some value you just received and wake if > some threshold
+                I_GET(R0, R0, example_read_cmd[HULP_I2C_CMD_DATA_OFFSET]),
+                M_BGE(LABEL_WAKE, 1234),
+                I_HALT(),
+                M_LABEL(LABEL_I2C_ERROR),
+                I_GPIO_SET(LED_ERR, 1),
+                I_END(),
+                M_LABEL(LABEL_WAKE),
+                I_WAKE(),
+                I_HALT(),
+                // Include the subroutine
+                M_INCLUDE_I2CBB_CMD(LABEL_I2C_READ, LABEL_I2C_WRITE, GPIO_NUM_25, GPIO_NUM_26)
 */
 #define M_INCLUDE_I2CBB_CMD(label_read, label_write, scl_gpio, sda_gpio) \
-	M_INCLUDE_I2CBB_CMD_(label_read, label_write, scl_gpio, sda_gpio, R1, R2, R3)
+    M_INCLUDE_I2CBB_CMD_(label_read, label_write, scl_gpio, sda_gpio, R1, R2, R3)
 
 #define M_INCLUDE_I2CBB_CMD_(label_read, label_write, scl_gpio, sda_gpio, reg_ptr, reg_scratch, reg_return) \
-	M_LABEL(label_read), \
+    M_LABEL(label_read), \
         I_MOVI(reg_scratch, 32), \
         M_MOVL(R0, label_read), \
         I_ST(reg_return, R0, 89), \
@@ -463,7 +463,7 @@ extern "C" {
         I_GPIO_OUTPUT_DIS(sda_gpio), \
         I_SUBI(R0, R0, 2), \
         I_BXR(reg_return), \
-	M_LABEL(label_write), \
+    M_LABEL(label_write), \
         I_MOVI(reg_scratch, 34), \
         I_BGE(-75, 0), \
         I_LD(R0, reg_ptr, 1), \
