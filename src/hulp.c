@@ -173,8 +173,22 @@ void hulp_tsens_configure(uint8_t clk_div)
     REG_CLR_BIT(SENS_SAR_TSENS_CTRL_REG, SENS_TSENS_POWER_UP_FORCE);
 }
 
+static void hulp_set_start_delay(void)
+{
+    /*
+        ULP is not officially supported if RTC peripherals domain is powered on, however this is often desirable.
+        The only observed bug is that, in deep sleep, the ULP may return to sleep very soon after starting up (typically after
+        just the first instruction), resulting in an apparent doubled wakeup period.
+        To fix this, the ULP start wait needs to be increased slightly (from the default 0x10).
+        Note that ulp_set_wakeup_period adjusts for this setting so timing should be unaffected. There should also, therefore,
+        be no side effects of setting this when unnecessary (ie. RTC peripherals not forced on).
+    */
+    REG_SET_FIELD(RTC_CNTL_TIMER2_REG, RTC_CNTL_ULPCP_TOUCH_START_WAIT, 0x20);
+}
+
 void hulp_peripherals_on(void)
 {
+    hulp_set_start_delay();
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
 }
 
@@ -663,11 +677,13 @@ void hulp_dump_program(uint32_t start_offset, size_t num_instructions)
 
 esp_err_t hulp_ulp_run(uint32_t entry_point)
 {
+    hulp_set_start_delay();
     return ulp_run(entry_point);
 }
 
 esp_err_t hulp_ulp_run_once(uint32_t entry_point)
 {
+    hulp_set_start_delay();
     // disable ULP timer
     CLEAR_PERI_REG_MASK(RTC_CNTL_STATE0_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN);
     // wait for at least 1 RTC_SLOW_CLK cycle

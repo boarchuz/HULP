@@ -155,7 +155,6 @@ uint16_t hulp_get_label_pc(uint16_t label, const ulp_insn_t *program);
 
 /**
  * Start the ULP coprocessor. Upon a I_HALT() instruction, the ULP will power down for the interval period before restarting.
- * This simply wraps ulp_run; it is provided for consistency with hulp_ulp_run_once.
  */
 esp_err_t hulp_ulp_run(uint32_t entry_point);
 
