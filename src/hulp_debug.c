@@ -1,6 +1,7 @@
 #include "hulp_debug.h"
 
 #include "esp_log.h"
+#include "esp32/rom/ets_sys.h"
 #include "soc/rtc_cntl_reg.h"
 
 #include "hulp.h"

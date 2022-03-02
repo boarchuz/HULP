@@ -1,5 +1,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp32/rom/ets_sys.h"
 #include "esp_log.h"
 
 #include "hulp.h"
@@ -86,7 +87,7 @@ void init_ulp()
             I_ADDI(R3, R3, 1),
             I_MOVI(R1, 0),
 
-            I_ADDI(R1, R1, 1),         
+            I_ADDI(R1, R1, 1),
         M_LABEL(LAB_BREAKPOINT_1), M_DEBUG_SET_BP(LAB_DEBUG_ENTRY, R2, ulp_debug_data),
             I_ADDI(R1, R1, 1),
         M_LABEL(LAB_SOMEWHERE_ELSE),

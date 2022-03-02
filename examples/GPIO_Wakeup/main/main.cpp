@@ -2,23 +2,23 @@
 
    This uses the deep sleep wakeup stub to add GPIO wakeup functionality to ESP32 ULP.
 
-   Upon powering on, the ULP program is loaded, an EXT1 wakeup trigger is configured, a custom deep 
+   Upon powering on, the ULP program is loaded, an EXT1 wakeup trigger is configured, a custom deep
    sleep wakeup stub is set, and deep sleep begins.
 
    In a typical application, the EXT1 trigger GPIO might be an interrupt signal from an I2C slave, and the ULP
    might read some data, apply filtering, and determine whether or not to wake the SoC.
-   In this example, GPIO 0 is used as the wakeup trigger as it is usually connected to a button on most dev boards, 
+   In this example, GPIO 0 is used as the wakeup trigger as it is usually connected to a button on most dev boards,
    and the ULP simply increments a counter, waking the SoC when it reaches 5.
 
-   For optimal power consumption, the stub strives to return to sleep asap. It disables EXT1, starts ULP, and immediately 
-   sleeps; the ULP handles processing, waits until the button is released, and then re-enables the EXT1 interrupt in 
+   For optimal power consumption, the stub strives to return to sleep asap. It disables EXT1, starts ULP, and immediately
+   sleeps; the ULP handles processing, waits until the button is released, and then re-enables the EXT1 interrupt in
    preparation for the next trigger.
 
-   Note that the ULP sleep timer is used here even though the ULP disables it anyway at the end of the program. This is 
+   Note that the ULP sleep timer is used here even though the ULP disables it anyway at the end of the program. This is
    because triggering a single ULP run in deep sleep proved difficult: it would often use the 150kHz clock (instead of
    8MHz); and RTC memory would power down once the stub ended (often while the ULP is running) causing lockup. Using the
    timer forces the RTC controller to handle all of this which is much easier and more reliable.
-   
+
    In practice, ULP runs ~1ms after trigger edge. When idle, expect nominal ESP32 deep sleep current (5-10uA).
 */
 #include <stdio.h>
@@ -26,6 +26,7 @@
 #include "freertos/task.h"
 #include "esp_sleep.h"
 #include "esp32/rom/rtc.h"
+#include "esp32/rom/ets_sys.h"
 #include "soc/uart_reg.h"
 #include "soc/timer_group_reg.h"
 
@@ -123,7 +124,7 @@ void prepare_ulp()
         LBL_BELOW_THRESHOLD,
         LBL_FINISH_UP,
     };
-    
+
     const ulp_insn_t program[] = {
 #ifdef DEBUG_MODE
         //Toggle GPIO
@@ -140,7 +141,7 @@ void prepare_ulp()
 
         //Check if counter has reached threshold
         M_BL(LBL_BELOW_THRESHOLD, 5),
-        
+
         //Set ulp_wake_signal
         I_MOVI(R1, 1),
         I_PUT(R1, R2, ulp_wake_signal),
@@ -162,14 +163,14 @@ void prepare_ulp()
             I_BL(-1, 1),
             //Debounce a few ms
             I_DELAY(65535),
-            
+
         M_LABEL(LBL_FINISH_UP),
             //Re-enable EXT1 so next button press will run wakeup stub
             I_EXT1_EN(),
             //Disable timer (ie. only run once)
             I_END(),
             I_HALT(),
-                
+
     };
 
     ESP_ERROR_CHECK(hulp_configure_pin(TRIGGER_GPIO, RTC_GPIO_MODE_INPUT_ONLY, GPIO_PULLUP_ONLY, 0));

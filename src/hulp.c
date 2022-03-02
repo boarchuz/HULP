@@ -6,6 +6,7 @@
 #include "esp_system.h"
 #include "esp_sleep.h"
 #include "esp_log.h"
+#include "esp32/rom/ets_sys.h"
 #include "driver/gpio.h"
 #include "driver/rtc_cntl.h"
 #include "driver/rtc_io.h"
