@@ -607,8 +607,8 @@ static int print_insn(const ulp_insn_t *ins)
                         ins->bs.sign ? "-" : "",
                         ins->bs.offset,
                         ins->bs.imm,
-                            (	ins->bs.cmp == JUMPS_LT ? 	"JUMPS_LT" :
-                            (	ins->bs.cmp == JUMPS_GE ? 	"JUMPS_GE" :
+                            (   ins->bs.cmp == JUMPS_LT ?   "JUMPS_LT" :
+                            (   ins->bs.cmp == JUMPS_GE ?   "JUMPS_GE" :
                                                             "JUMPS_LE"
                             ))
                     );

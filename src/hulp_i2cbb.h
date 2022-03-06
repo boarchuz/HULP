@@ -63,7 +63,7 @@ extern "C" {
 /**
  *  This macro expands to populate your ULP program with subroutines for basic I2C master bitbanging.
  *
- * 	See examples or M_INCLUDE_I2CBB description for setup.
+ *  See examples or M_INCLUDE_I2CBB description for setup.
  */
 
 #define M_INCLUDE_I2CBB(label_read, label_write, label_arblost_error, label_nack_error, scl_gpio, sda_gpio, slave_address) \
@@ -71,28 +71,28 @@ extern "C" {
 
 /**
  *  This macro expands to populate your ULP program with subroutines for basic I2C master bitbanging functionality.
- * 	Operations: 8 bit read, 16 bit read, 8 bit write. Only one slave device is supported.
+ *  Operations: 8 bit read, 16 bit read, 8 bit write. Only one slave device is supported.
  *  Additionally, there are callbacks for slave NACK and arbitration loss.
  *
- * 	Flow:
- * 		Read: -Prepare reg_data with the slave's sub address in the upper 8 bits. 		eg. I_MOVI( R1, (SUBADDRESS << 8) )
- *            	[Optional] To read 16 bits, additionally set bit 0 at the same time.	eg. I_MOVI( R1, (SUBADDRESS << 8) | 1) )
- * 			  -Prepare reg_return with the return address. 							eg. M_MOVL(R3, LABEL_I2C_SUCCESS_RETURN)
- * 			  -Branch to label_read. 													eg. M_BX(LABEL_I2C_READ)
- * 			On success: Branches to the address in reg_return; R0 = result, reg_data = reg_data, reg_scratch = 0, reg_return = reg_return, stage = undef
- * 			On error: Branches to label_arblost_error_handler or label_nack_error_handler; R0 = undef, reg_data = reg_data, reg_scratch = 0, reg_return = reg_return, stage = undef
+ *  Flow:
+ *      Read:   -Prepare reg_data with the slave's sub address in the upper 8 bits.         eg. I_MOVI( R1, (SUBADDRESS << 8) )
+ *                  [Optional] To read 16 bits, additionally set bit 0 at the same time.    eg. I_MOVI( R1, (SUBADDRESS << 8) | 1) )
+ *              -Prepare reg_return with the return address.                                eg. M_MOVL(R3, LABEL_I2C_SUCCESS_RETURN)
+ *              -Branch to label_read.                                                      eg. M_BX(LABEL_I2C_READ)
+ *          On success: Branches to the address in reg_return; R0 = result, reg_data = reg_data, reg_scratch = 0, reg_return = reg_return, stage = undef
+ *          On error: Branches to label_arblost_error_handler or label_nack_error_handler; R0 = undef, reg_data = reg_data, reg_scratch = 0, reg_return = reg_return, stage = undef
  *
- *  	Write: -Prepare reg_data with the slave's sub address in the upper 8 bits, and the value in the lower 8 bits. eg. I_MOVI(R1, (SUBADDRESS << 8) | (WRITE_VALUE) )
- * 			   -Prepare reg_return with the return address. eg. M_MOVL(R3, LABEL_I2C_SUCCESS_RETURN)
- * 			   -Branch to label_write. eg. M_BX(LABEL_I2C_WRITE)
- * 			On success: Branches to the address in reg_return; R0 = 0(ACK), reg_data = reg_data, reg_scratch = 0, reg_return = reg_return.
- * 			On error: Branches to label_arblost_error_handler or label_nack_error_handler; R0 = undef, reg_data = reg_data, reg_scratch = 0, reg_return = reg_return.
+ *      Write:  -Prepare reg_data with the slave's sub address in the upper 8 bits, and the value in the lower 8 bits. eg. I_MOVI(R1, (SUBADDRESS << 8) | (WRITE_VALUE) )
+ *              -Prepare reg_return with the return address. eg. M_MOVL(R3, LABEL_I2C_SUCCESS_RETURN)
+ *              -Branch to label_write. eg. M_BX(LABEL_I2C_WRITE)
+ *          On success: Branches to the address in reg_return; R0 = 0(ACK), reg_data = reg_data, reg_scratch = 0, reg_return = reg_return.
+ *          On error: Branches to label_arblost_error_handler or label_nack_error_handler; R0 = undef, reg_data = reg_data, reg_scratch = 0, reg_return = reg_return.
  *
  *
- * 	label_write: A label to identify the I2C write entry. Branch to this label to write.
+ *  label_write: A label to identify the I2C write entry. Branch to this label to write.
  *  label_read: A label to identify the I2C read entry. Branch to this label in your program to read (8 or 16 bits).
  *  label_arblost_error_handler / label_nack_error_handler: Provide labels to branch to in the event of an error.
- * 		These must be implemented elsewhere in your ULP program to handle errors. The same label may be used for both.
+ *      These must be implemented elsewhere in your ULP program to handle errors. The same label may be used for both.
  *  slave_address: 7-bit slave address
  *  sda_gpio / scl_gpio: I2C GPIOs
  *  reg_data: This register is used to pass the subaddress and data to the subroutine (see above for usage). R1-R3.
@@ -186,10 +186,10 @@ extern "C" {
  * The address of the current I2C slave should be set in the upper 7 bits of SENS_I2C_SLAVE_ADDR6.
  * You can use I_I2CBB_SET_SLAVE(addr) to do this easily in your ULP program.
 
- * eg. 	I_I2CBB_SET_SLAVE(0x12),							//Set the slave address
- * 		M_I2CBB_WR(LBL_WR_DEV1, LBL_I2C_WRITE, 0x34, 255),	//Perform I2C transactions
- * 		I_I2CBB_SET_SLAVE(0x56),							//Set a different slave address
- * 		M_I2CBB_RD(LBL_RD_DEV2, LBL_I2C_READ, 0x78),		//Perform I2C transactions with new device
+ * eg.  I_I2CBB_SET_SLAVE(0x12),                            // Set the slave address
+ *      M_I2CBB_WR(LBL_WR_DEV1, LBL_I2C_WRITE, 0x34, 255),  // Perform I2C transactions
+ *      I_I2CBB_SET_SLAVE(0x56),                            // Set a different slave address
+ *      M_I2CBB_RD(LBL_RD_DEV2, LBL_I2C_READ, 0x78),        // Perform I2C transactions with new device
 */
 #define M_INCLUDE_I2CBB_MULTI(label_read, label_write, label_arblost_error, label_nack_error, scl_gpio, sda_gpio) \
     M_INCLUDE_I2CBB_MULTI_(label_read, label_write, label_arblost_error, label_nack_error, scl_gpio, sda_gpio, R1, R2, R3)
@@ -284,9 +284,9 @@ extern "C" {
 /**
  * Initialise the header of a I2CBB command array for reading without writing pointer
  * By default, a read command consists of a write transaction to set the slave register pointer, followed by the configured read transaction.
- * 		slave_address[WR]+slave_reg + slave_address[RD]+num_bytes...
+ *      slave_address[WR]+slave_reg + slave_address[RD]+num_bytes...
  * Use this, instead, to skip the pointer write to perform only the read.
- * 		slave_address[RD]+num_bytes...
+ *      slave_address[RD]+num_bytes...
  *  See HULP_I2C_CMD_1B description for usage
  */
 #define HULP_I2C_CMD_HDR_NO_PTR(_slave_addr, _num_bytes) \
