@@ -660,6 +660,7 @@ static int print_insn(const ulp_insn_t *ins)
             assert(0 && "unknown opcode");
     }
     assert(0);
+    return 0;
 }
 
 void hulp_dump_program(uint32_t start_offset, size_t num_instructions)
