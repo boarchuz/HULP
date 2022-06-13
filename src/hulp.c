@@ -1,21 +1,24 @@
-#include "hulp.h"
-
 #include <string.h>
 #include <inttypes.h>
 
 #include "esp_system.h"
 #include "esp_sleep.h"
 #include "esp_log.h"
+#include "esp_idf_version.h"
 #include "esp32/rom/ets_sys.h"
 #include "driver/gpio.h"
-#include "driver/rtc_cntl.h"
+#if ESP_IDF_VERSION_MAJOR >= 5
+#   include "esp_private/rtc_ctrl.h"
+#else
+#   include "driver/rtc_cntl.h"
+#endif
 #include "driver/rtc_io.h"
 #include "driver/adc.h"
 #include "soc/rtc.h"
 #include "soc/adc_periph.h"
 
+#include "hulp.h"
 #include "hulp_compat.h"
-
 #include "hulp_config.h"
 
 static const char* TAG = "HULP";
@@ -209,12 +212,20 @@ void hulp_configure_hall_effect_sensor(void)
 
 void hulp_clear_program_memory(void)
 {
+    #pragma GCC push_options
+    #pragma GCC diagnostic ignored "-Warray-bounds"
+    #pragma GCC diagnostic ignored "-Wstringop-overflow"
     memset(RTC_SLOW_MEM, 0, HULP_ULP_RESERVE_MEM);
+    #pragma GCC pop_options
 }
 
 void hulp_clear_rtc_slow_memory(void)
 {
+    #pragma GCC push_options
+    #pragma GCC diagnostic ignored "-Warray-bounds"
+    #pragma GCC diagnostic ignored "-Wstringop-overflow"
     memset(RTC_SLOW_MEM, 0, 0x1000);
+    #pragma GCC pop_options
 }
 
 static uint64_t hulp_us_to_ticks(uint64_t time_us)
@@ -734,7 +745,11 @@ bool hulp_is_ulp_wakeup(void)
 
 esp_err_t hulp_ulp_isr_register(intr_handler_t handler, void* handler_arg)
 {
-    return rtc_isr_register(handler, handler_arg, RTC_CNTL_SAR_INT_ST_M);
+    #if ESP_IDF_VERSION_MAJOR >= 5
+        return rtc_isr_register(handler, handler_arg, RTC_CNTL_SAR_INT_ST_M, 0);
+    #else
+        return rtc_isr_register(handler, handler_arg, RTC_CNTL_SAR_INT_ST_M);
+    #endif
 }
 
 esp_err_t hulp_ulp_isr_deregister(intr_handler_t handler, void* handler_arg)
