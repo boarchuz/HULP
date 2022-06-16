@@ -210,24 +210,6 @@ void hulp_configure_hall_effect_sensor(void)
     REG_SET_BIT(RTC_IO_HALL_SENS_REG, RTC_IO_XPD_HALL);
 }
 
-void hulp_clear_program_memory(void)
-{
-    #pragma GCC push_options
-    #pragma GCC diagnostic ignored "-Warray-bounds"
-    #pragma GCC diagnostic ignored "-Wstringop-overflow"
-    memset(RTC_SLOW_MEM, 0, HULP_ULP_RESERVE_MEM);
-    #pragma GCC pop_options
-}
-
-void hulp_clear_rtc_slow_memory(void)
-{
-    #pragma GCC push_options
-    #pragma GCC diagnostic ignored "-Warray-bounds"
-    #pragma GCC diagnostic ignored "-Wstringop-overflow"
-    memset(RTC_SLOW_MEM, 0, 0x1000);
-    #pragma GCC pop_options
-}
-
 static uint64_t hulp_us_to_ticks(uint64_t time_us)
 {
     return rtc_time_us_to_slowclk(time_us, esp_clk_slowclk_cal_get());

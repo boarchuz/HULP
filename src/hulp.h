@@ -115,16 +115,6 @@ void hulp_configure_hall_effect_sensor(void);
 void hulp_tsens_configure(uint8_t clk_div);
 
 /**
- * Zero-out ULP_RESERVE_MEM bytes of RTC slow mem
- */
-void hulp_clear_program_memory(void);
-
-/**
- * Zero-out lower 4K of RTC slow mem
- */
-void hulp_clear_rtc_slow_memory(void);
-
-/**
  * Convert a time (in milliseconds) to an optimally-shifted 16-bit RTC tick count.
  */
 uint16_t hulp_ms_to_ulp_ticks(uint32_t time_ms);
