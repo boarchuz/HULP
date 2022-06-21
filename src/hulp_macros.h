@@ -223,6 +223,30 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_ADC(reg_dest, (uint32_t)hulp_adc_get_periph_index(pin), (uint32_t)(hulp_adc_get_channel_num(pin)))
 
 /**
+ * Enable RTCIO input.
+ */
+#define I_RTCIO_INPUT_EN(rtcio_num) \
+    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].ie), 1)
+
+/**
+ * Enable GPIO input.
+ */
+#define I_GPIO_INPUT_EN(gpio_num) \
+    I_RTCIO_INPUT_EN(hulp_gtr(gpio_num))
+
+/**
+ * Disable RTCIO input.
+ */
+#define I_RTCIO_INPUT_DIS(rtcio_num) \
+    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].ie), 0)
+
+/**
+ * Disable GPIO input.
+ */
+#define I_GPIO_INPUT_DIS(gpio_num) \
+    I_RTCIO_INPUT_DIS(hulp_gtr(gpio_num))
+
+/**
  * Set RTCIO output level.
  */
 #define I_RTCIO_SET(rtcio_num, level) \
