@@ -284,30 +284,24 @@ uint16_t hulp_get_label_pc(uint16_t label, const ulp_insn_t *program)
 }
 
 static uint32_t periph_sel_to_reg_base(uint32_t sel) {
-    uint32_t ret = 3;
     if(sel == 0) {
-        ret = DR_REG_RTCCNTL_BASE;
+        return DR_REG_RTCCNTL_BASE;
     } else if (sel == 1) {
-        ret = DR_REG_RTCIO_BASE;
+        return DR_REG_RTCIO_BASE;
     } else if (sel == 2) {
-        ret = DR_REG_SENS_BASE;
-    } else if (sel == 3) {
-        ret = DR_REG_RTC_I2C_BASE;
-    } else {
-        assert(0 && "invalid periph sel");
+        return DR_REG_SENS_BASE;
+    } else /* if (sel == 3) */ {
+        return DR_REG_RTC_I2C_BASE;
     }
-    return ret;
 }
 
-#define HULP_DUMP_INSN_STR(x) x ",\n"
-
-static int print_insn(const ulp_insn_t *ins)
+int hulp_print_instruction(const ulp_insn_t *ins)
 {
     switch(ins->b.opcode)
     {
         case OPCODE_WR_REG:
         {
-            return printf(HULP_DUMP_INSN_STR("I_WR_REG(0x%08X, %u, %u, %u)"),
+            return printf("I_WR_REG(0x%08X, %u, %u, %u)",
                 periph_sel_to_reg_base(ins->wr_reg.periph_sel) + ins->wr_reg.addr * sizeof(uint32_t),
                 ins->wr_reg.low,
                 ins->wr_reg.high,
@@ -316,7 +310,7 @@ static int print_insn(const ulp_insn_t *ins)
         }
         case OPCODE_RD_REG:
         {
-            return printf(HULP_DUMP_INSN_STR("I_RD_REG(0x%08X, %u, %u)"),
+            return printf("I_RD_REG(0x%08X, %u, %u)",
                 periph_sel_to_reg_base(ins->rd_reg.periph_sel) + ins->rd_reg.addr * sizeof(uint32_t),
                 ins->rd_reg.low,
                 ins->rd_reg.high
@@ -324,7 +318,7 @@ static int print_insn(const ulp_insn_t *ins)
         }
         case OPCODE_I2C:
         {
-            return printf(HULP_DUMP_INSN_STR("I_I2C_RW(%u, %u, %u, %u, %u, %u)"),
+            return printf("I_I2C_RW(%u, %u, %u, %u, %u, %u)",
                 ins->i2c.i2c_addr,
                 ins->i2c.data,
                 ins->i2c.low_bits,
@@ -335,13 +329,13 @@ static int print_insn(const ulp_insn_t *ins)
         }
         case OPCODE_DELAY:
         {
-            return printf(HULP_DUMP_INSN_STR("I_DELAY(%u)"),
+            return printf("I_DELAY(%u)",
                 ins->delay.cycles
             );
         }
         case OPCODE_ADC:
         {
-            return printf(HULP_DUMP_INSN_STR("I_ADC(R%u, %u, %u)"),
+            return printf("I_ADC(R%u, %u, %u)",
                 ins->adc.dreg,
                 ins->adc.sar_sel,
                 ins->adc.mux - 1
@@ -349,7 +343,7 @@ static int print_insn(const ulp_insn_t *ins)
         }
         case OPCODE_ST:
         {
-            return printf(HULP_DUMP_INSN_STR("I_ST(R%u, R%u, %u)"),
+            return printf("I_ST(R%u, R%u, %u)",
                 ins->st.dreg,
                 ins->st.sreg,
                 ins->st.offset
@@ -365,7 +359,7 @@ static int print_insn(const ulp_insn_t *ins)
                     {
                         case ALU_SEL_ADD:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_ADDR(R%u, R%u, R%u)"),
+                            return printf("I_ADDR(R%u, R%u, R%u)",
                                 ins->alu_reg.dreg,
                                 ins->alu_reg.sreg,
                                 ins->alu_reg.treg
@@ -373,7 +367,7 @@ static int print_insn(const ulp_insn_t *ins)
                         }
                         case ALU_SEL_SUB:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_SUBR(R%u, R%u, R%u)"),
+                            return printf("I_SUBR(R%u, R%u, R%u)",
                                 ins->alu_reg.dreg,
                                 ins->alu_reg.sreg,
                                 ins->alu_reg.treg
@@ -381,7 +375,7 @@ static int print_insn(const ulp_insn_t *ins)
                         }
                         case ALU_SEL_AND:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_ANDR(R%u, R%u, R%u)"),
+                            return printf("I_ANDR(R%u, R%u, R%u)",
                                 ins->alu_reg.dreg,
                                 ins->alu_reg.sreg,
                                 ins->alu_reg.treg
@@ -389,7 +383,7 @@ static int print_insn(const ulp_insn_t *ins)
                         }
                         case ALU_SEL_OR:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_ORR(R%u, R%u, R%u)"),
+                            return printf("I_ORR(R%u, R%u, R%u)",
                                 ins->alu_reg.dreg,
                                 ins->alu_reg.sreg,
                                 ins->alu_reg.treg
@@ -397,14 +391,14 @@ static int print_insn(const ulp_insn_t *ins)
                         }
                         case ALU_SEL_MOV:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_MOVR(R%u, R%u)"),
+                            return printf("I_MOVR(R%u, R%u)",
                                 ins->alu_reg.dreg,
                                 ins->alu_reg.sreg
                             );
                         }
                         case ALU_SEL_LSH:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_LSHR(R%u, R%u, R%u)"),
+                            return printf("I_LSHR(R%u, R%u, R%u)",
                                 ins->alu_reg.dreg,
                                 ins->alu_reg.sreg,
                                 ins->alu_reg.treg
@@ -412,14 +406,14 @@ static int print_insn(const ulp_insn_t *ins)
                         }
                         case ALU_SEL_RSH:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_RSHR(R%u, R%u, R%u)"),
+                            return printf("I_RSHR(R%u, R%u, R%u)",
                                 ins->alu_reg.dreg,
                                 ins->alu_reg.sreg,
                                 ins->alu_reg.treg
                             );
                         }
                         default:
-                            assert(0 && "unknown alu_reg operation");
+                            break;
                     }
                     break;
                 }
@@ -429,7 +423,7 @@ static int print_insn(const ulp_insn_t *ins)
                     {
                         case ALU_SEL_ADD:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_ADDI(R%u, R%u, %u)"),
+                            return printf("I_ADDI(R%u, R%u, %u)",
                                 ins->alu_imm.dreg,
                                 ins->alu_imm.sreg,
                                 ins->alu_imm.imm
@@ -437,7 +431,7 @@ static int print_insn(const ulp_insn_t *ins)
                         }
                         case ALU_SEL_SUB:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_SUBI(R%u, R%u, %u)"),
+                            return printf("I_SUBI(R%u, R%u, %u)",
                                 ins->alu_imm.dreg,
                                 ins->alu_imm.sreg,
                                 ins->alu_imm.imm
@@ -445,7 +439,7 @@ static int print_insn(const ulp_insn_t *ins)
                         }
                         case ALU_SEL_AND:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_ANDI(R%u, R%u, %u)"),
+                            return printf("I_ANDI(R%u, R%u, %u)",
                                 ins->alu_imm.dreg,
                                 ins->alu_imm.sreg,
                                 ins->alu_imm.imm
@@ -453,7 +447,7 @@ static int print_insn(const ulp_insn_t *ins)
                         }
                         case ALU_SEL_OR:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_ORI(R%u, R%u, %u)"),
+                            return printf("I_ORI(R%u, R%u, %u)",
                                 ins->alu_imm.dreg,
                                 ins->alu_imm.sreg,
                                 ins->alu_imm.imm
@@ -461,14 +455,14 @@ static int print_insn(const ulp_insn_t *ins)
                         }
                         case ALU_SEL_MOV:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_MOVI(R%u, %u)"),
+                            return printf("I_MOVI(R%u, %u)",
                                 ins->alu_imm.dreg,
                                 ins->alu_imm.imm
                             );
                         }
                         case ALU_SEL_LSH:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_LSHI(R%u, R%u, %u)"),
+                            return printf("I_LSHI(R%u, R%u, %u)",
                                 ins->alu_imm.dreg,
                                 ins->alu_imm.sreg,
                                 ins->alu_imm.imm
@@ -476,14 +470,14 @@ static int print_insn(const ulp_insn_t *ins)
                         }
                         case ALU_SEL_RSH:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_RSHI(R%u, R%u, %u)"),
+                            return printf("I_RSHI(R%u, R%u, %u)",
                                 ins->alu_imm.dreg,
                                 ins->alu_imm.sreg,
                                 ins->alu_imm.imm
                             );
                         }
                         default:
-                            assert(0 && "unknown alu_imm operation");
+                            break;
                     }
                     break;
                 }
@@ -493,27 +487,27 @@ static int print_insn(const ulp_insn_t *ins)
                     {
                         case ALU_SEL_SINC:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_STAGE_INC(%u)"),
+                            return printf("I_STAGE_INC(%u)",
                                 ins->alu_reg_s.imm
                             );
                         }
                         case ALU_SEL_SDEC:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_STAGE_DEC(%u)"),
+                            return printf("I_STAGE_DEC(%u)",
                                 ins->alu_reg_s.imm
                             );
                         }
                         case ALU_SEL_SRST:
                         {
-                            return printf(HULP_DUMP_INSN_STR("I_STAGE_RST()"));
+                            return printf("I_STAGE_RST()");
                         }
                         default:
-                            assert(0 && "unknown alu_reg_s operation");
+                            break;
                     }
                     break;
                 }
                 default:
-                    assert(0 && "unknown alu subopcode");
+                    break;
             }
             break;
         }
@@ -529,13 +523,13 @@ static int print_insn(const ulp_insn_t *ins)
                         {
                             if(ins->bx.reg)
                             {
-                                return printf(HULP_DUMP_INSN_STR("I_BXR(R%u)"),
+                                return printf("I_BXR(R%u)",
                                     ins->bx.dreg
                                 );
                             }
                             else
                             {
-                                return printf(HULP_DUMP_INSN_STR("I_BXI(%u)"),
+                                return printf("I_BXI(%u)",
                                     ins->bx.addr
                                 );
                             }
@@ -544,13 +538,13 @@ static int print_insn(const ulp_insn_t *ins)
                         {
                             if(ins->bx.reg)
                             {
-                                return printf(HULP_DUMP_INSN_STR("I_BXZR(R%u)"),
+                                return printf("I_BXZR(R%u)",
                                     ins->bx.dreg
                                 );
                             }
                             else
                             {
-                                return printf(HULP_DUMP_INSN_STR("I_BXZI(%u)"),
+                                return printf("I_BXZI(%u)",
                                     ins->bx.addr
                                 );
                             }
@@ -559,19 +553,19 @@ static int print_insn(const ulp_insn_t *ins)
                         {
                             if(ins->bx.reg)
                             {
-                                return printf(HULP_DUMP_INSN_STR("I_BXFR(R%u)"),
+                                return printf("I_BXFR(R%u)",
                                     ins->bx.dreg
                                 );
                             }
                             else
                             {
-                                return printf(HULP_DUMP_INSN_STR("I_BXFI(%u)"),
+                                return printf("I_BXFI(%u)",
                                     ins->bx.addr
                                 );
                             }
                         }
                         default:
-                            assert(0 && "unknown bx type");
+                            break;
                     }
                     break;
                 }
@@ -579,7 +573,7 @@ static int print_insn(const ulp_insn_t *ins)
                 {
                     if(ins->b.cmp == B_CMP_L)
                     {
-                        return printf(HULP_DUMP_INSN_STR("I_BL(%s%u, %u)"),
+                        return printf("I_BL(%s%u, %u)",
                             ins->b.sign ? "-" : "",
                             ins->b.offset,
                             ins->b.imm
@@ -587,7 +581,7 @@ static int print_insn(const ulp_insn_t *ins)
                     }
                     else
                     {
-                        return printf(HULP_DUMP_INSN_STR("I_BGE(%s%u, %u)"),
+                        return printf("I_BGE(%s%u, %u)",
                             ins->b.sign ? "-" : "",
                             ins->b.offset,
                             ins->b.imm
@@ -596,7 +590,7 @@ static int print_insn(const ulp_insn_t *ins)
                 }
                 case SUB_OPCODE_BS:
                 {
-                    return printf(HULP_DUMP_INSN_STR("I_JUMPS(%s%u, %u, %s)"),
+                    return printf("I_JUMPS(%s%u, %u, %s)",
                         ins->bs.sign ? "-" : "",
                         ins->bs.offset,
                         ins->bs.imm,
@@ -607,7 +601,7 @@ static int print_insn(const ulp_insn_t *ins)
                     );
                 }
                 default:
-                    assert(0 && "unknown branch subopcode");
+                    break;
             }
             break;
         }
@@ -617,55 +611,53 @@ static int print_insn(const ulp_insn_t *ins)
             {
                 case SUB_OPCODE_END:
                 {
-                    return printf(HULP_DUMP_INSN_STR("I_WAKE()"));
+                    return printf("I_WAKE()");
                 }
                 case SUB_OPCODE_SLEEP:
                 {
-                    return printf(HULP_DUMP_INSN_STR("I_SLEEP_CYCLE_SEL(%u)"),
+                    return printf("I_SLEEP_CYCLE_SEL(%u)",
                         ins->sleep.cycle_sel
                     );
                 }
                 default:
-                    assert(0 && "unknown end subopcode");
+                    break;
             }
             break;
         }
         case OPCODE_TSENS:
         {
-            return printf(HULP_DUMP_INSN_STR("I_TSENS(R%u, %u)"),
+            return printf("I_TSENS(R%u, %u)",
                 ins->tsens.dreg,
                 ins->tsens.wait_delay
             );
         }
         case OPCODE_HALT:
         {
-            return printf(HULP_DUMP_INSN_STR("I_HALT()"));
+            return printf("I_HALT()");
         }
         case OPCODE_LD:
         {
-            return printf(HULP_DUMP_INSN_STR("I_LD(R%u, R%u, %u)"),
+            return printf("I_LD(R%u, R%u, %u)",
                 ins->ld.dreg,
                 ins->ld.sreg,
                 ins->ld.offset
             );
         }
         default:
-            assert(0 && "unknown opcode");
+            break;
     }
-    abort();
+    return -1;
 }
 
-void hulp_dump_program(uint32_t start_offset, size_t num_instructions)
+void hulp_print_program(const ulp_insn_t *program, size_t num_instructions)
 {
-    assert((start_offset + num_instructions) < HULP_ULP_RESERVE_MEM);
-
-    const ulp_insn_t *p = (const ulp_insn_t*)&RTC_SLOW_MEM[start_offset];
-    const ulp_insn_t *end = (const ulp_insn_t*)&RTC_SLOW_MEM[start_offset + num_instructions];
-
-    while(p < end)
+    for(size_t i = 0; i < num_instructions; ++i)
     {
-        print_insn(p);
-        ++p;
+        if(hulp_print_instruction(&program[i]) < 0)
+        {
+            printf("I_INVALID(0x%08X)", program[i].instruction);
+        }
+        printf(",\n");
     }
 }
 

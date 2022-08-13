@@ -178,9 +178,14 @@ bool hulp_is_deep_sleep_wakeup(void);
 bool hulp_is_ulp_wakeup(void);
 
 /**
- * Read program loaded in RTC memory to serial
+ * Dump the provided instruction (via printf) in macro form
  */
-void hulp_dump_program(uint32_t start_offset, size_t num_instructions);
+int hulp_print_instruction(const ulp_insn_t *instruction);
+
+/**
+ * Dump the provided program (via printf) in macro form
+ */
+void hulp_print_program(const ulp_insn_t *program, size_t num_instructions);
 
 /**
  * Get the current ULP state.
