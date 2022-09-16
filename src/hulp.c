@@ -33,7 +33,7 @@ esp_err_t hulp_configure_pin(gpio_num_t pin, rtc_gpio_mode_t mode, gpio_pull_mod
         ESP_OK != rtc_gpio_set_direction(pin, mode)
     )
     {
-        ESP_LOGE(TAG, "[%s] error - %d (%d, %d, %u)", __func__, pin, mode, pull_mode, level);
+        ESP_LOGE(TAG, "[%s] error - %d (%d, %d, %" PRIu32 ")", __func__, pin, mode, pull_mode, level);
         return ESP_FAIL;
     }
     return ESP_OK;
@@ -302,7 +302,7 @@ int hulp_print_instruction(const ulp_insn_t *ins)
         case OPCODE_WR_REG:
         {
             return printf("I_WR_REG(0x%08X, %u, %u, %u)",
-                periph_sel_to_reg_base(ins->wr_reg.periph_sel) + ins->wr_reg.addr * sizeof(uint32_t),
+                (unsigned int)(periph_sel_to_reg_base(ins->wr_reg.periph_sel) + ins->wr_reg.addr * sizeof(uint32_t)),
                 ins->wr_reg.low,
                 ins->wr_reg.high,
                 ins->wr_reg.data
@@ -311,7 +311,7 @@ int hulp_print_instruction(const ulp_insn_t *ins)
         case OPCODE_RD_REG:
         {
             return printf("I_RD_REG(0x%08X, %u, %u)",
-                periph_sel_to_reg_base(ins->rd_reg.periph_sel) + ins->rd_reg.addr * sizeof(uint32_t),
+                (unsigned int)(periph_sel_to_reg_base(ins->rd_reg.periph_sel) + ins->rd_reg.addr * sizeof(uint32_t)),
                 ins->rd_reg.low,
                 ins->rd_reg.high
             );
@@ -655,7 +655,7 @@ void hulp_print_program(const ulp_insn_t *program, size_t num_instructions)
     {
         if(hulp_print_instruction(&program[i]) < 0)
         {
-            printf("I_INVALID(0x%08X)", program[i].instruction);
+            printf("I_INVALID(0x%08X)", (unsigned int)program[i].instruction);
         }
         printf(",\n");
     }
@@ -783,7 +783,7 @@ ulp_state_t hulp_get_state(void)
         case                                  BIT(16):
             return ULP_STATE_DONE;
         default:
-            ESP_LOGW(TAG, "unknown state: %u", ulp_state_bits);
+            ESP_LOGW(TAG, "unknown state: %" PRIu32, ulp_state_bits);
             return ULP_STATE_UNKNOWN;
     }
 }

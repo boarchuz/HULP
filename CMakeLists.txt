@@ -1,4 +1,8 @@
-set(srcs 
+set(include_dirs
+    "src"
+)
+
+set(srcs
     "src/hulp.c"
     "src/hulp_touch.c"
     "src/hulp_uart.c"
@@ -6,22 +10,14 @@ set(srcs
     "src/hulp_debug.c"
 )
 
-set(include_dirs 
-    "src"
-)
-
 set(requires
     ulp
     driver
-)
-
-set(priv_requires
     soc
 )
 
 idf_component_register(
-    SRCS "${srcs}"
     INCLUDE_DIRS "${include_dirs}"
+    SRCS "${srcs}"
     REQUIRES "${requires}"
-    PRIV_REQUIRES "${priv_requires}"
 )
