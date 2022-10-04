@@ -12,68 +12,9 @@
 #include "esp_assert.h"
 
 #include "hulp_compat.h"
+#include "hulp_macro_opt.h"
 
-#if CONFIG_HULP_TRY_CONST
-#define SOC_REG_TO_ULP_PERIPH_SEL(reg) (uint32_t)(((reg) - DR_REG_RTCCNTL_BASE) / 0x400)
-static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
-    RTCIO_GPIO0_CHANNEL,    //GPIO0
-    -1,//GPIO1
-    RTCIO_GPIO2_CHANNEL,    //GPIO2
-    -1,//GPIO3
-    RTCIO_GPIO4_CHANNEL,    //GPIO4
-    -1,//GPIO5
-    -1,//GPIO6
-    -1,//GPIO7
-    -1,//GPIO8
-    -1,//GPIO9
-    -1,//GPIO10
-    -1,//GPIO11
-    RTCIO_GPIO12_CHANNEL,   //GPIO12
-    RTCIO_GPIO13_CHANNEL,   //GPIO13
-    RTCIO_GPIO14_CHANNEL,   //GPIO14
-    RTCIO_GPIO15_CHANNEL,   //GPIO15
-    -1,//GPIO16
-    -1,//GPIO17
-    -1,//GPIO18
-    -1,//GPIO19
-    -1,//GPIO20
-    -1,//GPIO21
-    -1,//GPIO22
-    -1,//GPIO23
-    -1,//GPIO24
-    RTCIO_GPIO25_CHANNEL,   //GPIO25
-    RTCIO_GPIO26_CHANNEL,   //GPIO26
-    RTCIO_GPIO27_CHANNEL,   //GPIO27
-    -1,//GPIO28
-    -1,//GPIO29
-    -1,//GPIO30
-    -1,//GPIO31
-    RTCIO_GPIO32_CHANNEL,   //GPIO32
-    RTCIO_GPIO33_CHANNEL,   //GPIO33
-    RTCIO_GPIO34_CHANNEL,   //GPIO34
-    RTCIO_GPIO35_CHANNEL,   //GPIO35
-    RTCIO_GPIO36_CHANNEL,   //GPIO36
-    RTCIO_GPIO37_CHANNEL,   //GPIO37
-    RTCIO_GPIO38_CHANNEL,   //GPIO38
-    RTCIO_GPIO39_CHANNEL,   //GPIO39
-};
-
-#define hulp_gtr(gpio_num) ((uint8_t)s_rtc_io_num_map[gpio_num])
-
-#define RTC_WORD_OFFSET(x) ((uint16_t)((uint32_t*)(&(x)) - RTC_SLOW_MEM))
-
-#else // CONFIG_HULP_TRY_CONST
-
-#define hulp_gtr(gpio_num) ((uint8_t)rtc_io_number_get(gpio_num))
-
-#define RTC_WORD_OFFSET(x) ({ \
-            uint32_t* ptr_ = (uint32_t*)(&(x)); \
-            TRY_STATIC_ASSERT((uint32_t)(ptr_) % sizeof(uint32_t) == 0, (Not aligned)); \
-            TRY_STATIC_ASSERT(esp_ptr_in_rtc_slow(ptr_), (Not in RTC Slow Mem)); \
-            ((uint16_t)(ptr_ - RTC_SLOW_MEM)); \
-        })
-
-#endif // CONFIG_HULP_TRY_CONST
+#include "sdkconfig.h"
 
 #define hulp_log2(x) (31 - __builtin_clz(x))
 
@@ -212,8 +153,8 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Init RTCIO
  */
 #define M_RTCIO_INIT(rtcio_num) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].mux), 1), \
-    I_WR_REG(rtc_io_desc[(rtcio_num)].reg, rtc_io_desc[(rtcio_num)].func, rtc_io_desc[(rtcio_num)].func + 1, 0)
+    I_WR_REG_BIT(hulp_rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].mux), 1), \
+    I_WR_REG(hulp_rtc_io_desc[(rtcio_num)].reg, hulp_rtc_io_desc[(rtcio_num)].func, hulp_rtc_io_desc[(rtcio_num)].func + 1, 0)
 
 /**
  * Read GPIO analog value into reg_dest
@@ -226,7 +167,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Enable RTCIO input.
  */
 #define I_RTCIO_INPUT_EN(rtcio_num) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].ie), 1)
+    I_WR_REG_BIT(hulp_rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].ie), 1)
 
 /**
  * Enable GPIO input.
@@ -238,7 +179,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Disable RTCIO input.
  */
 #define I_RTCIO_INPUT_DIS(rtcio_num) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].ie), 0)
+    I_WR_REG_BIT(hulp_rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].ie), 0)
 
 /**
  * Disable GPIO input.
@@ -298,7 +239,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Set RTCIO internal pullup.
  */
 #define I_RTCIO_PULLUP(rtcio_num, enable) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pullup), ( (enable) ? 1 : 0) )
+    I_WR_REG_BIT(hulp_rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].pullup), ( (enable) ? 1 : 0) )
 
 /**
  * Set GPIO internal pullup.
@@ -310,7 +251,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Get RTCIO pullup enabled (1/0) into R0
  */
 #define I_RTCIO_PULLUP_RD(rtcio_num) \
-    I_RD_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pullup))
+    I_RD_REG_BIT(hulp_rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].pullup))
 
 /**
  * Get GPIO pullup enabled (1/0) into R0
@@ -322,7 +263,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Set RTCIO internal pulldown.
  */
 #define I_RTCIO_PULLDOWN(rtcio_num, enable) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pulldown), ( (enable) ? 1 : 0) )
+    I_WR_REG_BIT(hulp_rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].pulldown), ( (enable) ? 1 : 0) )
 
 /**
  * Set GPIO internal pulldown.
@@ -334,7 +275,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Get RTCIO pulldown enabled (1/0) into R0
  */
 #define I_RTCIO_PULLDOWN_RD(rtcio_num) \
-    I_RD_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pulldown))
+    I_RD_REG_BIT(hulp_rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].pulldown))
 
 /**
  * Get GPIO pulldown enabled (1/0) into R0
@@ -347,7 +288,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * pull_mode: GPIO_PULLUP_ONLY, GPIO_PULLDOWN_ONLY, GPIO_PULLUP_PULLDOWN, GPIO_FLOATING
  */
 #define I_RTCIO_PULL_MODE(rtcio_num, pull_mode) \
-    I_WR_REG(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].pullup), (uint8_t)(hulp_log2(rtc_io_desc[(rtcio_num)].pullup) + 1), (uint8_t)( ((pull_mode) == GPIO_PULLUP_ONLY ? 1 : ((pull_mode) == GPIO_PULLDOWN_ONLY ? 2 : ((pull_mode) == GPIO_PULLUP_PULLDOWN ? 3 : 0))) ) )
+    I_WR_REG(hulp_rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].pullup), (uint8_t)(hulp_log2(hulp_rtc_io_desc[(rtcio_num)].pullup) + 1), (uint8_t)( ((pull_mode) == GPIO_PULLUP_ONLY ? 1 : ((pull_mode) == GPIO_PULLDOWN_ONLY ? 2 : ((pull_mode) == GPIO_PULLUP_PULLDOWN ? 3 : 0))) ) )
 
 /**
  * Set GPIO internal pull mode.
@@ -361,7 +302,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * drv_cap (gpio_drive_cap_t): GPIO_DRIVE_CAP_0, GPIO_DRIVE_CAP_1, GPIO_DRIVE_CAP_2, GPIO_DRIVE_CAP_3
  */
 #define I_RTCIO_SET_DRV_CAP(rtcio_num, drv_cap) \
-    I_WR_REG(rtc_io_desc[(rtcio_num)].reg, rtc_io_desc[rtcio_num].drv_s, rtc_io_desc[rtcio_num].drv_s + 1, drv_cap)
+    I_WR_REG(hulp_rtc_io_desc[(rtcio_num)].reg, hulp_rtc_io_desc[rtcio_num].drv_s, hulp_rtc_io_desc[rtcio_num].drv_s + 1, drv_cap)
 
 /**
  * Set GPIO drive capability.
@@ -426,7 +367,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Latch individual RTCIO config. Use before returning to deep sleep to maintain state.
  */
 #define I_RTCIO_HOLD_EN(rtcio_num) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold), 1)
+    I_WR_REG_BIT(hulp_rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].hold), 1)
 
 /**
  * Latch GPIO config. Use before returning to deep sleep to maintain state.
@@ -439,7 +380,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Unlatch individual RTCIO config.
  */
 #define I_RTCIO_HOLD_DIS(rtcio_num) \
-    I_WR_REG_BIT(rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold), 0)
+    I_WR_REG_BIT(hulp_rtc_io_desc[(rtcio_num)].reg, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].hold), 0)
 
 /**
  * Unlatch individual GPIO config.
@@ -452,7 +393,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Note: This uses a different reg to I_RTCIO_HOLD_EN. Do not confuse the two.
  */
 #define I_RTCIO_FORCE_HOLD_EN(rtcio_num) \
-    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold_force), 1)
+    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].hold_force), 1)
 
 /**
  * Unlatch RTCIO config. Use before returning to deep sleep to maintain state.
@@ -466,7 +407,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Unlatch RTCIO config.
  */
 #define I_RTCIO_FORCE_HOLD_DIS(rtcio_num) \
-    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)hulp_log2(rtc_io_desc[(rtcio_num)].hold_force), 0)
+    I_WR_REG_BIT(RTC_CNTL_HOLD_FORCE_REG, (uint8_t)hulp_log2(hulp_rtc_io_desc[(rtcio_num)].hold_force), 0)
 
 /**
  * Unlatch GPIO config.
@@ -498,7 +439,7 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
  * Set GPIO output strength. Ensure pin is output capable!
  */
 #define I_RTCIO_SET_DRIVE_CAP(rtcio_num, drive_cap) \
-    I_WR_REG(rtc_io_desc[(rtcio_num)].reg, rtc_io_desc[(rtcio_num)].drv_s, rtc_io_desc[(rtcio_num)].drv_s + 1, (uint8_t)(drive_cap))
+    I_WR_REG(hulp_rtc_io_desc[(rtcio_num)].reg, hulp_rtc_io_desc[(rtcio_num)].drv_s, hulp_rtc_io_desc[(rtcio_num)].drv_s + 1, (uint8_t)(drive_cap))
 
 /**
  * Set GPIO output strength. Ensure pin is output capable!

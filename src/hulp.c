@@ -113,10 +113,12 @@ esp_err_t hulp_configure_i2c_pins(gpio_num_t scl_pin, gpio_num_t sda_pin, bool s
         return ESP_ERR_INVALID_ARG;
     }
 
+    const int scl_rtcio_num = rtc_io_number_get(scl_pin);
     ESP_ERROR_CHECK(hulp_configure_pin(scl_pin, RTC_GPIO_MODE_INPUT_ONLY, scl_pullup ? GPIO_PULLUP_ONLY : GPIO_FLOATING, 0));
-    SET_PERI_REG_BITS(rtc_io_desc[hulp_gtr(scl_pin)].reg, RTC_IO_TOUCH_PAD1_FUN_SEL_V, RTCIO_FUNC_RTC_I2C, rtc_io_desc[hulp_gtr(scl_pin)].func);
+    SET_PERI_REG_BITS(rtc_io_desc[scl_rtcio_num].reg, RTC_IO_TOUCH_PAD1_FUN_SEL_V, RTCIO_FUNC_RTC_I2C, rtc_io_desc[scl_rtcio_num].func);
+    const int sda_rtcio_num = rtc_io_number_get(sda_pin);
     ESP_ERROR_CHECK(hulp_configure_pin(sda_pin, RTC_GPIO_MODE_INPUT_ONLY, sda_pullup ? GPIO_PULLUP_ONLY : GPIO_FLOATING, 0));
-    SET_PERI_REG_BITS(rtc_io_desc[hulp_gtr(sda_pin)].reg, RTC_IO_TOUCH_PAD1_FUN_SEL_V, RTCIO_FUNC_RTC_I2C, rtc_io_desc[hulp_gtr(sda_pin)].func);
+    SET_PERI_REG_BITS(rtc_io_desc[sda_rtcio_num].reg, RTC_IO_TOUCH_PAD1_FUN_SEL_V, RTCIO_FUNC_RTC_I2C, rtc_io_desc[sda_rtcio_num].func);
 
     REG_SET_FIELD(RTC_IO_SAR_I2C_IO_REG, RTC_IO_SAR_I2C_SCL_SEL, scl_pin == GPIO_NUM_4 ? 0 : 1);
     REG_SET_FIELD(RTC_IO_SAR_I2C_IO_REG, RTC_IO_SAR_I2C_SDA_SEL, sda_pin == GPIO_NUM_0 ? 0 : 1);

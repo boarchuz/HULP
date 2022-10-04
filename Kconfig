@@ -28,8 +28,11 @@ menu "HULP"
             UART transmit will use push-pull configuration by default. Enable this to use open drain instead.
             External pullups may be required for higher baud rates.
 
-    config HULP_TRY_CONST
-        bool "Enable const optimisations"
+    config HULP_MACRO_OPTIMISATIONS
+        bool "Enable macro optimisations"
         default n
+        help
+            After verifying that the ULP program loads and runs correctly, enable this option to reduce binary size and processing overhead
+            by omitting some checks and allowing further constant folding by the compiler.
 
 endmenu
