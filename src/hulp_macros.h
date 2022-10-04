@@ -357,6 +357,20 @@ static const int s_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     I_RTCIO_PULL_MODE(hulp_gtr(gpio_num), pull_mode)
 
 /**
+ * Set RTCIO drive capability.
+ * drv_cap (gpio_drive_cap_t): GPIO_DRIVE_CAP_0, GPIO_DRIVE_CAP_1, GPIO_DRIVE_CAP_2, GPIO_DRIVE_CAP_3
+ */
+#define I_RTCIO_SET_DRV_CAP(rtcio_num, drv_cap) \
+    I_WR_REG(rtc_io_desc[(rtcio_num)].reg, rtc_io_desc[rtcio_num].drv_s, rtc_io_desc[rtcio_num].drv_s + 1, drv_cap)
+
+/**
+ * Set GPIO drive capability.
+ * drv_cap (gpio_drive_cap_t): GPIO_DRIVE_CAP_0, GPIO_DRIVE_CAP_1, GPIO_DRIVE_CAP_2, GPIO_DRIVE_CAP_3
+ */
+#define I_GPIO_SET_DRV_CAP(gpio_num, drv_cap) \
+    I_RTCIO_SET_DRV_CAP(hulp_gtr(gpio_num), drv_cap)
+
+/**
  * Get RTCIO output level setting (0/1)
  */
 #define I_RTCIO_SET_RD(rtcio_num) \
