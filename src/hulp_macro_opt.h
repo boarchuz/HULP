@@ -9,9 +9,15 @@
 #include "soc/rtc_cntl_reg.h"
 #include "driver/rtc_io.h"
 
+// Ensure that esp32/ulp.h is included so that SOC_REG_TO_ULP_PERIPH_SEL is defined
+#include "hulp_compat.h"
+
 #include "sdkconfig.h"
 
 #ifdef CONFIG_HULP_MACRO_OPTIMISATIONS
+
+#define SOC_REG_TO_ULP_PERIPH_SEL(reg) (uint32_t)(((reg) - DR_REG_RTCCNTL_BASE) / 0x400)
+
 static const int s_hulp_rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     RTCIO_GPIO0_CHANNEL,    //GPIO0
     -1,//GPIO1
