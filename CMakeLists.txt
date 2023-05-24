@@ -14,6 +14,7 @@ set(requires
     ulp
     driver
     soc
+    hal
 )
 
 idf_component_register(

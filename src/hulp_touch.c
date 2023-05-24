@@ -4,6 +4,7 @@
 #include "driver/touch_pad.h"
 #include "soc/touch_sensor_channel.h"
 #include "soc/touch_sensor_periph.h"
+#include "hal/touch_sensor_hal.h"
 
 #include "hulp_config.h"
 
@@ -30,14 +31,14 @@ esp_err_t hulp_configure_touch_controller(const hulp_touch_controller_config_t *
     if(
         ESP_OK != (err = touch_pad_init()) ||
         ESP_OK != (err = touch_pad_set_fsm_mode(TOUCH_FSM_MODE_SW)) ||
-        ESP_OK != (err = touch_pad_set_voltage(config->high_voltage, config->low_voltage, config->attenuation)) ||
-        //sw control so sleep_cycle is irrelevant here; set to default
-        ESP_OK != (err = touch_pad_set_meas_time(TOUCH_PAD_SLEEP_CYCLE_DEFAULT, config->fastclk_meas_cycles))
+        ESP_OK != (err = touch_pad_set_voltage(config->high_voltage, config->low_voltage, config->attenuation))
     )
     {
         ESP_LOGE(TAG, "[%s] err (0x%x)", __func__, err);
         return err;
     }
+    
+    touch_hal_set_meas_time(config->fastclk_meas_cycles);
     return ESP_OK;
 }
 
