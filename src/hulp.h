@@ -6,9 +6,8 @@
 #include "driver/adc.h"
 
 #include "hulp_compat.h"
-
-#include "hulp_macros.h"
 #include "hulp_types.h"
+#include "hulp_macros.h"
 
 #include "hulp_config.h"
 

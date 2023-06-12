@@ -11,8 +11,9 @@
 #include "soc/soc_memory_layout.h"
 #include "esp_assert.h"
 
-#include "hulp_compat.h"
+#include "hulp.h"
 #include "hulp_macro_opt.h"
+#include "hulp_macro_fix.h"
 
 #include "sdkconfig.h"
 

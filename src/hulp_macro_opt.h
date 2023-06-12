@@ -9,8 +9,7 @@
 #include "soc/rtc_cntl_reg.h"
 #include "driver/rtc_io.h"
 
-// Ensure that esp32/ulp.h is included so that SOC_REG_TO_ULP_PERIPH_SEL is defined
-#include "hulp_compat.h"
+#include "hulp.h"
 
 #include "sdkconfig.h"
 
