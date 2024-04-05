@@ -85,7 +85,7 @@ typedef struct {
 /**
  * SoC: Flag mutex wanted
  */
-static inline void hulp_mutex_soc_request(ulp_mutex_t *mutex)
+static inline void hulp_mutex_soc_request(volatile ulp_mutex_t *mutex)
 {
     mutex->soc_request.val = 1;
     mutex->soc_priority.val = 0;
@@ -94,7 +94,7 @@ static inline void hulp_mutex_soc_request(ulp_mutex_t *mutex)
 /**
  * SoC: Check if mutex held (after hulp_mutex_soc_request)
  */
-static inline bool hulp_mutex_soc_check(ulp_mutex_t *mutex)
+static inline bool hulp_mutex_soc_check(const volatile ulp_mutex_t *mutex)
 {
     return mutex->ulp_request.val == 0 || mutex->soc_priority.val != 0;
 }
@@ -102,7 +102,7 @@ static inline bool hulp_mutex_soc_check(ulp_mutex_t *mutex)
 /**
  * SoC: Release mutex
  */
-static inline void hulp_mutex_soc_release(ulp_mutex_t *mutex)
+static inline void hulp_mutex_soc_release(volatile ulp_mutex_t *mutex)
 {
     mutex->soc_request.val = 0;
 }
