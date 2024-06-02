@@ -33,7 +33,7 @@
  */
 #define HULP_LBLA() ({ \
             TRY_STATIC_ASSERT(__LINE__ <= (UINT16_MAX - CONFIG_HULP_LABEL_AUTO_BASE), (Auto label overflow)); \
-            (CONFIG_HULP_LABEL_AUTO_BASE + __LINE__); \
+            ((uint32_t)CONFIG_HULP_LABEL_AUTO_BASE + __LINE__); \
         })
 
 /**
